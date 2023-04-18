@@ -1,0 +1,82 @@
+// Copyright Epic Games, Inc. All Rights Reserved.
+// Copyright Eigi Chin
+
+#include "BEPlayerStart.h"
+
+#include "Delegates/Delegate.h"
+#include "Engine/World.h"
+#include "GameFramework/Controller.h"
+#include "GameFramework/GameModeBase.h"
+#include "GameFramework/Pawn.h"
+#include "Math/MathFwd.h"
+#include "Math/Rotator.h"
+#include "Math/Vector.h"
+#include "Templates/SubclassOf.h"
+#include "TimerManager.h"
+#include "UObject/Class.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BEPlayerStart)
+
+
+ABEPlayerStart::ABEPlayerStart(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+}
+
+EBEPlayerStartLocationOccupancy ABEPlayerStart::GetLocationOccupancy(AController* const ControllerPawnToFit) const
+{
+	UWorld* const World = GetWorld();
+	if (HasAuthority() && World)
+	{
+		if (AGameModeBase* AuthGameMode = World->GetAuthGameMode())
+		{
+			TSubclassOf<APawn> PawnClass = AuthGameMode->GetDefaultPawnClassForController(ControllerPawnToFit);
+			const APawn* const PawnToFit = PawnClass ? GetDefault<APawn>(PawnClass) : nullptr;
+
+			FVector ActorLocation = GetActorLocation();
+			const FRotator ActorRotation = GetActorRotation();
+
+			if (!World->EncroachingBlockingGeometry(PawnToFit, ActorLocation, ActorRotation, nullptr))
+			{
+				return EBEPlayerStartLocationOccupancy::Empty;
+			}
+			else if (World->FindTeleportSpot(PawnToFit, ActorLocation, ActorRotation))
+			{
+				return EBEPlayerStartLocationOccupancy::Partial;
+			}
+		}
+	}
+
+	return EBEPlayerStartLocationOccupancy::Full;
+}
+
+bool ABEPlayerStart::IsClaimed() const
+{
+	return ClaimingController != nullptr;
+}
+
+bool ABEPlayerStart::TryClaim(AController* OccupyingController)
+{
+	if (OccupyingController != nullptr && !IsClaimed())
+	{
+		ClaimingController = OccupyingController;
+		if (UWorld* World = GetWorld())
+		{
+			World->GetTimerManager().SetTimer(ExpirationTimerHandle, FTimerDelegate::CreateUObject(this, &ABEPlayerStart::CheckUnclaimed), ExpirationCheckInterval, true);
+		}
+		return true;
+	}
+	return false;
+}
+
+void ABEPlayerStart::CheckUnclaimed()
+{
+	if (ClaimingController != nullptr && ClaimingController->GetPawn() != nullptr && GetLocationOccupancy(ClaimingController) == EBEPlayerStartLocationOccupancy::Empty)
+	{
+		ClaimingController = nullptr;
+		if (UWorld* World = GetWorld())
+		{
+			World->GetTimerManager().ClearTimer(ExpirationTimerHandle);
+		}
+	}
+}
