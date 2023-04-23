@@ -1,4 +1,3 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
 // Copyright Eigi Chin
 
 #include "BEEquipmentManagerComponent.h"
@@ -6,7 +5,9 @@
 #include "Ability/BEAbilitySystemComponent.h"
 #include "Ability/BEAbilitySet.h"
 #include "BEEquipmentInstance.h"
-#include "BEEquipmentDefinition.h"
+#include "BEEquipmentSlotData.h"
+#include "Item/BEItemData.h"
+#include "Item/BEItemDataFragment_Equippable.h"
 
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
@@ -19,20 +20,31 @@
 #include "UObject/Object.h"
 #include "UObject/ObjectPtr.h"
 #include "UObject/UObjectBaseUtility.h"
+#include "GameFramework/GameplayMessageSubsystem.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BEEquipmentManagerComponent)
+
+UE_DEFINE_GAMEPLAY_TAG(TAG_Message_Equipment_SlotChange, "Message.Equipment.SlotChange");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Message_Equipment_ActiveSlotChange, "Message.Equipment.ActiveSlotChange");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Equipment_Slot, "Equipment.Slot");
 
 class FLifetimeProperty;
 struct FReplicationFlags;
 
 
 //////////////////////////////////////////////////////////////////////
-// FBEAppliedEquipmentEntry
+// FBEEquipmentEntry
 
-FString FBEAppliedEquipmentEntry::GetDebugString() const
+FString FBEEquipmentEntry::GetDebugString() const
 {
-	return FString::Printf(TEXT("%s of %s"), *GetNameSafe(Instance), *GetNameSafe(EquipmentDefinition.Get()));
+	return FString::Printf(TEXT("(Slot: %s) ItemData: %s, Instance: %s"), *SlotTag.GetTagName().ToString(), *GetNameSafe(ItemData), *GetNameSafe(Instance));
 }
+
+bool FBEEquipmentEntry::IsValid() const
+{
+	return (ItemData != nullptr) && (Instance != nullptr) && (SlotTag.IsValid());
+}
+
 
 //////////////////////////////////////////////////////////////////////
 // FBEEquipmentList
@@ -41,10 +53,16 @@ void FBEEquipmentList::PreReplicatedRemove(const TArrayView<int32> RemovedIndice
 {
  	for (int32 Index : RemovedIndices)
  	{
- 		const FBEAppliedEquipmentEntry& Entry = Entries[Index];
-		if (Entry.Instance != nullptr)
+ 		const FBEEquipmentEntry& Entry = Entries[Index];
+		if (Entry.IsValid())
 		{
-			Entry.Instance->OnUnequipped();
+			Entry.Instance->OnUnequiped();
+			BroadcastSlotChangeMessage();
+
+			if (Entry.Activated == true)
+			{
+				Entry.Instance->OnDeactivated();
+			}
 		}
  	}
 }
@@ -53,91 +71,170 @@ void FBEEquipmentList::PostReplicatedAdd(const TArrayView<int32> AddedIndices, i
 {
 	for (int32 Index : AddedIndices)
 	{
-		const FBEAppliedEquipmentEntry& Entry = Entries[Index];
-		if (Entry.Instance != nullptr)
+		const FBEEquipmentEntry& Entry = Entries[Index];
+		if (Entry.IsValid())
 		{
-			Entry.Instance->OnEquipped();
+			Entry.Instance->OnEquiped(Entry.ItemData);
+			BroadcastSlotChangeMessage(Entry.SlotTag, Entry.ItemData, Entry.Instance);
+
+			if (Entry.Activated == true)
+			{
+				Entry.Instance->OnActivated();
+				BroadcastActiveSlotChangeMessage(Entry.SlotTag, Entry.ItemData, Entry.Instance);
+			}
 		}
 	}
 }
 
 void FBEEquipmentList::PostReplicatedChange(const TArrayView<int32> ChangedIndices, int32 FinalSize)
 {
-// 	for (int32 Index : ChangedIndices)
-// 	{
-// 		const FGameplayTagStack& Stack = Stacks[Index];
-// 		TagToCountMap[Stack.Tag] = Stack.StackCount;
-// 	}
+	for (int32 Index : ChangedIndices)
+	{
+		const FBEEquipmentEntry& Entry = Entries[Index];
+		if (Entry.IsValid())
+		{
+			if (Entry.Activated == true)
+			{
+				Entry.Instance->OnActivated();
+				BroadcastActiveSlotChangeMessage(Entry.SlotTag, Entry.ItemData, Entry.Instance);
+			}
+			else
+			{
+				Entry.Instance->OnDeactivated();
+			}
+		}
+	}
 }
 
-UBEAbilitySystemComponent* FBEEquipmentList::GetAbilitySystemComponent() const
+void FBEEquipmentList::BroadcastSlotChangeMessage(FGameplayTag SlotTag, UBEItemData* ItemData, UBEEquipmentInstance* Instance)
 {
-	check(OwnerComponent);
-	AActor* OwningActor = OwnerComponent->GetOwner();
-	return Cast<UBEAbilitySystemComponent>(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(OwningActor));
+	FBEEquipmentSlotChangedMessage Message;
+	Message.OwnerComponent = OwnerComponent;
+	Message.SlotTag = SlotTag;
+	Message.ItemData = ItemData;
+	Message.Instance = Instance;
+
+	UGameplayMessageSubsystem& MessageSystem = UGameplayMessageSubsystem::Get(OwnerComponent->GetWorld());
+	MessageSystem.BroadcastMessage(TAG_Message_Equipment_SlotChange, Message);
 }
 
-UBEEquipmentInstance* FBEEquipmentList::AddEntry(TSubclassOf<UBEEquipmentDefinition> EquipmentDefinition)
+void FBEEquipmentList::BroadcastActiveSlotChangeMessage(FGameplayTag SlotTag, UBEItemData* ItemData, UBEEquipmentInstance* Instance)
 {
-	UBEEquipmentInstance* Result = nullptr;
+	FBEEquipmentSlotChangedMessage Message;
+	Message.OwnerComponent = OwnerComponent;
+	Message.SlotTag = SlotTag;
+	Message.ItemData = ItemData;
+	Message.Instance = Instance;
 
-	check(EquipmentDefinition != nullptr);
- 	check(OwnerComponent);
-	check(OwnerComponent->GetOwner()->HasAuthority());
-	
-	const UBEEquipmentDefinition* EquipmentCDO = GetDefault<UBEEquipmentDefinition>(EquipmentDefinition);
+	UGameplayMessageSubsystem& MessageSystem = UGameplayMessageSubsystem::Get(OwnerComponent->GetWorld());
+	MessageSystem.BroadcastMessage(TAG_Message_Equipment_ActiveSlotChange, Message);
+}
 
-	TSubclassOf<UBEEquipmentInstance> InstanceType = EquipmentCDO->InstanceType;
+
+UBEEquipmentInstance* FBEEquipmentList::AddEntry(UBEItemData* ItemData, FGameplayTag SlotTag, UBEAbilitySystemComponent* ASC)
+{
+	const UBEItemDataFragment_Equippable* Fragment = ItemData->FindFragmentByClass<UBEItemDataFragment_Equippable>();
+	if (Fragment == nullptr)
+	{
+		return nullptr;
+	}
+
+	const TSubclassOf<UBEEquipmentInstance> InstanceType = Fragment->InstanceType;
 	if (InstanceType == nullptr)
 	{
-		InstanceType = UBEEquipmentInstance::StaticClass();
+		return nullptr;
 	}
-	
-	FBEAppliedEquipmentEntry& NewEntry = Entries.AddDefaulted_GetRef();
-	NewEntry.EquipmentDefinition = EquipmentDefinition;
-	NewEntry.Instance = NewObject<UBEEquipmentInstance>(OwnerComponent->GetOwner(), InstanceType);  //@TODO: Using the actor instead of component as the outer due to UE-127172
-	Result = NewEntry.Instance;
 
-	if (UBEAbilitySystemComponent* ASC = GetAbilitySystemComponent())
+	FBEEquipmentEntry& NewEntry = Entries.AddDefaulted_GetRef();
+	NewEntry.SlotTag	= SlotTag;
+	NewEntry.ItemData	= ItemData;
+	NewEntry.Instance	= NewObject<UBEEquipmentInstance>(OwnerComponent->GetOwner(), InstanceType);
+	NewEntry.Instance->OnEquiped(ItemData);
+
+	for (TObjectPtr<const UBEAbilitySet> AbilitySet : Fragment->AbilitySetsToGrantOnEquip)
 	{
-		for (TObjectPtr<const UBEAbilitySet> AbilitySet : EquipmentCDO->AbilitySetsToGrant)
+		AbilitySet->GiveToAbilitySystem(ASC, /*out=*/ &NewEntry.GrantedHandles_Equip, NewEntry.Instance);
+	}
+
+	MarkItemDirty(NewEntry);
+
+	return NewEntry.Instance;
+}
+
+void FBEEquipmentList::RemoveEntry(int32 Index, UBEAbilitySystemComponent* ASC)
+{
+	FBEEquipmentEntry& Entry = Entries[Index];
+	
+	if (Entry.Activated == true)
+	{
+		Entry.GrantedHandles_Active.TakeFromAbilitySystem(ASC);
+		Entry.GrantedHandles_Equip.TakeFromAbilitySystem(ASC);
+
+		if (UBEEquipmentInstance* Instance = Entry.Instance)
 		{
-			AbilitySet->GiveToAbilitySystem(ASC, /*inout*/ &NewEntry.GrantedHandles, Result);
+			Instance->OnDeactivated();
+			Instance->OnUnequiped();
 		}
 	}
 	else
 	{
-		//@TODO: Warning logging?
-	}
+		Entry.GrantedHandles_Equip.TakeFromAbilitySystem(ASC);
 
-	Result->SpawnEquipmentActors(EquipmentCDO->ActorsToSpawn);
-
-
-	MarkItemDirty(NewEntry);
-
-	return Result;
-}
-
-void FBEEquipmentList::RemoveEntry(UBEEquipmentInstance* Instance)
-{
-	for (auto EntryIt = Entries.CreateIterator(); EntryIt; ++EntryIt)
-	{
-		FBEAppliedEquipmentEntry& Entry = *EntryIt;
-		if (Entry.Instance == Instance)
+		if (UBEEquipmentInstance* Instance = Entry.Instance)
 		{
-			if (UBEAbilitySystemComponent* ASC = GetAbilitySystemComponent())
-			{
-				Entry.GrantedHandles.TakeFromAbilitySystem(ASC);
-			}
-
-			Instance->DestroyEquipmentActors();
-			
-
-			EntryIt.RemoveCurrent();
-			MarkArrayDirty();
+			Instance->OnUnequiped();
 		}
 	}
 }
+
+
+void FBEEquipmentList::ActivateEntry(int32 Index, UBEAbilitySystemComponent* ASC)
+{
+	FBEEquipmentEntry& Entry = Entries[Index];
+
+	const UBEItemData* ItemData = Entry.ItemData;
+	if (ItemData == nullptr)
+	{
+		return;
+	}
+
+	const UBEItemDataFragment_Equippable* Fragment = ItemData->FindFragmentByClass<UBEItemDataFragment_Equippable>();
+	if (Fragment == nullptr)
+	{
+		return;
+	}
+
+	for (TObjectPtr<const UBEAbilitySet> AbilitySet : Fragment->AbilitySetsToGrantOnActive)
+	{
+		AbilitySet->GiveToAbilitySystem(ASC, /*out=*/ &Entries[Index].GrantedHandles_Active, Entries[Index].Instance);
+	}
+
+	if (UBEEquipmentInstance* Instance = Entry.Instance)
+	{
+		Instance->OnActivated();
+	}
+
+	Entry.Activated = true;
+
+	MarkItemDirty(Entry);
+}
+
+void FBEEquipmentList::DeactivateEntry(int32 Index, UBEAbilitySystemComponent* ASC)
+{
+	FBEEquipmentEntry& Entry = Entries[Index];
+
+	Entry.GrantedHandles_Active.TakeFromAbilitySystem(ASC);
+
+	if (UBEEquipmentInstance* Instance = Entry.Instance)
+	{
+		Instance->OnDeactivated();
+	}
+
+	Entry.Activated = false;
+
+	MarkItemDirty(Entry);
+}
+
 
 //////////////////////////////////////////////////////////////////////
 // UBEEquipmentManagerComponent
@@ -150,51 +247,20 @@ UBEEquipmentManagerComponent::UBEEquipmentManagerComponent(const FObjectInitiali
 	bWantsInitializeComponent = true;
 }
 
+
 void UBEEquipmentManagerComponent::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, EquipmentList);
-}
-
-UBEEquipmentInstance* UBEEquipmentManagerComponent::EquipItem(TSubclassOf<UBEEquipmentDefinition> EquipmentClass)
-{
-	UBEEquipmentInstance* Result = nullptr;
-	if (EquipmentClass != nullptr)
-	{
-		Result = EquipmentList.AddEntry(EquipmentClass);
-		if (Result != nullptr)
-		{
-			Result->OnEquipped();
-
-			if (IsUsingRegisteredSubObjectList() && IsReadyForReplication())
-			{
-				AddReplicatedSubObject(Result);
-			}
-		}
-	}
-	return Result;
-}
-
-void UBEEquipmentManagerComponent::UnequipItem(UBEEquipmentInstance* ItemInstance)
-{
-	if (ItemInstance != nullptr)
-	{
-		if (IsUsingRegisteredSubObjectList())
-		{
-			RemoveReplicatedSubObject(ItemInstance);
-		}
-
-		ItemInstance->OnUnequipped();
-		EquipmentList.RemoveEntry(ItemInstance);
-	}
+	DOREPLIFETIME(ThisClass, ActiveSlot);
 }
 
 bool UBEEquipmentManagerComponent::ReplicateSubobjects(UActorChannel* Channel, class FOutBunch* Bunch, FReplicationFlags* RepFlags)
 {
 	bool WroteSomething = Super::ReplicateSubobjects(Channel, Bunch, RepFlags);
 
-	for (FBEAppliedEquipmentEntry& Entry : EquipmentList.Entries)
+	for (FBEEquipmentEntry& Entry : EquipmentList.Entries)
 	{
 		UBEEquipmentInstance* Instance = Entry.Instance;
 
@@ -207,25 +273,9 @@ bool UBEEquipmentManagerComponent::ReplicateSubobjects(UActorChannel* Channel, c
 	return WroteSomething;
 }
 
-void UBEEquipmentManagerComponent::InitializeComponent()
-{
-	Super::InitializeComponent();
-}
-
 void UBEEquipmentManagerComponent::UninitializeComponent()
 {
-	TArray<UBEEquipmentInstance*> AllEquipmentInstances;
-
-	// gathering all instances before removal to avoid side effects affecting the equipment list iterator	
-	for (const FBEAppliedEquipmentEntry& Entry : EquipmentList.Entries)
-	{
-		AllEquipmentInstances.Add(Entry.Instance);
-	}
-
-	for (UBEEquipmentInstance* EquipInstance : AllEquipmentInstances)
-	{
-		UnequipItem(EquipInstance);
-	}
+	RemoveAllEquipments();
 
 	Super::UninitializeComponent();
 }
@@ -234,10 +284,9 @@ void UBEEquipmentManagerComponent::ReadyForReplication()
 {
 	Super::ReadyForReplication();
 
-	// Register existing LyraEquipmentInstances
 	if (IsUsingRegisteredSubObjectList())
 	{
-		for (const FBEAppliedEquipmentEntry& Entry : EquipmentList.Entries)
+		for (const FBEEquipmentEntry& Entry : EquipmentList.Entries)
 		{
 			UBEEquipmentInstance* Instance = Entry.Instance;
 
@@ -249,35 +298,182 @@ void UBEEquipmentManagerComponent::ReadyForReplication()
 	}
 }
 
-UBEEquipmentInstance* UBEEquipmentManagerComponent::GetFirstInstanceOfType(TSubclassOf<UBEEquipmentInstance> InstanceType)
+
+UBEAbilitySystemComponent* UBEEquipmentManagerComponent::GetAbilitySystemComponent() const
 {
-	for (FBEAppliedEquipmentEntry& Entry : EquipmentList.Entries)
+	return Cast<UBEAbilitySystemComponent>(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(GetOwner()));
+}
+
+
+bool UBEEquipmentManagerComponent::AddEquipment(FGameplayTag SlotTag, UBEItemData* ItemData, bool ActivateImmediately)
+{
+	check(GetOwner()->HasAuthority());
+	check(SlotTag.IsValid());
+	check(ItemData != nullptr);
+
+	UBEAbilitySystemComponent* ASC = GetAbilitySystemComponent();
+	check(ASC != nullptr);
+
+	if (AddedSlotTags.Contains(SlotTag))
 	{
-		if (UBEEquipmentInstance* Instance = Entry.Instance)
+		return false;
+	}
+
+	if (UBEEquipmentInstance* Result = EquipmentList.AddEntry(ItemData, SlotTag, ASC))
+	{
+		if (IsUsingRegisteredSubObjectList() && IsReadyForReplication())
 		{
-			if (Instance->IsA(InstanceType))
+			AddReplicatedSubObject(Result);
+		}
+
+		if (ActivateImmediately == true)
+		{
+			SetActiveSlot(SlotTag);
+		}
+
+		AddedSlotTags.Add(SlotTag);
+
+		return true;
+	}
+
+	return false;
+}
+
+void UBEEquipmentManagerComponent::AddEquipments(const TMap<FGameplayTag, UBEItemData*>& ItemDatas, FGameplayTag ActivateSlotTag)
+{
+	check(GetOwner()->HasAuthority());
+
+	UBEAbilitySystemComponent* ASC = GetAbilitySystemComponent();
+	check(ASC != nullptr);
+
+	for (const auto& KVP : ItemDatas)
+	{
+		if ((!KVP.Key.IsValid()) || (KVP.Value == nullptr) || (AddedSlotTags.Contains(KVP.Key)))
+		{
+			continue;
+		}
+
+		if (UBEEquipmentInstance* Result = EquipmentList.AddEntry(KVP.Value, KVP.Key, ASC))
+		{
+			if (IsUsingRegisteredSubObjectList() && IsReadyForReplication())
 			{
-				return Instance;
+				AddReplicatedSubObject(Result);
 			}
+
+			AddedSlotTags.Add(KVP.Key);
 		}
 	}
 
-	return nullptr;
+	if (ActivateSlotTag.IsValid())
+	{
+		SetActiveSlot(ActivateSlotTag);
+	}
 }
 
-TArray<UBEEquipmentInstance*> UBEEquipmentManagerComponent::GetEquipmentInstancesOfType(TSubclassOf<UBEEquipmentInstance> InstanceType) const
+bool UBEEquipmentManagerComponent::RemoveEquipment(FGameplayTag SlotTag)
 {
-	TArray<UBEEquipmentInstance*> Results;
-	for (const FBEAppliedEquipmentEntry& Entry : EquipmentList.Entries)
+	if (!GetOwner()->HasAuthority())
 	{
-		if (UBEEquipmentInstance* Instance = Entry.Instance)
+		return false;
+	}
+
+	if (!SlotTag.IsValid())
+	{
+		return false;
+	}
+
+	UBEAbilitySystemComponent* ASC = GetAbilitySystemComponent();
+	if (ASC == nullptr)
+	{
+		return false;
+	}
+
+	for (auto EntryIt = EquipmentList.Entries.CreateIterator(); EntryIt; ++EntryIt)
+	{
+		FBEEquipmentEntry& Entry = *EntryIt;
+		if (Entry.SlotTag == SlotTag)
 		{
-			if (Instance->IsA(InstanceType))
+			if (IsUsingRegisteredSubObjectList())
 			{
-				Results.Add(Instance);
+				RemoveReplicatedSubObject(Entry.Instance);
 			}
+			
+			EquipmentList.RemoveEntry(EntryIt.GetIndex(), ASC);
+			EquipmentList.Entries.RemoveAt(Index);
+			EquipmentList.MarkArrayDirty();
+
+			AddedSlotTags.Remove(Entry.SlotTag);
+
+			return true;
 		}
 	}
-	return Results;
+
+	return false;
 }
 
+void UBEEquipmentManagerComponent::RemoveAllEquipments()
+{
+	if (!GetOwner()->HasAuthority())
+	{
+		return false;
+	}
+
+	UBEAbilitySystemComponent* ASC = GetAbilitySystemComponent();
+	if (ASC == nullptr)
+	{
+		return false;
+	}
+
+	for (auto EntryIt = EquipmentList.Entries.CreateIterator(); EntryIt; ++EntryIt)
+	{
+		FBEEquipmentEntry& Entry = *EntryIt;
+
+		if (IsUsingRegisteredSubObjectList())
+		{
+			RemoveReplicatedSubObject(Entry.Instance);
+		}
+
+		EquipmentList.RemoveEntry(EntryIt.GetIndex(), ASC);
+
+		AddedSlotTags.Remove(Entry.SlotTag);
+	}
+
+	EquipmentList.Entries.RemoveAll();
+	EquipmentList.MarkArrayDirty();
+}
+
+
+void UBEEquipmentManagerComponent::SetActiveSlot(FGameplayTag SlotTag)
+{
+	check(GetOwner()->HasAuthority());
+	check(SlotTag.IsValid());
+
+	UBEAbilitySystemComponent* ASC = GetAbilitySystemComponent();
+	check(ASC != nullptr);
+
+	int32 LastActiveIndex, NewActiveIndex = INDEX_NONE;
+	for (auto EntryIt = EquipmentList.Entries.CreateIterator(); EntryIt; ++EntryIt)
+	{
+		FBEEquipmentEntry& Entry = *EntryIt;
+
+		if (Entry.Activated == true)
+		{
+			LastActiveIndex = EntryIt.GetIndex();
+		}
+
+		if (Entry.SlotTag == SlotTag)
+		{
+			NewActiveIndex = EntryIt.GetIndex();
+		}
+	}
+
+	check(NewActiveIndex != INDEX_NONE);
+	check(NewActiveIndex != LastActiveIndex);
+	
+	if (LastActiveIndex != INDEX_NONE)
+	{
+		EquipmentList.DeactivateEntry(LastActiveIndex, ASC);
+	}
+
+	EquipmentList.ActivateEntry(NewActiveIndex, ASC);
+}

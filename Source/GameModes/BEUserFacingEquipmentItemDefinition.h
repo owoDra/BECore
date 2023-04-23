@@ -37,7 +37,7 @@ struct FBESkinEquipmentItem
 public:
 
 	// Item DefinitionのプライマリーアセットID
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = PawnData, meta = (AllowedTypes = "BEInventoryItemDefinition"))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = PawnData, meta = (AllowedTypes = "BEInventoryItemData"))
 		FPrimaryAssetId ItemDef;
 
 	// タイトル

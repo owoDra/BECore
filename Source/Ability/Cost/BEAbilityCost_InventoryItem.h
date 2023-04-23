@@ -13,7 +13,7 @@
 #include "BEAbilityCost_InventoryItem.generated.h"
 
 class UBEGameplayAbility;
-class UBEInventoryItemDefinition;
+class UBEItemData;
 class UObject;
 struct FGameplayAbilityActorInfo;
 struct FGameplayTagContainer;
@@ -44,5 +44,5 @@ protected:
 
 	/** Which item to consume */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category=AbilityCost)
-	TSubclassOf<UBEInventoryItemDefinition> ItemDefinition;
+	TSubclassOf<UBEItemData> ItemDefinition;
 };

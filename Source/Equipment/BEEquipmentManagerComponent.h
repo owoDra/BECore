@@ -1,4 +1,3 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
 // Copyright Eigi Chin
 
 #pragma once
@@ -19,49 +18,98 @@
 #include "Templates/UnrealTemplate.h"
 #include "UObject/Class.h"
 #include "UObject/UObjectGlobals.h"
+#include "NativeGameplayTags.h"
 
 #include "BEEquipmentManagerComponent.generated.h"
 
-class UObject;
-class UActorComponent;
-class UBEEquipmentDefinition;
+class UBEItemData;
 class UBEEquipmentInstance;
-class UBEAbilitySystemComponent;
+class UBEEquipmentSlotData;
 class UBEEquipmentManagerComponent;
-struct FFrame;
-struct FNetDeltaSerializeInfo;
-struct FReplicationFlags;
-struct FBEEquipmentList;
+
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Message_Equipment_SlotChange);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Message_Equipment_ActiveSlotChange);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Equipment_Slot);
 
 
-/** A single piece of applied equipment */
+/**
+ * FBEEquipmentSlotChangedMessage
+ *
+ * EquipmentManagerComponent に登録した Equipment が変更されたときのメッセージ
+ */
 USTRUCT(BlueprintType)
-struct FBEAppliedEquipmentEntry : public FFastArraySerializerItem
+struct FBEEquipmentSlotChangedMessage
 {
 	GENERATED_BODY()
 
-	FBEAppliedEquipmentEntry()
-	{}
+public:
+	UPROPERTY(BlueprintReadOnly, Category = "Equipment")
+	TObjectPtr<UActorComponent> OwnerComponent = nullptr;
 
-	FString GetDebugString() const;
+	UPROPERTY(BlueprintReadOnly, Category = "Equipment")
+	FGameplayTag SlotTag = FGameplayTag::EmptyTag;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Equipment")
+	TObjectPtr<UBEItemData> ItemData = nullptr;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Equipment")
+	TObjectPtr<UBEEquipmentInstance> Instance = nullptr;
+};
+
+
+/**
+ * FBEEquipmentEntry
+ *
+ * EquipmentManagerComponent に登録した Equipment の情報
+ */
+USTRUCT(BlueprintType)
+struct FBEEquipmentEntry : public FFastArraySerializerItem
+{
+	GENERATED_BODY()
+
+	FBEEquipmentEntry()
+	{
+		Activated = false;
+	}
 
 private:
 	friend FBEEquipmentList;
 	friend UBEEquipmentManagerComponent;
 
-	// The equipment class that got equipped
 	UPROPERTY()
-	TSubclassOf<UBEEquipmentDefinition> EquipmentDefinition;
+	TObjectPtr<UBEItemData> ItemData = nullptr;
 
 	UPROPERTY()
 	TObjectPtr<UBEEquipmentInstance> Instance = nullptr;
 
-	// Authority-only list of granted handles
+	UPROPERTY()
+	FGameplayTag SlotTag = FGameplayTag::EmptyTag;
+
+	UPROPERTY()
+	uint8 Activated : 1;
+
+	// EquipmentManagerComponent に登録した際に付与される AbilitySet の GrantedHandles
+	// データを保持するのはサーバー権限のみ
 	UPROPERTY(NotReplicated)
-	FBEAbilitySet_GrantedHandles GrantedHandles;
+	FBEAbilitySet_GrantedHandles GrantedHandles_Equip;
+
+	// EquipmentManagerComponent で Active にしたときに付与される AbilitySet の GrantedHandles
+	// データを保持するのはサーバー権限のみ
+	UPROPERTY(NotReplicated)
+	FBEAbilitySet_GrantedHandles GrantedHandles_Active;
+
+public:
+	FString GetDebugString() const;
+
+	bool IsValid() const;
 };
 
-/** List of applied equipment */
+
+/**
+ * FBEEquipmentList
+ *
+ * EquipmentManagerComponent に登録した Equipment のリスト
+ */
 USTRUCT(BlueprintType)
 struct FBEEquipmentList : public FFastArraySerializer
 {
@@ -77,30 +125,45 @@ struct FBEEquipmentList : public FFastArraySerializer
 	{
 	}
 
+private:
+	friend UBEEquipmentManagerComponent;
+
+
 public:
+	bool NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParms)
+	{
+		return FFastArraySerializer::FastArrayDeltaSerialize<FBEEquipmentEntry, FBEEquipmentList>(Entries, DeltaParms, *this);
+	}
+
 	//~FFastArraySerializer contract
 	void PreReplicatedRemove(const TArrayView<int32> RemovedIndices, int32 FinalSize);
 	void PostReplicatedAdd(const TArrayView<int32> AddedIndices, int32 FinalSize);
 	void PostReplicatedChange(const TArrayView<int32> ChangedIndices, int32 FinalSize);
 	//~End of FFastArraySerializer contract
 
-	bool NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParms)
-	{
-		return FFastArraySerializer::FastArrayDeltaSerialize<FBEAppliedEquipmentEntry, FBEEquipmentList>(Entries, DeltaParms, *this);
-	}
+private:
+	void BroadcastSlotChangeMessage(
+		FGameplayTag SlotTag = FGameplayTag::EmptyTag,
+		UBEItemData* ItemData = nullptr,
+		UBEEquipmentInstance* Instance = nullptr);
 
-	UBEEquipmentInstance* AddEntry(TSubclassOf<UBEEquipmentDefinition> EquipmentDefinition);
-	void RemoveEntry(UBEEquipmentInstance* Instance);
+	void BroadcastActiveSlotChangeMessage(
+		FGameplayTag SlotTag = FGameplayTag::EmptyTag,
+		UBEItemData* ItemData = nullptr,
+		UBEEquipmentInstance* Instance = nullptr);
+
+
+public:
+	UBEEquipmentInstance* AddEntry(UBEItemData* ItemData, FGameplayTag SlotTag, UBEAbilitySystemComponent* ASC);
+	void RemoveEntry(int32 Index, UBEAbilitySystemComponent* ASC);
+
+	void ActivateEntry(int32 Index, UBEAbilitySystemComponent* ASC);
+	void DeactivateEntry(int32 Index, UBEAbilitySystemComponent* ASC);
+
 
 private:
-	UBEAbilitySystemComponent* GetAbilitySystemComponent() const;
-
-	friend UBEEquipmentManagerComponent;
-
-private:
-	// Replicated list of equipment entries
 	UPROPERTY()
-	TArray<FBEAppliedEquipmentEntry> Entries;
+	TArray<FBEEquipmentEntry> Entries;
 
 	UPROPERTY(NotReplicated)
 	TObjectPtr<UActorComponent> OwnerComponent;
@@ -113,50 +176,85 @@ struct TStructOpsTypeTraits<FBEEquipmentList> : public TStructOpsTypeTraitsBase2
 };
 
 
-
 /**
- * Manages equipment applied to a pawn
+ * UBEEquipmentManagerComponent
+ *
+ * Equipment を管理するためのコンポーネント
  */
 UCLASS(BlueprintType, Const)
 class UBEEquipmentManagerComponent : public UPawnComponent
 {
 	GENERATED_BODY()
 
-public:
 	UBEEquipmentManagerComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly)
-	UBEEquipmentInstance* EquipItem(TSubclassOf<UBEEquipmentDefinition> EquipmentDefinition);
-
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly)
-	void UnequipItem(UBEEquipmentInstance* ItemInstance);
-
+public:
 	//~UObject interface
 	virtual bool ReplicateSubobjects(class UActorChannel* Channel, class FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
 	//~End of UObject interface
 
 	//~UActorComponent interface
-	//virtual void EndPlay() override;
-	virtual void InitializeComponent() override;
 	virtual void UninitializeComponent() override;
 	virtual void ReadyForReplication() override;
 	//~End of UActorComponent interface
 
-	/** Returns the first equipped instance of a given type, or nullptr if none are found */
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	UBEEquipmentInstance* GetFirstInstanceOfType(TSubclassOf<UBEEquipmentInstance> InstanceType);
 
- 	/** Returns all equipped instances of a given type, or an empty array if none are found */
- 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	TArray<UBEEquipmentInstance*> GetEquipmentInstancesOfType(TSubclassOf<UBEEquipmentInstance> InstanceType) const;
+private:
+	UBEAbilitySystemComponent* GetAbilitySystemComponent() const;
 
-	template <typename T>
-	T* GetFirstInstanceOfType()
-	{
-		return (T*)GetFirstInstanceOfType(T::StaticClass());
-	}
+
+public:
+	/**
+	 * AddEquipment
+	 *
+	 * 指定した Slot に ItemData を追加する。
+	 * ItemData をもとに Equipment を作成する。
+	 * 複数の ItemData を追加する場合は AddEquipments を使用してください。
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Equipment")
+	bool AddEquipment(FGameplayTag SlotTag, UBEItemData* ItemData, bool ActivateImmediately = true);
+
+	/**
+	 * AddEquipments
+	 *
+	 * 指定した Slot に ItemData を追加する。
+	 * 複数の ItemData をいっぺんに追加する。
+	 * ActivateSlotTag に SlotTag を指定することで Active にすることができる。
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Equipment")
+	void AddEquipments(const TMap<FGameplayTag, UBEItemData*>& ItemDatas, FGameplayTag ActivateSlotTag = FGameplayTag());
+
+	/**
+	 * RemoveEquipment
+	 *
+	 * 指定した Slot の Equipment を削除する。
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Equipment")
+	bool RemoveEquipment(FGameplayTag SlotTag);
+
+	/**
+	 * RemoveAllEquipments
+	 *
+	 * つかされたすべての Equipment を削除する。
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Equipment")
+	void RemoveAllEquipments();
+
+
+public:
+	/**
+	 * SetActiveSlot
+	 *
+	 * Active な Slot を変更する
+	 * 設定する Slot がすでに Active な場合は何も起こらない
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Equipment")
+	void SetActiveSlot(FGameplayTag SlotTag);
 
 private:
 	UPROPERTY(Replicated)
 	FBEEquipmentList EquipmentList;
+
+	UPROPERTY(Transient)
+	TSet<FGameplayTag> AddedSlotTags;
 };
