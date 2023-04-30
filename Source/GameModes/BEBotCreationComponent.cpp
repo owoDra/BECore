@@ -8,7 +8,7 @@
 #include "Development/BEDeveloperSettings.h"
 #include "Player/BEPlayerState.h"
 #include "Character/BEPawnExtensionComponent.h"
-#include "Character/BEHealthComponent.h"
+#include "Character/BECharacterHealthComponent.h"
 
 #include "Engine/World.h"
 #include "GameFramework/PlayerState.h"
@@ -150,7 +150,7 @@ void UBEBotCreationComponent::RemoveOneBot()
 			// If we can find a health component, self-destruct it, otherwise just destroy the actor
 			if (APawn* ControlledPawn = BotToRemove->GetPawn())
 			{
-				if (UBEHealthComponent* HealthComponent = UBEHealthComponent::FindHealthComponent(ControlledPawn))
+				if (UBECharacterHealthComponent* HealthComponent = UBECharacterHealthComponent::FindHealthComponent(ControlledPawn))
 				{
 					// Note, right now this doesn't work quite as desired: as soon as the player state goes away when
 					// the controller is destroyed, the abilities like the death animation will be interrupted immediately

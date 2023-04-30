@@ -1,3 +1,4 @@
+// Copyright Epic Games, Inc. All Rights Reserved.
 // Copyright Eigi Chin
 
 #pragma once
@@ -49,12 +50,14 @@ struct FBEPenetrationAvoidanceFeeler
 	{
 	}
 
-	FBEPenetrationAvoidanceFeeler(const FRotator& InAdjustmentRot,
-									const float& InWorldWeight, 
-									const float& InPawnWeight, 
-									const float& InExtent, 
-									const int32& InTraceInterval = 0, 
-									const int32& InFramesUntilNextTrace = 0)
+	FBEPenetrationAvoidanceFeeler(
+		const FRotator& InAdjustmentRot,
+		const float& InWorldWeight, 
+		const float& InPawnWeight, 
+		const float& InExtent, 
+		const int32& InTraceInterval = 0, 			
+		const int32& InFramesUntilNextTrace = 0
+	)
 		: AdjustmentRot(InAdjustmentRot)
 		, WorldWeight(InWorldWeight)
 		, PawnWeight(InPawnWeight)

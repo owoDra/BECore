@@ -4,7 +4,7 @@
 #include "GameFeatures/GameFeatureAction_AddInputConfig.h"
 #include "Components/GameFrameworkComponentManager.h"
 #include "EnhancedInputSubsystems.h"
-#include "Character/BEHeroComponent.h"	// for NAME_BindInputsNow
+#include "Character/BECharacterPlayableComponent.h"	// for NAME_BindInputsNow
 #include "GameFramework/PlayerController.h"
 #include "Engine/LocalPlayer.h"
 #include "PlayerMappableInputConfig.h"
@@ -124,7 +124,7 @@ void UGameFeatureAction_AddInputConfig::HandlePawnExtension(AActor* Actor, FName
 	APawn* AsPawn = CastChecked<APawn>(Actor);
 	FPerContextData& ActiveData = ContextData.FindOrAdd(ChangeContext);
 
-	if (EventName == UGameFrameworkComponentManager::NAME_ExtensionAdded || EventName == UBEHeroComponent::NAME_BindInputsNow)
+	if (EventName == UGameFrameworkComponentManager::NAME_ExtensionAdded || EventName == UBECharacterPlayableComponent::NAME_BindInputsNow)
 	{
 		AddInputConfig(AsPawn, ActiveData);
 	}

@@ -46,7 +46,7 @@ struct FBEEquipmentActorToSpawn
  * A piece of equipment spawned and applied to a pawn
  */
 UCLASS(BlueprintType, Blueprintable)
-class UBEEquipmentInstance : public UObject
+class BECORE_API UBEEquipmentInstance : public UObject
 {
 	GENERATED_BODY()
 

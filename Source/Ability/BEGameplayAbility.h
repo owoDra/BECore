@@ -28,7 +28,7 @@ class UAnimMontage;
 class UBEAbilityCost;
 class UBEAbilitySystemComponent;
 class UBECameraMode;
-class UBEHeroComponent;
+class UBECharacterCameraComponent;
 class UObject;
 struct FFrame;
 struct FGameplayAbilityActorInfo;
@@ -104,7 +104,7 @@ public:
 	ABECharacter* GetBECharacterFromActorInfo() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Ability")
-	UBEHeroComponent* GetHeroComponentFromActorInfo() const;
+	UBECharacterCameraComponent* GetCharacterCameraComponentFromActorInfo() const;
 
 	EBEAbilityActivationPolicy GetActivationPolicy() const { return ActivationPolicy; }
 	EBEAbilityActivationGroup GetActivationGroup() const { return ActivationGroup; }

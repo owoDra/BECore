@@ -19,7 +19,7 @@ class AGameModeBase;
 class APawn;
 class APlayerController;
 class UClass;
-class UBEPawnData;
+class UBECharacterData;
 class UBEExperienceDefinition;
 class UObject;
 struct FFrame;
@@ -48,7 +48,7 @@ public:
 	ABEGameMode(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	UFUNCTION(BlueprintCallable)
-	const UBEPawnData* GetPawnDataForController(const AController* InController) const;
+	const UBECharacterData* GetPawnDataForController(const AController* InController) const;
 
 	//~AGameModeBase interface
 	virtual void InitGame(const FString& MapName, const FString& Options, FString& ErrorMessage) override;

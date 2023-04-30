@@ -9,7 +9,7 @@
 #include "BEBotCreationComponent.generated.h"
 
 class UBEExperienceDefinition;
-class UBEPawnData;
+class UBECharacterData;
 class AAIController;
 
 

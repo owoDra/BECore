@@ -12,7 +12,7 @@
 #include "Character/BECharacter.h"
 #include "UI/BEHUD.h"
 #include "Character/BEPawnExtensionComponent.h"
-#include "Character/BEPawnData.h"
+#include "Character/BECharacterData.h"
 #include "GameModes/BEWorldSettings.h"
 #include "GameModes/BEExperienceDefinition.h"
 #include "GameModes/BEExperienceManagerComponent.h"
@@ -36,14 +36,14 @@ ABEGameMode::ABEGameMode(const FObjectInitializer& ObjectInitializer)
 	HUDClass = ABEHUD::StaticClass();
 }
 
-const UBEPawnData* ABEGameMode::GetPawnDataForController(const AController* InController) const
+const UBECharacterData* ABEGameMode::GetPawnDataForController(const AController* InController) const
 {
 	// See if pawn data is already set on the player state
 	if (InController != nullptr)
 	{
 		if (const ABEPlayerState* BEPS = InController->GetPlayerState<ABEPlayerState>())
 		{
-			if (const UBEPawnData* PawnData = BEPS->GetPawnData<UBEPawnData>())
+			if (const UBECharacterData* PawnData = BEPS->GetPawnData<UBECharacterData>())
 			{
 				return PawnData;
 			}
@@ -194,7 +194,7 @@ bool ABEGameMode::IsExperienceLoaded() const
 
 UClass* ABEGameMode::GetDefaultPawnClassForController_Implementation(AController* InController)
 {
-	if (const UBEPawnData* PawnData = GetPawnDataForController(InController))
+	if (const UBECharacterData* PawnData = GetPawnDataForController(InController))
 	{
 		if (PawnData->PawnClass)
 		{
@@ -218,7 +218,7 @@ APawn* ABEGameMode::SpawnDefaultPawnAtTransform_Implementation(AController* NewP
 		{
 			if (UBEPawnExtensionComponent* PawnExtComp = UBEPawnExtensionComponent::FindPawnExtensionComponent(SpawnedPawn))
 			{
-				if (const UBEPawnData* PawnData = GetPawnDataForController(NewPlayer))
+				if (const UBECharacterData* PawnData = GetPawnDataForController(NewPlayer))
 				{
 					PawnExtComp->SetPawnData(PawnData);
 				}

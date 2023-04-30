@@ -1,25 +1,19 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
 // Copyright Eigi Chin
 
 #include "BECameraComponent.h"
 
-#include "BECameraMode.h"
+#include "Mode/BECameraMode.h"
 
 #include "Camera/CameraTypes.h"
-#include "Containers/EnumAsByte.h"
-#include "Containers/UnrealString.h"
-#include "Engine/Canvas.h"
 #include "Engine/Engine.h"
 #include "Engine/Scene.h"
 #include "GameFramework/Pawn.h"
 #include "GameFramework/PlayerController.h"
-#include "Math/Color.h"
 #include "Math/Rotator.h"
 #include "Math/UnrealMathSSE.h"
 #include "Math/Vector.h"
 #include "Misc/AssertionMacros.h"
 #include "Templates/Casts.h"
-#include "Templates/SubclassOf.h"
 #include "UObject/UObjectBaseUtility.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BECameraComponent)
@@ -28,8 +22,10 @@
 UBECameraComponent::UBECameraComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	SetIsReplicatedByDefault(false);
 	CameraModeStack = nullptr;
 }
+
 
 void UBECameraComponent::OnRegister()
 {
@@ -45,36 +41,26 @@ void UBECameraComponent::OnRegister()
 void UBECameraComponent::GetCameraView(float DeltaTime, FMinimalViewInfo& DesiredView)
 {
 	check(CameraModeStack);
+	ComputeCameraView(DeltaTime, DesiredView);
+}
 
-	UpdateCameraModes();
-	UpdateZoomAmount(DeltaTime);
 
+void UBECameraComponent::ComputeCameraView(float DeltaTime, FMinimalViewInfo& DesiredView)
+{
+	APlayerController* PlayerController = GetOwnerController();
+	check(PlayerController);
+	
 	FBECameraModeView CameraModeView;
 	CameraModeStack->EvaluateStack(DeltaTime, CameraModeView);
+	
+	ComputeRecoilAmount(DeltaTime, CameraModeView);
+	ComputeZoomAmount(DeltaTime, CameraModeView);
 
-	// Keep player controller in sync with the latest view.
-	if (APawn* TargetPawn = Cast<APawn>(GetTargetActor()))
-	{
-		if (APlayerController* PC = TargetPawn->GetController<APlayerController>())
-		{
-			const FRotator SuppressedRotation = UpdateRecoilOffset(DeltaTime, CameraModeView.ControlRotation - PrevControlRotation);
-
-			PrevControlRotation = CameraModeView.ControlRotation;
-			CameraModeView.ControlRotation += SuppressedRotation;
-			CameraModeView.Rotation += RecoilOffset;
-
-			PC->SetControlRotation(CameraModeView.ControlRotation);
-		}
-	}
-
-	// Zoom „ÇíÈÅ©Âøú
-	CameraModeView.FieldOfView *= (1.0/CurrentZoomAmount);
-
-	// Keep camera component in sync with the latest view.
 	SetWorldLocationAndRotation(CameraModeView.Location, CameraModeView.Rotation);
+	PlayerController->SetControlRotation(CameraModeView.ControlRotation);
+	PreviousControlRotation = CameraModeView.ControlRotation;
 	FieldOfView = CameraModeView.FieldOfView;
 
-	// Fill in desired view.
 	DesiredView.Location = CameraModeView.Location;
 	DesiredView.Rotation = CameraModeView.Rotation;
 	DesiredView.FOV = CameraModeView.FieldOfView;
@@ -85,113 +71,110 @@ void UBECameraComponent::GetCameraView(float DeltaTime, FMinimalViewInfo& Desire
 	DesiredView.bConstrainAspectRatio = bConstrainAspectRatio;
 	DesiredView.bUseFieldOfViewForLOD = bUseFieldOfViewForLOD;
 	DesiredView.ProjectionMode = ProjectionMode;
-
-	// See if the CameraActor wants to override the PostProcess settings used.
-	DesiredView.PostProcessBlendWeight = PostProcessBlendWeight;
-	if (PostProcessBlendWeight > 0.0f)
-	{
-		DesiredView.PostProcessSettings = PostProcessSettings;
-	}
+	DesiredView.PostProcessBlendWeight = (PostProcessBlendWeight > 0.0f) ? PostProcessSettings : PostProcessBlendWeight;
 }
 
-void UBECameraComponent::UpdateCameraModes()
+void UBECameraComponent::ComputeRecoilAmount(float DeltaTime, FBECameraModeView& CameraModeView)
 {
-	check(CameraModeStack);
-
-	if (CameraModeStack->IsStackActivate())
+	// Recoil ÇÃìKâû
+	if (RecoilState == EBECameraRecoilState::RecoilUp)
 	{
-		if (DetermineCameraModeDelegate.IsBound())
-		{
-			if (const TSubclassOf<UBECameraMode> CameraMode = DetermineCameraModeDelegate.Execute())
-			{
-				CameraModeStack->PushCameraMode(CameraMode);
+		// Ç±ÇÃÉtÉåÅ[ÉÄÇ…Ç®ÇØÇÈ ControlRotation ÇÃÉfÉãÉ^
+		const FRotator ControlDelta = (CameraModeView.ControlRotation - PreviousControlRotation);
+		const bool bNegativeDeltaY = (ControlDelta.Pitch < 0.0);
+		const bool bNegativeDeltaX = (ControlDelta.Yaw < 0.0);
 
-				float Weight;
-				FGameplayTag CameraTag;
-				GetBlendInfo(Weight, CameraTag);
-				OnCameraModeChanged.Broadcast(Weight, CameraTag);
-			}
+		// Ç±ÇÃÉtÉåÅ[ÉÄÇ…ìKâûÇ∑ÇÈ Recoil ÇÃí«â¡âÒì]ó 
+		const FRotator RecoilAmount = RecoilAmountToAdd * DeltaTime * 16;
+		const bool bNegativeRecoilY = (RecoilAmount.Pitch < 0.0);
+		const bool bNegativeRecoilX = (RecoilAmount.Yaw < 0.0);
+
+		RecoilAmountToAdd -= RecoilAmount;
+
+		// ÉäÉRÉCÉãó}êßâ¬î\Ç»ÇÁìKâû
+		float SuppressedRecoilY, SuppressedRecoilX = 0.0;
+
+		if (bNegativeDeltaY != bNegativeRecoilY)
+		{
+			SuppressedRecoilY = (RecoilAmount.Pitch + ControlDelta.Pitch);
+			SuppressedRecoilY = bNegativeRecoilY ? FMath::Min(SuppressedRecoilY, 0.0) : FMath::Max(SuppressedRecoilY, 0.0);
+		}
+		if (bNegativeDeltaX != bNegativeRecoilX)
+		{
+			SuppressedRecoilX = (RecoilAmount.Yaw + ControlDelta.Yaw);
+			SuppressedRecoilX = bNegativeRecoilX ? FMath::Min(SuppressedRecoilX, 0.0) : FMath::Max(SuppressedRecoilX, 0.0);
+		}
+
+		const FRotator SuppressedRecoil = FRotator(SuppressedRecoilY, SuppressedRecoilX, 0.0);
+
+		// ÉäÉRÉCÉãÇìKâû
+		CameraModeView.ControlRotation += SuppressedRecoil;
+		CurrentRecoilAmount += SuppressedRecoil;
+
+		// ÉäÉRÉCÉãÇÃìKâûÇ™èIÇÌÇ¡ÇΩÇ©îªíËÇµÅAèIÇÌÇ¡ÇƒÇ¢ÇΩÇÁ RecoilState Ç None Ç…Ç∑ÇÈÅB
+		if (RecoilAmountToAdd.IsNearlyZero())
+		{
+			RecoilAmountToAdd = 0.0;
+			RecoilState = EBECameraRecoilState::None;
+		}
+	}
+
+	// Recovery ÇÃìKâû
+	else if (RecoilState == EBECameraRecoilState::Recovery)
+	{
+		// Ç±ÇÃÉtÉåÅ[ÉÄÇ…ìKâûÇ∑ÇÈ Recoil ÇÃïúå≥âÒì]ó 
+		const FRotator RecoveryAmount = CurrentRecoilAmount * DeltaTime * 4;
+
+		// Recovery ÇìKâû
+		CameraModeView.ControlRotation -= RecoveryAmount;
+		CurrentRecoilAmount -= RecoveryAmount;
+
+		// Recovery ÇÃìKâûÇ™èIÇÌÇ¡ÇΩÇ©îªíËÇµÅAèIÇÌÇ¡ÇƒÇ¢ÇΩÇÁ RecoilState Ç None Ç…Ç∑ÇÈÅB
+		if (CurrentRecoilAmount.IsNearlyZero())
+		{
+			CurrentRecoilAmount = 0.0;
+			RecoilState = EBECameraRecoilState::None;
 		}
 	}
 }
 
-FRotator UBECameraComponent::UpdateRecoilOffset(float DeltaTime, FRotator DeltaRotation)
+void UBECameraComponent::ComputeZoomAmount(float DeltaTime, FBECameraModeView& CameraModeView)
 {
-	FRotator SuppressedAmount = FRotator::ZeroRotator;
-
-	if (CanRecoilRecovery)
+	if (isZooming)
 	{
-		RecoilOffset = FMath::RInterpTo(RecoilOffset, FRotator(0.0), DeltaTime, 4.0);
-		TargetRecoilOffset = FMath::RInterpTo(TargetRecoilOffset, FRotator(0.0), DeltaTime, 4.0);
+		CurrentZoomAmount = FMath::FInterpTo(CurrentZoomAmount, TargetZoomAmount, DeltaTime, ZoomInterpSpeed);
 
-		if (RecoilOffset.IsNearlyZero() && TargetRecoilOffset.IsNearlyZero())
+		if (CurrentZoomAmount == TargetZoomAmount)
 		{
-			CanRecoilRecovery = false;
-		}
-	}
-	else
-	{
-		RecoilOffset = FMath::RInterpTo(RecoilOffset, TargetRecoilOffset, DeltaTime, 16.0);
-
-		if (!RecoilOffset.IsNearlyZero())
-		{
-			// Á∏¶„É™„Ç≥„Ç§„É´„ÇíÁõ∏ÊÆ∫
-			float DeltaVert = DeltaRotation.Pitch;
-			float TargetVert = RecoilOffset.Pitch;
-
-			if ((TargetVert > 0) && (DeltaVert < 0))
-			{
-				TargetVert = FMath::Max(0, TargetVert + DeltaVert);
-			}
-			else if ((TargetVert < 0) && (DeltaVert > 0))
-			{
-				TargetVert = FMath::Min(0, TargetVert + DeltaVert);
-			}
-
-			// Ê®™„É™„Ç≥„Ç§„É´„ÇíÁõ∏ÊÆ∫
-			float DeltaHori = DeltaRotation.Yaw;
-			float TargetHori = RecoilOffset.Yaw;
-
-			if ((TargetHori > 0) && (DeltaHori < 0))
-			{
-				TargetHori = FMath::Max(0, TargetHori + DeltaHori);
-			}
-			else if ((TargetHori < 0) && (DeltaHori > 0))
-			{
-				TargetHori = FMath::Min(0, TargetHori + DeltaHori);
-			}
-
-			const FRotator ModifiedOffset = FRotator(TargetVert, TargetHori, 0.0);
-
-			SuppressedAmount = RecoilOffset - ModifiedOffset;
-
-			TargetRecoilOffset -= SuppressedAmount;
-
-			RecoilOffset = ModifiedOffset;
+			isZooming = false;
 		}
 	}
 
-	return SuppressedAmount;
+	CameraModeView.FieldOfView *= (1.0 / CurrentZoomAmount);
 }
 
-void UBECameraComponent::DrawDebug(UCanvas* Canvas) const
+
+void UBECameraComponent::AddRecoilOffset(FVector2D Offset, float RecoveryDelay)
 {
-	check(Canvas);
+	RecoilAmountToAdd.Yaw += Offset.X;
+	RecoilAmountToAdd.Pitch += Offset.Y;
 
-	FDisplayDebugManager& DisplayDebugManager = Canvas->DisplayDebugManager;
+	RecoilState = EBECameraRecoilState::RecoilUp;
 
-	DisplayDebugManager.SetFont(GEngine->GetSmallFont());
-	DisplayDebugManager.SetDrawColor(FColor::Yellow);
-	DisplayDebugManager.DrawString(FString::Printf(TEXT("BECameraComponent: %s"), *GetNameSafe(GetTargetActor())));
-
-	DisplayDebugManager.SetDrawColor(FColor::White);
-	DisplayDebugManager.DrawString(FString::Printf(TEXT("   Location: %s"), *GetComponentLocation().ToCompactString()));
-	DisplayDebugManager.DrawString(FString::Printf(TEXT("   Rotation: %s"), *GetComponentRotation().ToCompactString()));
-	DisplayDebugManager.DrawString(FString::Printf(TEXT("   FOV: %f"), FieldOfView));
-
-	check(CameraModeStack);
-	CameraModeStack->DrawDebug(Canvas);
+	if (GetWorld()->GetTimerManager().TimerExists(TimerRecoilRecovery) ||
+		GetWorld()->GetTimerManager().IsTimerActive(TimerRecoilRecovery))
+	{
+		GetWorld()->GetTimerManager().ClearTimer(TimerRecoilRecovery);
+	}
+	GetWorld()->GetTimerManager().SetTimer(TimerRecoilRecovery, this, &ThisClass::HandleRecoilRecovery, 1.0, false, RecoveryDelay);
 }
+
+void UBECameraComponent::HandleRecoilRecovery()
+{
+	RecoilAmountToAdd = 0.0;
+	RecoilState = EBECameraRecoilState::Recovery;
+}
+
 
 void UBECameraComponent::SetZoom(float ZoomAmount, float InterpSpeed)
 {
@@ -200,45 +183,30 @@ void UBECameraComponent::SetZoom(float ZoomAmount, float InterpSpeed)
 	ZoomInterpSpeed = InterpSpeed;
 }
 
-void UBECameraComponent::UpdateZoomAmount(float DeltaTime)
+
+APlayerController* UBECameraComponent::GetOwnerController() const
 {
-	if (!isZooming)
+	if (APawn* TargetPawn = Cast<APawn>(GetOwner()))
 	{
-		return;
+		return TargetPawn->GetController<APlayerController>();
 	}
 
-	CurrentZoomAmount = FMath::FInterpTo(CurrentZoomAmount, TargetZoomAmount, DeltaTime, ZoomInterpSpeed);
-
-	if (CurrentZoomAmount == TargetZoomAmount)
-	{
-		isZooming = false;
-	}
+	return nullptr;
 }
 
-void UBECameraComponent::AddRecoilOffset(FVector2D Offset, float RecoveryDelay)
+UBECameraComponent* UBECameraComponent::FindCameraComponent(const APawn* Pawn)
 {
-	TargetRecoilOffset.Yaw += Offset.X;
-	TargetRecoilOffset.Pitch += Offset.Y;
-
-	CanRecoilRecovery = false;
-
-	if (GetWorld()->GetTimerManager().TimerExists(TimerRecoilRecovery) ||
-		GetWorld()->GetTimerManager().IsTimerActive(TimerRecoilRecovery))
-	{
-		GetWorld()->GetTimerManager().ClearTimer(TimerRecoilRecovery);
-	}
-
-	GetWorld()->GetTimerManager().SetTimer(TimerRecoilRecovery, this, &ThisClass::HandleRecoilRecovery, 1.0, false, RecoveryDelay);
+	return (Pawn ? Pawn->FindComponentByClass<UBECameraComponent>() : nullptr);
 }
 
 void UBECameraComponent::GetBlendInfo(float& OutWeightOfTopLayer, FGameplayTag& OutTagOfTopLayer) const
 {
 	check(CameraModeStack);
-	CameraModeStack->GetBlendInfo(/*out*/ OutWeightOfTopLayer, /*out*/ OutTagOfTopLayer);
+	CameraModeStack->GetBlendInfo(OutWeightOfTopLayer, OutTagOfTopLayer);
 }
 
-void UBECameraComponent::HandleRecoilRecovery()
+void UBECameraComponent::PushCameraMode(TSubclassOf<UBECameraMode> CameraModeClass)
 {
-	CanRecoilRecovery = true;
+	check(CameraModeStack);
+	CameraModeStack->PushCameraMode(CameraModeClass);
 }
-

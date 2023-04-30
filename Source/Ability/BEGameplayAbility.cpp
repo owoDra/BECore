@@ -1,7 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 // Copyright Eigi Chin
 
-#include "Ability/Abilities/BEGameplayAbility.h"
+#include "Ability/BEGameplayAbility.h"
 
 #include "Ability/Abilities/BEAbilitySimpleFailureMessage.h"
 #include "Ability/Abilities/BEAbilityCost.h"
@@ -10,7 +10,7 @@
 #include "Ability/BEGameplayEffectContext.h"
 #include "Player/BEPlayerController.h"
 #include "Character/BECharacter.h"
-#include "Character/BEHeroComponent.h"
+#include "Character/Component/BECharacterCameraComponent.h"
 #include "Camera/BECameraMode.h"
 #include "BEGameplayTags.h"
 #include "BELogChannels.h"
@@ -97,9 +97,9 @@ ABECharacter* UBEGameplayAbility::GetBECharacterFromActorInfo() const
 	return (CurrentActorInfo ? Cast<ABECharacter>(CurrentActorInfo->AvatarActor.Get()) : nullptr);
 }
 
-UBEHeroComponent* UBEGameplayAbility::GetHeroComponentFromActorInfo() const
+UBECharacterCameraComponent* UBEGameplayAbility::GetCharacterCameraComponentFromActorInfo() const
 {
-	return (CurrentActorInfo ? UBEHeroComponent::FindHeroComponent(CurrentActorInfo->AvatarActor.Get()) : nullptr);
+	return (CurrentActorInfo ? UBECharacterCameraComponent::FindCharacterCameraComponent(Cast<APawn>(CurrentActorInfo->AvatarActor.Get())) : nullptr);
 }
 
 void UBEGameplayAbility::NativeOnAbilityFailedToActivate(const FGameplayTagContainer& FailedReason) const
@@ -551,9 +551,9 @@ void UBEGameplayAbility::SetCameraMode(TSubclassOf<UBECameraMode> CameraMode)
 {
 	ENSURE_ABILITY_IS_INSTANTIATED_OR_RETURN(SetCameraMode, );
 
-	if (UBEHeroComponent* HeroComponent = GetHeroComponentFromActorInfo())
+	if (UBECharacterCameraComponent* CameraComponent = GetCharacterCameraComponentFromActorInfo())
 	{
-		HeroComponent->SetAbilityCameraMode(CameraMode, CurrentSpecHandle);
+		CameraComponent->SetAbilityCameraMode(CameraMode, CurrentSpecHandle);
 		ActiveCameraMode = CameraMode;
 	}
 }
@@ -564,9 +564,9 @@ void UBEGameplayAbility::ClearCameraMode()
 
 	if (ActiveCameraMode)
 	{
-		if (UBEHeroComponent* HeroComponent = GetHeroComponentFromActorInfo())
+		if (UBECharacterCameraComponent* CameraComponent = GetCharacterCameraComponentFromActorInfo())
 		{
-			HeroComponent->ClearAbilityCameraMode(CurrentSpecHandle);
+			CameraComponent->ClearAbilityCameraMode(CurrentSpecHandle);
 		}
 
 		ActiveCameraMode = nullptr;

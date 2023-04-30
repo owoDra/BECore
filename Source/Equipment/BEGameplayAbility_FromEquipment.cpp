@@ -1,9 +1,9 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
 // Copyright Eigi Chin
 
 #include "BEGameplayAbility_FromEquipment.h"
+
 #include "BEEquipmentInstance.h"
-#include "Inventory/BEInventoryItemInstance.h"
+#include "Item/BEItemData.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BEGameplayAbility_FromEquipment)
 
@@ -23,11 +23,11 @@ UBEEquipmentInstance* UBEGameplayAbility_FromEquipment::GetAssociatedEquipment()
 	return nullptr;
 }
 
-UBEInventoryItemInstance* UBEGameplayAbility_FromEquipment::GetAssociatedItem() const
+UBEItemData* UBEGameplayAbility_FromEquipment::GetAssociatedItem() const
 {
 	if (UBEEquipmentInstance* Equipment = GetAssociatedEquipment())
 	{
-		return Cast<UBEInventoryItemInstance>(Equipment->GetInstigator());
+		return Equipment->GetItemData();
 	}
 	return nullptr;
 }

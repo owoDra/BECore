@@ -10,7 +10,7 @@
 #include "BEAssetManager.generated.h"
 
 class UBEGameData;
-class UBEPawnData;
+class UBECharacterData;
 
 ////////////////////////////////////////////////////////////
 
@@ -52,7 +52,7 @@ public:
 	static void DumpLoadedAssets();
 
 	const UBEGameData& GetGameData();
-	const UBEPawnData* GetDefaultPawnData() const;
+	const UBECharacterData* GetDefaultPawnData() const;
 
 protected:
 	template <typename GameDataClass>
@@ -95,7 +95,7 @@ protected:
 
 	// Pawn data used when spawning player pawns if there isn't one set on the player state.
 	UPROPERTY(Config)
-		TSoftObjectPtr<UBEPawnData> DefaultPawnData;
+		TSoftObjectPtr<UBECharacterData> DefaultPawnData;
 
 private:
 	// Flushes the StartupJobs array. Processes all startup work.

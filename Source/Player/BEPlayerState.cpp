@@ -7,7 +7,7 @@
 #include "Ability/Attributes/BEHealthSet.h"
 #include "Ability/Attributes/BEMovementSet.h"
 #include "Ability/BEAbilitySystemComponent.h"
-#include "Character/BEPawnData.h"
+#include "Character/BECharacterData.h"
 #include "Character/BEPawnExtensionComponent.h"
 #include "GameModes/BEExperienceManagerComponent.h"
 #include "GameModes/BEGameMode.h"
@@ -128,7 +128,7 @@ void ABEPlayerState::OnExperienceLoaded(const UBEExperienceDefinition* /*Current
 {
 	if (ABEGameMode* BEGameMode = GetWorld()->GetAuthGameMode<ABEGameMode>())
 	{
-		if (const UBEPawnData* NewPawnData = BEGameMode->GetPawnDataForController(GetOwningController()))
+		if (const UBECharacterData* NewPawnData = BEGameMode->GetPawnDataForController(GetOwningController()))
 		{
 			SetPawnData(NewPawnData);
 		}
@@ -181,7 +181,7 @@ void ABEPlayerState::PostInitializeComponents()
 	}
 }
 
-void ABEPlayerState::SetPawnData(const UBEPawnData* InPawnData, bool Override)
+void ABEPlayerState::SetPawnData(const UBECharacterData* InPawnData, bool Override)
 {
 	check(InPawnData);
 
@@ -222,7 +222,7 @@ void ABEPlayerState::SetPawnData(const UBEPawnData* InPawnData, bool Override)
 	ForceNetUpdate();
 }
 
-void ABEPlayerState::K2_SetPawnData(const UBEPawnData* InPawnData, bool Override)
+void ABEPlayerState::K2_SetPawnData(const UBECharacterData* InPawnData, bool Override)
 {
 	SetPawnData(InPawnData, Override);
 }

@@ -1,10 +1,8 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
 // Copyright Eigi Chin
 
 #include "BECameraMode.h"
 
-#include "BEPlayerCameraManager.h"
-#include "BECameraComponent.h"
+#include "Camera/BECameraComponent.h"
 
 #include "Components/CapsuleComponent.h"
 #include "Containers/UnrealString.h"
@@ -18,12 +16,19 @@
 #include "UObject/Class.h"
 #include "UObject/UnrealNames.h"
 
+#define BE_CAMERA_DEFAULT_FOV		(90.0f)
+#define BE_CAMERA_DEFAULT_PITCH_MIN	(-89.0f)
+#define BE_CAMERA_DEFAULT_PITCH_MAX	(89.0f)
+
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BECameraMode)
+
+UE_DEFINE_GAMEPLAY_TAG(TAG_Camera_Type, "Camera.Type");
 
 
 //////////////////////////////////////////////////////////////////////////
 // FBECameraModeView
 //////////////////////////////////////////////////////////////////////////
+
 FBECameraModeView::FBECameraModeView()
 	: Location(ForceInit)
 	, Rotation(ForceInit)
@@ -60,13 +65,9 @@ void FBECameraModeView::Blend(const FBECameraModeView& Other, float OtherWeight)
 // UBECameraMode
 //////////////////////////////////////////////////////////////////////////
 
-// =================================
-//  初期化
-// =================================
-
 UBECameraMode::UBECameraMode()
 {
-	FieldOfView = BE_CAMERA_DEFAULT_FOV;
+	FieldOfView = 90.0;
 	ViewPitchMin = BE_CAMERA_DEFAULT_PITCH_MIN;
 	ViewPitchMax = BE_CAMERA_DEFAULT_PITCH_MAX;
 
@@ -75,50 +76,38 @@ UBECameraMode::UBECameraMode()
 	BlendExponent = 4.0f;
 	BlendAlpha = 1.0f;
 	BlendWeight = 1.0f;
+
+	ActivationState = EBECameraModeActivationState::Deactevated;
 }
 
 
-// =================================
-//  ユーティリティ
-// =================================
-
-UBECameraComponent* UBECameraMode::GetBECameraComponent() const
+void UBECameraMode::SetActivationState(EBECameraModeActivationState NewActivationState)
 {
-	return CastChecked<UBECameraComponent>(GetOuter());
+	if (ActivationState == NewActivationState)
+	{
+		return;
+	}
+
+	ActivationState = NewActivationState;
+
+	if (ActivationState == EBECameraModeActivationState::PreActivate)
+	{
+		PreActivateMode();
+	}
+	else if (ActivationState == EBECameraModeActivationState::Activated)
+	{
+		PostActivateMode();
+	}
+	else if (ActivationState == EBECameraModeActivationState::PreDeactevate)
+	{
+		PreDeactivateMode();
+	}
+	else if (ActivationState == EBECameraModeActivationState::Deactevated)
+	{
+		PostDeactivateMode();
+	}
 }
 
-UWorld* UBECameraMode::GetWorld() const
-{
-	return HasAnyFlags(RF_ClassDefaultObject) ? nullptr : GetOuter()->GetWorld();
-}
-
-AActor* UBECameraMode::GetTargetActor() const
-{
-	const UBECameraComponent* BECameraComponent = GetBECameraComponent();
-
-	return BECameraComponent->GetTargetActor();
-}
-
-void UBECameraMode::UpdateCameraMode(float DeltaTime)
-{
-	UpdateView(DeltaTime);
-	UpdateBlending(DeltaTime);
-}
-
-void UBECameraMode::DrawDebug(UCanvas* Canvas) const
-{
-	check(Canvas);
-
-	FDisplayDebugManager& DisplayDebugManager = Canvas->DisplayDebugManager;
-
-	DisplayDebugManager.SetDrawColor(FColor::White);
-	DisplayDebugManager.DrawString(FString::Printf(TEXT("      BECameraMode: %s (%f)"), *GetName(), BlendWeight));
-}
-
-
-// =================================
-//  カメラ
-// =================================
 
 FVector UBECameraMode::GetPivotLocation() const
 {
@@ -178,37 +167,6 @@ void UBECameraMode::UpdateView(float DeltaTime)
 	View.FieldOfView = FieldOfView;
 }
 
-void UBECameraMode::SetBlendWeight(float Weight)
-{
-	BlendWeight = FMath::Clamp(Weight, 0.0f, 1.0f);
-
-	// Since we're setting the blend weight directly, we need to calculate the blend alpha to account for the blend function.
-	const float InvExponent = (BlendExponent > 0.0f) ? (1.0f / BlendExponent) : 1.0f;
-
-	switch (BlendFunction)
-	{
-	case EBECameraModeBlendFunction::Linear:
-		BlendAlpha = BlendWeight;
-		break;
-
-	case EBECameraModeBlendFunction::EaseIn:
-		BlendAlpha = FMath::InterpEaseIn(0.0f, 1.0f, BlendWeight, InvExponent);
-		break;
-
-	case EBECameraModeBlendFunction::EaseOut:
-		BlendAlpha = FMath::InterpEaseOut(0.0f, 1.0f, BlendWeight, InvExponent);
-		break;
-
-	case EBECameraModeBlendFunction::EaseInOut:
-		BlendAlpha = FMath::InterpEaseInOut(0.0f, 1.0f, BlendWeight, InvExponent);
-		break;
-
-	default:
-		checkf(false, TEXT("SetBlendWeight: Invalid BlendFunction [%d]\n"), (uint8)BlendFunction);
-		break;
-	}
-}
-
 void UBECameraMode::UpdateBlending(float DeltaTime)
 {
 	if (BlendTime > 0.0f)
@@ -247,130 +205,76 @@ void UBECameraMode::UpdateBlending(float DeltaTime)
 	}
 }
 
+void UBECameraMode::UpdateCameraMode(float DeltaTime)
+{
+	UpdateView(DeltaTime);
+	UpdateBlending(DeltaTime);
+}
+
+void UBECameraMode::SetBlendWeight(float Weight)
+{
+	BlendWeight = FMath::Clamp(Weight, 0.0f, 1.0f);
+
+	// Since we're setting the blend weight directly, we need to calculate the blend alpha to account for the blend function.
+	const float InvExponent = (BlendExponent > 0.0f) ? (1.0f / BlendExponent) : 1.0f;
+
+	switch (BlendFunction)
+	{
+	case EBECameraModeBlendFunction::Linear:
+		BlendAlpha = BlendWeight;
+		break;
+
+	case EBECameraModeBlendFunction::EaseIn:
+		BlendAlpha = FMath::InterpEaseIn(0.0f, 1.0f, BlendWeight, InvExponent);
+		break;
+
+	case EBECameraModeBlendFunction::EaseOut:
+		BlendAlpha = FMath::InterpEaseOut(0.0f, 1.0f, BlendWeight, InvExponent);
+		break;
+
+	case EBECameraModeBlendFunction::EaseInOut:
+		BlendAlpha = FMath::InterpEaseInOut(0.0f, 1.0f, BlendWeight, InvExponent);
+		break;
+
+	default:
+		checkf(false, TEXT("SetBlendWeight: Invalid BlendFunction [%d]\n"), (uint8)BlendFunction);
+		break;
+	}
+}
+
+
+UBECameraComponent* UBECameraMode::GetBECameraComponent() const
+{
+	return CastChecked<UBECameraComponent>(GetOuter());
+}
+
+UWorld* UBECameraMode::GetWorld() const
+{
+	return HasAnyFlags(RF_ClassDefaultObject) ? nullptr : GetOuter()->GetWorld();
+}
+
+AActor* UBECameraMode::GetTargetActor() const
+{
+	const UBECameraComponent* BECameraComponent = GetBECameraComponent();
+
+	return BECameraComponent->GetOwner();
+}
 
 
 //////////////////////////////////////////////////////////////////////////
 // UBECameraModeStack
 //////////////////////////////////////////////////////////////////////////
+
 UBECameraModeStack::UBECameraModeStack()
 {
-	bIsActive = true;
 }
 
-void UBECameraModeStack::ActivateStack()
-{
-	if (!bIsActive)
-	{
-		bIsActive = true;
-
-		// Notify camera modes that they are being activated.
-		for (UBECameraMode* CameraMode : CameraModeStack)
-		{
-			check(CameraMode);
-			CameraMode->OnActivation();
-		}
-	}
-}
-
-void UBECameraModeStack::DeactivateStack()
-{
-	if (bIsActive)
-	{
-		bIsActive = false;
-
-		// Notify camera modes that they are being deactivated.
-		for (UBECameraMode* CameraMode : CameraModeStack)
-		{
-			check(CameraMode);
-			CameraMode->OnDeactivation();
-		}
-	}
-}
-
-void UBECameraModeStack::PushCameraMode(TSubclassOf<UBECameraMode> CameraModeClass)
-{
-	if (!CameraModeClass)
-	{
-		return;
-	}
-
-	UBECameraMode* CameraMode = GetCameraModeInstance(CameraModeClass);
-	check(CameraMode);
-
-	int32 StackSize = CameraModeStack.Num();
-
-	if ((StackSize > 0) && (CameraModeStack[0] == CameraMode))
-	{
-		// Already top of stack.
-		return;
-	}
-
-	// See if it's already in the stack and remove it.
-	// Figure out how much it was contributing to the stack.
-	int32 ExistingStackIndex = INDEX_NONE;
-	float ExistingStackContribution = 1.0f;
-
-	for (int32 StackIndex = 0; StackIndex < StackSize; ++StackIndex)
-	{
-		if (CameraModeStack[StackIndex] == CameraMode)
-		{
-			ExistingStackIndex = StackIndex;
-			ExistingStackContribution *= CameraMode->GetBlendWeight();
-			break;
-		}
-		else
-		{
-			ExistingStackContribution *= (1.0f - CameraModeStack[StackIndex]->GetBlendWeight());
-		}
-	}
-
-	if (ExistingStackIndex != INDEX_NONE)
-	{
-		CameraModeStack.RemoveAt(ExistingStackIndex);
-		StackSize--;
-	}
-	else
-	{
-		ExistingStackContribution = 0.0f;
-	}
-
-	// Decide what initial weight to start with.
-	const bool bShouldBlend = ((CameraMode->GetBlendTime() > 0.0f) && (StackSize > 0));
-	const float BlendWeight = (bShouldBlend ? ExistingStackContribution : 1.0f);
-
-	CameraMode->SetBlendWeight(BlendWeight);
-
-	// Add new entry to top of stack.
-	CameraModeStack.Insert(CameraMode, 0);
-
-	// Make sure stack bottom is always weighted 100%.
-	CameraModeStack.Last()->SetBlendWeight(1.0f);
-
-	// Let the camera mode know if it's being added to the stack.
-	if (ExistingStackIndex == INDEX_NONE)
-	{
-		CameraMode->OnActivation();
-	}
-}
-
-bool UBECameraModeStack::EvaluateStack(float DeltaTime, FBECameraModeView& OutCameraModeView)
-{
-	if (!bIsActive)
-	{
-		return false;
-	}
-
-	UpdateStack(DeltaTime);
-	BlendStack(OutCameraModeView);
-
-	return true;
-}
 
 UBECameraMode* UBECameraModeStack::GetCameraModeInstance(TSubclassOf<UBECameraMode> CameraModeClass)
 {
 	check(CameraModeClass);
 
-	// First see if we already created one.
+	// 既にインスタンスが作成されているか確認
 	for (UBECameraMode* CameraMode : CameraModeInstances)
 	{
 		if ((CameraMode != nullptr) && (CameraMode->GetClass() == CameraModeClass))
@@ -379,18 +283,22 @@ UBECameraMode* UBECameraModeStack::GetCameraModeInstance(TSubclassOf<UBECameraMo
 		}
 	}
 
-	// Not found, so we need to create it.
+	// 既にインスタンスが作成されていない場合は作成する
 	UBECameraMode* NewCameraMode = NewObject<UBECameraMode>(GetOuter(), CameraModeClass, NAME_None, RF_NoFlags);
 	check(NewCameraMode);
 
+	// インスタンスを配列に追加し後から参照できるようにする
 	CameraModeInstances.Add(NewCameraMode);
 
 	return NewCameraMode;
 }
 
+
 void UBECameraModeStack::UpdateStack(float DeltaTime)
 {
 	const int32 StackSize = CameraModeStack.Num();
+
+	// Stack が 0 以下(つまり空)の場合はスキップ
 	if (StackSize <= 0)
 	{
 		return;
@@ -399,6 +307,7 @@ void UBECameraModeStack::UpdateStack(float DeltaTime)
 	int32 RemoveCount = 0;
 	int32 RemoveIndex = INDEX_NONE;
 
+	// Stack 内の CameraMode をすべて更新する
 	for (int32 StackIndex = 0; StackIndex < StackSize; ++StackIndex)
 	{
 		UBECameraMode* CameraMode = CameraModeStack[StackIndex];
@@ -406,24 +315,31 @@ void UBECameraModeStack::UpdateStack(float DeltaTime)
 
 		CameraMode->UpdateCameraMode(DeltaTime);
 
+		// CameraMode の BlendWeight が 1.0 以上(つまり Blend が完了済み)かどうか
 		if (CameraMode->GetBlendWeight() >= 1.0f)
 		{
-			// Everything below this mode is now irrelevant and can be removed.
+			// Blend が完了している CameraMode より前に追加された最初の項目の Index とそこから何個の項目を削除するか記録
 			RemoveIndex = (StackIndex + 1);
 			RemoveCount = (StackSize - RemoveIndex);
+
+			// Blend が完了したということは完全に Active になったということなので
+			// ActivationState を Activated に設定
+			CameraMode->SetActivationState(EBECameraModeActivationState::Activated);
 			break;
 		}
 	}
 
+	// Blend が完了し除外しても問題ない項目があるか
 	if (RemoveCount > 0)
 	{
-		// Let the camera modes know they being removed from the stack.
+		// 記録した項目を削除する
 		for (int32 StackIndex = RemoveIndex; StackIndex < StackSize; ++StackIndex)
 		{
 			UBECameraMode* CameraMode = CameraModeStack[StackIndex];
 			check(CameraMode);
 
-			CameraMode->OnDeactivation();
+			// ActivationState を Deactevated 設定する
+			CameraMode->SetActivationState(EBECameraModeActivationState::Deactevated);
 		}
 
 		CameraModeStack.RemoveAt(RemoveIndex, RemoveCount);
@@ -432,19 +348,21 @@ void UBECameraModeStack::UpdateStack(float DeltaTime)
 
 void UBECameraModeStack::BlendStack(FBECameraModeView& OutCameraModeView) const
 {
-	const int32 StackSize = CameraModeStack.Num();
-	if (StackSize <= 0)
+	const int32 LastIndex = CameraModeStack.Num() - 1;
+
+	// Stack が空の場合はスキップ
+	if (LastIndex < 0)
 	{
 		return;
 	}
 
-	// Start at the bottom and blend up the stack
-	const UBECameraMode* CameraMode = CameraModeStack[StackSize - 1];
+	// Stack の一番最後の CameraMode から順番に Blend する
+	const UBECameraMode* CameraMode = CameraModeStack[LastIndex];
 	check(CameraMode);
 
 	OutCameraModeView = CameraMode->GetCameraModeView();
 
-	for (int32 StackIndex = (StackSize - 2); StackIndex >= 0; --StackIndex)
+	for (int32 StackIndex = (LastIndex - 1); StackIndex >= 0; --StackIndex)
 	{
 		CameraMode = CameraModeStack[StackIndex];
 		check(CameraMode);
@@ -453,36 +371,105 @@ void UBECameraModeStack::BlendStack(FBECameraModeView& OutCameraModeView) const
 	}
 }
 
-void UBECameraModeStack::DrawDebug(UCanvas* Canvas) const
+void UBECameraModeStack::PushCameraMode(TSubclassOf<UBECameraMode> CameraModeClass)
 {
-	check(Canvas);
-
-	FDisplayDebugManager& DisplayDebugManager = Canvas->DisplayDebugManager;
-
-	DisplayDebugManager.SetDrawColor(FColor::Green);
-	DisplayDebugManager.DrawString(FString(TEXT("   --- Camera Modes (Begin) ---")));
-
-	for (const UBECameraMode* CameraMode : CameraModeStack)
+	// 新しく適応する CameraMode が有効かどうか
+	if (!CameraModeClass)
 	{
-		check(CameraMode);
-		CameraMode->DrawDebug(Canvas);
+		return;
 	}
 
-	DisplayDebugManager.SetDrawColor(FColor::Green);
-	DisplayDebugManager.DrawString(FString::Printf(TEXT("   --- Camera Modes (End) ---")));
+	// CameraMode からインスタンスを作成、またはキャッシュから取得
+	UBECameraMode* CameraMode = GetCameraModeInstance(CameraModeClass);
+	check(CameraMode);
+
+	int32 StackSize = CameraModeStack.Num();
+
+	// 追加しようとしている CameraMode が既に Stack の一番上(つまり有効化済み、または有効か途中)かどうか
+	if ((StackSize > 0) && (CameraModeStack[0] == CameraMode))
+	{
+		return;
+	}
+
+	// Stack に既にあるかどうかを確認し、Stack 内の CameraMode の BlendWeight から
+	// 新しく追加する CameraMode の BlendWeight を決める
+	int32 ExistingStackIndex		= INDEX_NONE;
+	float ExistingStackContribution = 1.0f;
+	bool bCameraModeExisted = false;
+
+	for (int32 StackIndex = 0; StackIndex < StackSize; ++StackIndex)
+	{
+		const bool bSameCameraMode = (CameraModeStack[StackIndex] == CameraMode);
+
+		// 新しく追加する CameraMode が存在するかわかっていない間だけ ExistingStackContribution の計算を続ける
+		if (bCameraModeExisted == false)
+		{
+			if (bSameCameraMode)
+			{
+				ExistingStackIndex = StackIndex;
+				ExistingStackContribution *= CameraMode->GetBlendWeight();
+
+				// CameraMode が存在しているとわかったのでフラグを立てる
+				bCameraModeExisted = true;
+			}
+			else
+			{
+				ExistingStackContribution *= (1.0f - CameraModeStack[StackIndex]->GetBlendWeight());
+			}
+		}
+
+		// 新しく追加する CameraMode と同じではないときにだけ、その CameraMode の ActivationState を PreDeactevate にする
+		if (bSameCameraMode == false)
+		{
+			CameraModeStack[StackIndex]->SetActivationState(EBECameraModeActivationState::PreDeactevate);
+		}
+	}
+
+	// Stack に既にないなら全体の BlendWeight に影響しないので 0.0 に設定
+	if (ExistingStackIndex == INDEX_NONE)
+	{
+		ExistingStackContribution = 0.0f;
+	}
+
+	// Stack に既にあるなら削除する
+	else
+	{
+		CameraModeStack.RemoveAt(ExistingStackIndex);
+		StackSize--;
+	}
+
+	// 新しく追加する CameraMode の BlendWeight を決める
+	const bool bShouldBlend = ((CameraMode->GetBlendTime() > 0.0f) && (StackSize > 0));
+	const float BlendWeight = (bShouldBlend ? ExistingStackContribution : 1.0f);
+
+	CameraMode->SetBlendWeight(BlendWeight);
+
+	// Stack の最初に挿入
+	CameraModeStack.Insert(CameraMode, 0);
+
+	// Stack の最後の項目の BlendWeight を 1.0 (100%)にする
+	CameraModeStack.Last()->SetBlendWeight(1.0f);
+
+	// CameraMode の ActivationState を PreActivate に設定
+	CameraMode->SetActivationState(EBECameraModeActivationState::PreActivate);
+}
+
+void UBECameraModeStack::EvaluateStack(float DeltaTime, FBECameraModeView& OutCameraModeView)
+{
+	UpdateStack(DeltaTime);
+	BlendStack(OutCameraModeView);
 }
 
 void UBECameraModeStack::GetBlendInfo(float& OutWeightOfTopLayer, FGameplayTag& OutTagOfTopLayer) const
 {
-	if (CameraModeStack.Num() == 0)
+	if (CameraModeStack.IsEmpty())
 	{
 		OutWeightOfTopLayer = 1.0f;
 		OutTagOfTopLayer = FGameplayTag();
-		return;
 	}
 	else
 	{
-		UBECameraMode* TopEntry = CameraModeStack.Last();
+		UBECameraMode* TopEntry = CameraModeStack[0];
 		check(TopEntry);
 		OutWeightOfTopLayer = TopEntry->GetBlendWeight();
 		OutTagOfTopLayer = TopEntry->GetCameraTypeTag();

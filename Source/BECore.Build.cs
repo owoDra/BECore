@@ -38,7 +38,6 @@ public class BECore : ModuleRules
                 "DataRegistry",
                 "ReplicationGraph",
                 "GameFeatures",
-                "SignificanceManager",
                 "Hotfix",
                 "CommonLoadingScreen",
                 "Niagara",

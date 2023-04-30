@@ -7,7 +7,7 @@
 #include "BEDebugCameraController.h"
 #include "Ability/BEAbilitySystemComponent.h"
 #include "System/BEAssetManager.h"
-#include "Character/BEHealthComponent.h"
+#include "Character/BECharacterHealthComponent.h"
 #include "Character/BEPawnExtensionComponent.h"
 #include "System/BESystemStatics.h"
 #include "System/BEGameData.h"
@@ -275,7 +275,7 @@ void UBECheatManager::DamageSelfDestruct()
 		{
 			if (PawnExtComp->HasReachedInitState(TAG_InitState_GameplayReady))
 			{
-				if (UBEHealthComponent* HealthComponent = UBEHealthComponent::FindHealthComponent(BEPC->GetPawn()))
+				if (UBECharacterHealthComponent* HealthComponent = UBECharacterHealthComponent::FindHealthComponent(BEPC->GetPawn()))
 				{
 					HealthComponent->DamageSelfDestruct();
 				}

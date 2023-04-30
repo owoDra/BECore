@@ -1,23 +1,26 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
 // Copyright Eigi Chin
 
 #pragma once
 
-#include "CoreMinimal.h"
-#include "Ability/Abilities/BEGameplayAbility.h"
+#include "Ability/BEGameplayAbility.h"
+
+#include "Internationalization/Text.h"
+#include "UObject/UObjectGlobals.h"
 
 #include "BEGameplayAbility_FromEquipment.generated.h"
 
+class UBEItemData;
 class UBEEquipmentInstance;
-class UBEInventoryItemInstance;
+
 
 /**
  * UBEGameplayAbility_FromEquipment
  *
- * An ability granted by and associated with an equipment instance
+ * Equipment とともに使用することが想定された GameplayAbility。
+ * Equipment と共に使用しないと正常に動作しない。
  */
 UCLASS()
-class UBEGameplayAbility_FromEquipment : public UBEGameplayAbility
+class BECORE_API UBEGameplayAbility_FromEquipment : public UBEGameplayAbility
 {
 	GENERATED_BODY()
 
@@ -25,14 +28,13 @@ public:
 
 	UBEGameplayAbility_FromEquipment(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	UFUNCTION(BlueprintCallable, Category="BE|Ability")
+	UFUNCTION(BlueprintCallable, Category = "Equipment")
 	UBEEquipmentInstance* GetAssociatedEquipment() const;
 
-	UFUNCTION(BlueprintCallable, Category = "BE|Ability")
-	UBEInventoryItemInstance* GetAssociatedItem() const;
+	UFUNCTION(BlueprintCallable, Category = "Equipment")
+	UBEItemData* GetAssociatedItem() const;
 
 #if WITH_EDITOR
 	virtual EDataValidationResult IsDataValid(TArray<FText>& ValidationErrors) override;
 #endif
-
 };

@@ -10,7 +10,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
 #include "Engine/LocalPlayer.h"
-#include "Character/BEHeroComponent.h"
+#include "Character/BECharacterPlayableComponent.h"
 #include "Input/BEInputConfig.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(GameFeatureAction_AddInputBinding)
@@ -111,7 +111,7 @@ void UGameFeatureAction_AddInputBinding::HandlePawnExtension(AActor* Actor, FNam
 	{
 		RemoveInputMapping(AsPawn, ActiveData);
 	}
-	else if ((EventName == UGameFrameworkComponentManager::NAME_ExtensionAdded) || (EventName == UBEHeroComponent::NAME_BindInputsNow))
+	else if ((EventName == UGameFrameworkComponentManager::NAME_ExtensionAdded) || (EventName == UBECharacterPlayableComponent::NAME_BindInputsNow))
 	{
 		AddInputMappingForPlayer(AsPawn, ActiveData);
 	}
@@ -125,7 +125,7 @@ void UGameFeatureAction_AddInputBinding::AddInputMappingForPlayer(APawn* Pawn, F
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* InputSystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
 		{
-			UBEHeroComponent* HeroComponent = Pawn->FindComponentByClass<UBEHeroComponent>();
+			UBECharacterPlayableComponent* HeroComponent = Pawn->FindComponentByClass<UBECharacterPlayableComponent>();
 			if (HeroComponent && HeroComponent->IsReadyToBindInputs())
 			{
 				for (const TSoftObjectPtr<const UBEInputConfig>& Entry : InputConfigs)
@@ -153,7 +153,7 @@ void UGameFeatureAction_AddInputBinding::RemoveInputMapping(APawn* Pawn, FPerCon
 	{
 		if (UEnhancedInputLocalPlayerSubsystem* InputSystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
 		{
-			if (UBEHeroComponent* HeroComponent = Pawn->FindComponentByClass<UBEHeroComponent>())
+			if (UBECharacterPlayableComponent* HeroComponent = Pawn->FindComponentByClass<UBECharacterPlayableComponent>())
 			{
 				for (const TSoftObjectPtr<const UBEInputConfig>& Entry : InputConfigs)
 				{

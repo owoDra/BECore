@@ -5,7 +5,7 @@
 #include "BELogChannels.h"
 #include "BEGameData.h"
 #include "AbilitySystemGlobals.h"
-#include "Character/BEPawnData.h"
+#include "Character/BECharacterData.h"
 #include "Stats/StatsMisc.h"
 #include "Engine/Engine.h"
 #include "Ability/BEGameplayCueManager.h"
@@ -145,7 +145,7 @@ const UBEGameData& UBEAssetManager::GetGameData()
 	return GetOrLoadTypedGameData<UBEGameData>(BEGameDataPath);
 }
 
-const UBEPawnData* UBEAssetManager::GetDefaultPawnData() const
+const UBECharacterData* UBEAssetManager::GetDefaultPawnData() const
 {
 	return GetAsset(DefaultPawnData);
 }

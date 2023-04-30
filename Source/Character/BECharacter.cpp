@@ -1,16 +1,14 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
 // Copyright Eigi Chin
 
 #include "BECharacter.h"
 
-#include "Character/BEPawnExtensionComponent.h"
-#include "Character/BEHealthComponent.h"
-#include "BECharacterMovementComponent.h"
+#include "Character/Component/BECharacterBasicComponent.h"
+#include "Character/Component/BECharacterMovementComponent.h"
+#include "Character/Component/BECharacterCameraComponent.h"
+#include "Character/Movement/BECharacterMovementFragment.h"
+#include "Ability/BEAbilitySystemComponent.h"
 #include "Player/BEPlayerController.h"
 #include "Player/BEPlayerState.h"
-#include "System/BESignificanceManager.h"
-#include "Camera/BECameraComponent.h"
-#include "Ability/BEAbilitySystemComponent.h"
 #include "BELogChannels.h"
 #include "BEGameplayTags.h"
 
@@ -47,6 +45,10 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BECharacter)
 
+UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Crouching, "Status.Crouching");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Running, "Status.Running");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Targeting, "Status.Targeting");
+
 /////////////////////////////////////////////////////////////////////////////////
 
 static FName NAME_BECharacterCollisionProfile_Capsule(TEXT("BEPawnCapsule"));
@@ -70,19 +72,12 @@ ABECharacter::ABECharacter(const FObjectInitializer& ObjectInitializer)
 
 	USkeletalMeshComponent* MeshComp = GetMesh();
 	check(MeshComp);
-	MeshComp->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));  // Rotate mesh to be X forward since it is exported as Y forward.
+	MeshComp->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 	MeshComp->SetCollisionProfileName(NAME_BECharacterCollisionProfile_Mesh);
 
-	PawnExtComponent = CreateDefaultSubobject<UBEPawnExtensionComponent>(TEXT("PawnExtensionComponent"));
-	PawnExtComponent->OnAbilitySystemInitialized_RegisterAndCall(FSimpleMulticastDelegate::FDelegate::CreateUObject(this, &ThisClass::OnAbilitySystemInitialized));
-	PawnExtComponent->OnAbilitySystemUninitialized_Register(FSimpleMulticastDelegate::FDelegate::CreateUObject(this, &ThisClass::OnAbilitySystemUninitialized));
-
-	HealthComponent = CreateDefaultSubobject<UBEHealthComponent>(TEXT("HealthComponent"));
-	HealthComponent->OnDeathStarted.AddDynamic(this, &ThisClass::OnDeathStarted);
-	HealthComponent->OnDeathFinished.AddDynamic(this, &ThisClass::OnDeathFinished);
-
-	CameraComponent = CreateDefaultSubobject<UBECameraComponent>(TEXT("CameraComponent"));
-	CameraComponent->SetRelativeLocation(FVector(-300.0f, 0.0f, 75.0f));
+	CharacterBasicComponent = CreateDefaultSubobject<UBECharacterBasicComponent>(TEXT("BasicComponent"));
+	CharacterBasicComponent->OnAbilitySystemInitialized_RegisterAndCall(FSimpleMulticastDelegate::FDelegate::CreateUObject(this, &ThisClass::OnAbilitySystemInitialized));
+	CharacterBasicComponent->OnAbilitySystemUninitialized_Register(FSimpleMulticastDelegate::FDelegate::CreateUObject(this, &ThisClass::OnAbilitySystemUninitialized));
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = true;
@@ -92,52 +87,6 @@ ABECharacter::ABECharacter(const FObjectInitializer& ObjectInitializer)
 	CrouchedEyeHeight = 50.0f;
 }
 
-void ABECharacter::PreInitializeComponents()
-{
-	Super::PreInitializeComponents();
-}
-
-void ABECharacter::BeginPlay()
-{
-	Super::BeginPlay();
-
-	UWorld* World = GetWorld();
-
-	const bool bRegisterWithSignificanceManager = !IsNetMode(NM_DedicatedServer);
-	if (bRegisterWithSignificanceManager)
-	{
-		if (UBESignificanceManager* SignificanceManager = USignificanceManager::Get<UBESignificanceManager>(World))
-		{
-//@TODO: SignificanceManager->RegisterObject(this, (EFortSignificanceType)SignificanceType);
-		}
-	}
-}
-
-void ABECharacter::EndPlay(const EEndPlayReason::Type EndPlayReason)
-{
-	Super::EndPlay(EndPlayReason);
-
-	UWorld* World = GetWorld();
-
-	const bool bRegisterWithSignificanceManager = !IsNetMode(NM_DedicatedServer);
-	if (bRegisterWithSignificanceManager)
-	{
-		if (UBESignificanceManager* SignificanceManager = USignificanceManager::Get<UBESignificanceManager>(World))
-		{
-			SignificanceManager->UnregisterObject(this);
-		}
-	}
-}
-
-void ABECharacter::Reset()
-{
-	DisableMovementAndCollision();
-
-	K2_OnReset();
-
-	UninitAndDestroy();
-}
-
 void ABECharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -145,9 +94,29 @@ void ABECharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLi
 	DOREPLIFETIME_CONDITION(ThisClass, ReplicatedAcceleration, COND_SimulatedOnly);
 
 	DOREPLIFETIME_CONDITION(ThisClass, bIsRunning, COND_SimulatedOnly);
-	DOREPLIFETIME_CONDITION(ThisClass, bIsAiming, COND_SimulatedOnly);
+	DOREPLIFETIME_CONDITION(ThisClass, bIsTargeting, COND_SimulatedOnly);
 
 	DOREPLIFETIME(ThisClass, MyTeamID);
+}
+
+
+void ABECharacter::OnRep_ReplicatedAcceleration()
+{
+	if (UBECharacterMovementComponent* BEMovementComponent = Cast<UBECharacterMovementComponent>(GetCharacterMovement()))
+	{
+		// 圧縮された Acceleration を展開
+		// [0, 255] -> [0, MaxAccel]
+		// [0, 255] -> [0, 2PI]
+		const double MaxAccel = BEMovementComponent->MaxAcceleration;
+		const double AccelXYMagnitude = double(ReplicatedAcceleration.AccelXYMagnitude) * MaxAccel / 255.0; 
+		const double AccelXYRadians = double(ReplicatedAcceleration.AccelXYRadians) * TWO_PI / 255.0;     
+
+		// [-127, 127] -> [-MaxAccel, MaxAccel]
+		FVector UnpackedAcceleration = FVector::ZeroVector;
+		FMath::PolarToCartesian(AccelXYMagnitude, AccelXYRadians, UnpackedAcceleration.X, UnpackedAcceleration.Y);
+		UnpackedAcceleration.Z = double(ReplicatedAcceleration.AccelZ) * MaxAccel / 127.0; 
+		BEMovementComponent->SetReplicatedAcceleration(UnpackedAcceleration);
+	}
 }
 
 void ABECharacter::PreReplication(IRepChangedPropertyTracker& ChangedPropertyTracker)
@@ -156,15 +125,18 @@ void ABECharacter::PreReplication(IRepChangedPropertyTracker& ChangedPropertyTra
 
 	if (UCharacterMovementComponent* MovementComponent = GetCharacterMovement())
 	{
-		// Compress Acceleration: XY components as direction + magnitude, Z component as direct value
+		// XY に方向とその大きさ、Z に直接大きさを圧縮する
 		const double MaxAccel = MovementComponent->MaxAcceleration;
 		const FVector CurrentAccel = MovementComponent->GetCurrentAcceleration();
 		double AccelXYRadians, AccelXYMagnitude;
 		FMath::CartesianToPolar(CurrentAccel.X, CurrentAccel.Y, AccelXYMagnitude, AccelXYRadians);
 
-		ReplicatedAcceleration.AccelXYRadians   = FMath::FloorToInt((AccelXYRadians / TWO_PI) * 255.0);     // [0, 2PI] -> [0, 255]
-		ReplicatedAcceleration.AccelXYMagnitude = FMath::FloorToInt((AccelXYMagnitude / MaxAccel) * 255.0);	// [0, MaxAccel] -> [0, 255]
-		ReplicatedAcceleration.AccelZ           = FMath::FloorToInt((CurrentAccel.Z / MaxAccel) * 127.0);   // [-MaxAccel, MaxAccel] -> [-127, 127]
+		// [0, 2PI] -> [0, 255]
+		// [0, MaxAccel] -> [0, 255]
+		// [-MaxAccel, MaxAccel] -> [-127, 127]
+		ReplicatedAcceleration.AccelXYRadians = FMath::FloorToInt((AccelXYRadians / TWO_PI) * 255.0);     
+		ReplicatedAcceleration.AccelXYMagnitude = FMath::FloorToInt((AccelXYMagnitude / MaxAccel) * 255.0);	
+		ReplicatedAcceleration.AccelZ = FMath::FloorToInt((CurrentAccel.Z / MaxAccel) * 127.0);   
 	}
 }
 
@@ -174,7 +146,7 @@ void ABECharacter::NotifyControllerChanged()
 
 	Super::NotifyControllerChanged();
 
-	// Update our team ID based on the controller
+	// Controller の TeamID をもとに Character の TeamID を設定
 	if (HasAuthority() && (Controller != nullptr))
 	{
 		if (IBETeamAgentInterface* ControllerWithTeam = Cast<IBETeamAgentInterface>(Controller))
@@ -185,171 +157,14 @@ void ABECharacter::NotifyControllerChanged()
 	}
 }
 
-void ABECharacter::PossessedBy(AController* NewController)
-{
-	const FGenericTeamId OldTeamID = MyTeamID;
 
-	Super::PossessedBy(NewController);
-
-	PawnExtComponent->HandleControllerChanged();
-
-	// Grab the current team ID and listen for future changes
-	if (IBETeamAgentInterface* ControllerAsTeamProvider = Cast<IBETeamAgentInterface>(NewController))
-	{
-		MyTeamID = ControllerAsTeamProvider->GetGenericTeamId();
-		ControllerAsTeamProvider->GetTeamChangedDelegateChecked().AddDynamic(this, &ThisClass::OnControllerChangedTeam);
-	}
-	ConditionalBroadcastTeamChanged(this, OldTeamID, MyTeamID);
-}
-
-void ABECharacter::UnPossessed()
-{
-	AController* const OldController = Controller;
-
-	// Stop listening for changes from the old controller
-	const FGenericTeamId OldTeamID = MyTeamID;
-	if (IBETeamAgentInterface* ControllerAsTeamProvider = Cast<IBETeamAgentInterface>(OldController))
-	{
-		ControllerAsTeamProvider->GetTeamChangedDelegateChecked().RemoveAll(this);
-	}
-
-	Super::UnPossessed();
-
-	PawnExtComponent->HandleControllerChanged();
-
-	// Determine what the new team ID should be afterwards
-	MyTeamID = DetermineNewTeamAfterPossessionEnds(OldTeamID);
-	ConditionalBroadcastTeamChanged(this, OldTeamID, MyTeamID);
-}
-
-void ABECharacter::OnRep_Controller()
-{
-	Super::OnRep_Controller();
-
-	PawnExtComponent->HandleControllerChanged();
-}
-
-void ABECharacter::OnRep_PlayerState()
-{
-	Super::OnRep_PlayerState();
-
-	PawnExtComponent->HandlePlayerStateReplicated();
-}
-
-void ABECharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	PawnExtComponent->SetupPlayerInputComponent();
-}
-
-void ABECharacter::OnAbilitySystemInitialized()
-{
-	UBEAbilitySystemComponent* BEASC = GetBEAbilitySystemComponent();
-	check(BEASC);
-
-	HealthComponent->InitializeWithAbilitySystem(BEASC);
-
-	UBECharacterMovementComponent* BECMC = CastChecked<UBECharacterMovementComponent>(GetCharacterMovement());
-	BECMC->InitializeWithAbilitySystem(BEASC);
-
-	InitializeGameplayTags();
-}
-
-void ABECharacter::OnAbilitySystemUninitialized()
-{
-	HealthComponent->UninitializeFromAbilitySystem();
-
-	UBECharacterMovementComponent* BECMC = CastChecked<UBECharacterMovementComponent>(GetCharacterMovement());
-	BECMC->UninitializeFromAbilitySystem();
-}
-
-void ABECharacter::InitializeGameplayTags()
-{
-	// Clear tags that may be lingering on the ability system from the previous pawn.
-	if (UBEAbilitySystemComponent* BEASC = GetBEAbilitySystemComponent())
-	{
-		const FBEGameplayTags& GameplayTags = FBEGameplayTags::Get();
-
-		for (const TPair<uint8, FGameplayTag>& TagMapping : GameplayTags.MovementModeTagMap)
-		{
-			if (TagMapping.Value.IsValid())
-			{
-				BEASC->SetLooseGameplayTagCount(TagMapping.Value, 0);
-			}
-		}
-
-		for (const TPair<uint8, FGameplayTag>& TagMapping : GameplayTags.CustomMovementModeTagMap)
-		{
-			if (TagMapping.Value.IsValid())
-			{
-				BEASC->SetLooseGameplayTagCount(TagMapping.Value, 0);
-			}
-		}
-
-		UBECharacterMovementComponent* BEMoveComp = CastChecked<UBECharacterMovementComponent>(GetCharacterMovement());
-		SetMovementModeTag(BEMoveComp->MovementMode, BEMoveComp->CustomMovementMode, true);
-	}
-}
-
-
-void ABECharacter::SetGenericTeamId(const FGenericTeamId& NewTeamID)
-{
-	if (GetController() == nullptr)
-	{
-		if (HasAuthority())
-		{
-			const FGenericTeamId OldTeamID = MyTeamID;
-			MyTeamID = NewTeamID;
-			ConditionalBroadcastTeamChanged(this, OldTeamID, MyTeamID);
-		}
-		else
-		{
-			UE_LOG(LogBETeams, Error, TEXT("You can't set the team ID on a character (%s) except on the authority"), *GetPathNameSafe(this));
-		}
-	}
-	else
-	{
-		UE_LOG(LogBETeams, Error, TEXT("You can't set the team ID on a possessed character (%s); it's driven by the associated controller"), *GetPathNameSafe(this));
-	}
-}
-
-FGenericTeamId ABECharacter::GetGenericTeamId() const
-{
-	return MyTeamID;
-}
-
-FOnBETeamIndexChangedDelegate* ABECharacter::GetOnTeamIndexChangedDelegate()
-{
-	return &OnTeamChangedDelegate;
-}
-
-void ABECharacter::OnControllerChangedTeam(UObject* TeamAgent, int32 OldTeam, int32 NewTeam)
-{
-	const FGenericTeamId MyOldTeamID = MyTeamID;
-	MyTeamID = IntegerToGenericTeamId(NewTeam);
-	ConditionalBroadcastTeamChanged(this, MyOldTeamID, MyTeamID);
-}
-
-void ABECharacter::OnRep_MyTeamID(FGenericTeamId OldTeamID)
-{
-	ConditionalBroadcastTeamChanged(this, OldTeamID, MyTeamID);
-}
-
-
-void ABECharacter::FellOutOfWorld(const class UDamageType& dmgType)
-{
-	HealthComponent->DamageSelfDestruct(/*bFellOutOfWorld=*/ true);
-}
-
-void ABECharacter::OnDeathStarted(AActor*)
+void ABECharacter::Reset()
 {
 	DisableMovementAndCollision();
-}
 
-void ABECharacter::OnDeathFinished(AActor*)
-{
-	GetWorld()->GetTimerManager().SetTimerForNextTick(this, &ThisClass::DestroyDueToDeath);
+	K2_OnReset();
+
+	UninitAndDestroy();
 }
 
 void ABECharacter::DisableMovementAndCollision()
@@ -369,13 +184,6 @@ void ABECharacter::DisableMovementAndCollision()
 	BEMoveComp->DisableMovement();
 }
 
-void ABECharacter::DestroyDueToDeath()
-{
-	K2_OnDeathFinished();
-
-	UninitAndDestroy();
-}
-
 void ABECharacter::UninitAndDestroy()
 {
 	if (GetLocalRole() == ROLE_Authority)
@@ -384,66 +192,76 @@ void ABECharacter::UninitAndDestroy()
 		SetLifeSpan(0.1f);
 	}
 
-	// Uninitialize the ASC if we're still the avatar actor (otherwise another pawn already did it when they became the avatar actor)
+	// この Character がまだ AvatarActor として ASC に登録されている場合に初期化解除する。
+	// AvatarActor 出ない場合はすでに他の Actor などから初期化解除を行っている必要がある。
 	if (UBEAbilitySystemComponent* BEASC = GetBEAbilitySystemComponent())
 	{
 		if (BEASC->GetAvatarActor() == this)
 		{
-			PawnExtComponent->UninitializeAbilitySystem();
+			CharacterBasicComponent->UninitializeAbilitySystem();
 		}
 	}
 
 	SetActorHiddenInGame(true);
 }
 
-void ABECharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode)
+
+void ABECharacter::PossessedBy(AController* NewController)
 {
-	Super::OnMovementModeChanged(PrevMovementMode, PreviousCustomMode);
+	const FGenericTeamId OldTeamID = MyTeamID;
 
-	UBECharacterMovementComponent* BEMoveComp = CastChecked<UBECharacterMovementComponent>(GetCharacterMovement());
+	Super::PossessedBy(NewController);
 
-	SetMovementModeTag(PrevMovementMode, PreviousCustomMode, false);
-	SetMovementModeTag(BEMoveComp->MovementMode, BEMoveComp->CustomMovementMode, true);
+	CharacterBasicComponent->HandleControllerChanged();
+
+	// Team の変更をリッスンする
+	if (IBETeamAgentInterface* ControllerAsTeamProvider = Cast<IBETeamAgentInterface>(NewController))
+	{
+		MyTeamID = ControllerAsTeamProvider->GetGenericTeamId();
+		ControllerAsTeamProvider->GetTeamChangedDelegateChecked().AddDynamic(this, &ThisClass::OnControllerChangedTeam);
+	}
+	ConditionalBroadcastTeamChanged(this, OldTeamID, MyTeamID);
 }
 
-void ABECharacter::SetMovementModeTag(EMovementMode MovementMode, uint8 CustomMovementMode, bool bTagEnabled)
+void ABECharacter::UnPossessed()
 {
-	if (UBEAbilitySystemComponent* BEASC = GetBEAbilitySystemComponent())
+	AController* const OldController = Controller;
+
+	// Team の変更のリッスンを終了する
+	const FGenericTeamId OldTeamID = MyTeamID;
+	if (IBETeamAgentInterface* ControllerAsTeamProvider = Cast<IBETeamAgentInterface>(OldController))
 	{
-		const FBEGameplayTags& GameplayTags = FBEGameplayTags::Get();
-		const FGameplayTag* MovementModeTag = nullptr;
-
-		if (MovementMode == MOVE_Custom)
-		{
-			MovementModeTag = GameplayTags.CustomMovementModeTagMap.Find(CustomMovementMode);
-		}
-		else
-		{
-			MovementModeTag = GameplayTags.MovementModeTagMap.Find(MovementMode);
-		}
-
-		if (MovementModeTag && MovementModeTag->IsValid())
-		{
-			BEASC->SetLooseGameplayTagCount(*MovementModeTag, (bTagEnabled ? 1 : 0));
-		}
+		ControllerAsTeamProvider->GetTeamChangedDelegateChecked().RemoveAll(this);
 	}
+
+	Super::UnPossessed();
+
+	CharacterBasicComponent->HandleControllerChanged();
+
+	// Controller 空所有されなくなった後の Team を設定
+	MyTeamID = DetermineNewTeamAfterPossessionEnds(OldTeamID);
+	ConditionalBroadcastTeamChanged(this, OldTeamID, MyTeamID);
 }
 
-void ABECharacter::OnRep_ReplicatedAcceleration()
+void ABECharacter::OnRep_Controller()
 {
-	if (UBECharacterMovementComponent* BEMovementComponent = Cast<UBECharacterMovementComponent>(GetCharacterMovement()))
-	{
-		// Decompress Acceleration
-		const double MaxAccel = BEMovementComponent->MaxAcceleration;
-		const double AccelXYMagnitude = double(ReplicatedAcceleration.AccelXYMagnitude) * MaxAccel / 255.0; // [0, 255] -> [0, MaxAccel]
-		const double AccelXYRadians = double(ReplicatedAcceleration.AccelXYRadians) * TWO_PI / 255.0;     // [0, 255] -> [0, 2PI]
+	Super::OnRep_Controller();
 
-		FVector UnpackedAcceleration(FVector::ZeroVector);
-		FMath::PolarToCartesian(AccelXYMagnitude, AccelXYRadians, UnpackedAcceleration.X, UnpackedAcceleration.Y);
-		UnpackedAcceleration.Z = double(ReplicatedAcceleration.AccelZ) * MaxAccel / 127.0; // [-127, 127] -> [-MaxAccel, MaxAccel]
+	CharacterBasicComponent->HandleControllerChanged();
+}
 
-		BEMovementComponent->SetReplicatedAcceleration(UnpackedAcceleration);
-	}
+void ABECharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	CharacterBasicComponent->HandlePlayerStateReplicated();
+}
+
+void ABECharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	CharacterBasicComponent->HandlePlayerInputComponentSetup();
 }
 
 
@@ -579,70 +397,119 @@ void ABECharacter::OnEndRun()
 }
 
 
-void ABECharacter::OnRep_IsAiming()
+void ABECharacter::OnRep_IsTargeting()
 {
 	if (UCharacterMovementComponent* CMC = GetCharacterMovement())
 	{
 		if (UBECharacterMovementComponent* BECMC = Cast<UBECharacterMovementComponent>(CMC))
 		{
-			if (bIsAiming)
+			if (bIsTargeting)
 			{
-				BECMC->bWantsToAim = true;
-				BECMC->Aim(true);
+				BECMC->bWantsToTarget = true;
+				BECMC->Target(true);
 			}
 			else
 			{
-				BECMC->bWantsToAim = false;
-				BECMC->UnAim(true);
+				BECMC->bWantsToTarget = false;
+				BECMC->UnTarget(true);
 			}
 		}
 	}
 }
 
-void ABECharacter::Aim()
+void ABECharacter::Target()
 {
 	if (UCharacterMovementComponent* CMC = GetCharacterMovement())
 	{
 		if (UBECharacterMovementComponent* BECMC = Cast<UBECharacterMovementComponent>(CMC))
 		{
-			BECMC->bWantsToAim = true;
+			BECMC->bWantsToTarget = true;
 		}
 	}
 }
 
-void ABECharacter::UnAim()
+void ABECharacter::UnTarget()
 {
 	if (UCharacterMovementComponent* CMC = GetCharacterMovement())
 	{
 		if (UBECharacterMovementComponent* BECMC = Cast<UBECharacterMovementComponent>(CMC))
 		{
-			BECMC->bWantsToAim = false;
+			BECMC->bWantsToTarget = false;
 		}
 	}
 }
 
-void ABECharacter::OnStartAim()
+void ABECharacter::OnStartTarget()
 {
 	if (UBEAbilitySystemComponent* BEASC = GetBEAbilitySystemComponent())
 	{
-		BEASC->SetLooseGameplayTagCount(TAG_Status_Aiming, 1);
+		BEASC->SetLooseGameplayTagCount(TAG_Status_Targeting, 1);
 	}
 
-	OnAimChanged.Broadcast(true);
+	OnTargetChanged.Broadcast(true);
 
-	K2_OnStartAim();
+	K2_OnStartTarget();
 }
 
-void ABECharacter::OnEndAim()
+void ABECharacter::OnEndTarget()
 {
 	if (UBEAbilitySystemComponent* BEASC = GetBEAbilitySystemComponent())
 	{
-		BEASC->SetLooseGameplayTagCount(TAG_Status_Aiming, 0);
+		BEASC->SetLooseGameplayTagCount(TAG_Status_Targeting, 0);
 	}
 
-	OnAimChanged.Broadcast(false);
+	OnTargetChanged.Broadcast(false);
 
-	K2_OnEndAim();
+	K2_OnEndTarget();
+}
+
+
+void ABECharacter::SetGenericTeamId(const FGenericTeamId& NewTeamID)
+{
+	if (GetController() == nullptr)
+	{
+		if (HasAuthority())
+		{
+			const FGenericTeamId OldTeamID = MyTeamID;
+			MyTeamID = NewTeamID;
+			ConditionalBroadcastTeamChanged(this, OldTeamID, MyTeamID);
+		}
+		else
+		{
+			UE_LOG(LogBETeams, Error, TEXT("You can't set the team ID on a character (%s) except on the authority"), *GetPathNameSafe(this));
+		}
+	}
+	else
+	{
+		UE_LOG(LogBETeams, Error, TEXT("You can't set the team ID on a possessed character (%s); it's driven by the associated controller"), *GetPathNameSafe(this));
+	}
+}
+
+FGenericTeamId ABECharacter::GetGenericTeamId() const
+{
+	return MyTeamID;
+}
+
+FOnBETeamIndexChangedDelegate* ABECharacter::GetOnTeamIndexChangedDelegate()
+{
+	return &OnTeamChangedDelegate;
+}
+
+FGenericTeamId ABECharacter::DetermineNewTeamAfterPossessionEnds(FGenericTeamId OldTeamID) const
+{
+	return FGenericTeamId::NoTeam;
+}
+
+void ABECharacter::OnControllerChangedTeam(UObject* TeamAgent, int32 OldTeam, int32 NewTeam)
+{
+	const FGenericTeamId MyOldTeamID = MyTeamID;
+	MyTeamID = IntegerToGenericTeamId(NewTeam);
+	ConditionalBroadcastTeamChanged(this, MyOldTeamID, MyTeamID);
+}
+
+void ABECharacter::OnRep_MyTeamID(FGenericTeamId OldTeamID)
+{
+	ConditionalBroadcastTeamChanged(this, OldTeamID, MyTeamID);
 }
 
 
@@ -658,12 +525,12 @@ ABEPlayerState* ABECharacter::GetBEPlayerState() const
 
 UBEAbilitySystemComponent* ABECharacter::GetBEAbilitySystemComponent() const
 {
-	return Cast<UBEAbilitySystemComponent>(GetAbilitySystemComponent());
+	return CharacterBasicComponent->GetBEAbilitySystemComponent();
 }
 
 UAbilitySystemComponent* ABECharacter::GetAbilitySystemComponent() const
 {
-	return PawnExtComponent->GetBEAbilitySystemComponent();
+	return CharacterBasicComponent->GetBEAbilitySystemComponent();
 }
 
 void ABECharacter::GetOwnedGameplayTags(FGameplayTagContainer& TagContainer) const

@@ -343,9 +343,7 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Aiming, "Status.Aiming");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Reloading, "Status.Reloading");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Fireing, "Status.Fireing");
 
-UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Death, "Status.Death");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Death_Dying, "Status.Death.Dying");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Death_Dead, "Status.Death.Dead");
+
 
 UE_DEFINE_GAMEPLAY_TAG(TAG_Status_AbilityInputBlocked, "Status.AbilityInputBlocked");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Status_WeaponFireBlocked, "Status.WeaponFireBlocked");

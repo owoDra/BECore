@@ -1,4 +1,3 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
 // Copyright Eigi Chin
 
 #pragma once
@@ -12,7 +11,9 @@
 #include "Math/UnrealMathSSE.h"
 #include "Math/Vector.h"
 #include "Templates/SubclassOf.h"
+#include "UObject/ObjectPtr.h"
 #include "UObject/UObjectGlobals.h"
+#include "NativeGameplayTags.h"
 
 #include "BECameraMode.generated.h"
 
@@ -20,53 +21,54 @@ class UBECameraComponent;
 class AActor;
 class UCanvas;
 
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Camera_Type);
 
-// =================================
-//  列挙型
-// =================================
 
 /**
  * EBECameraModeBlendFunction
  *
- *	Blend function used for transitioning between camera modes.
+ *	CameraMode 間の遷移に使用されるブレンド関数
  */
 UENUM(BlueprintType)
 enum class EBECameraModeBlendFunction : uint8
 {
-	// Does a simple linear interpolation.
 	Linear,
-
-	// Immediately accelerates, but smoothly decelerates into the target.  Ease amount controlled by the exponent.
 	EaseIn,
-
-	// Smoothly accelerates, but does not decelerate into the target.  Ease amount controlled by the exponent.
 	EaseOut,
-
-	// Smoothly accelerates and decelerates.  Ease amount controlled by the exponent.
 	EaseInOut,
 
 	COUNT	UMETA(Hidden)
 };
 
 
-// =================================
-//  構造体
-// =================================
+/**
+ * EBECameraModeActivationState
+ *
+ *	CameraMode が有効化状態
+ */
+UENUM(BlueprintType)
+enum class EBECameraModeActivationState : uint8
+{
+	PreActivate,	// アクティブになる前のブレンド中の状態
+	Activated,		// アクティブな状態
+	PreDeactevate,	// 非アクティブになる前のブレンド中の状態
+	Deactevated,	// 非アクティブな状態
+
+	COUNT	UMETA(Hidden)
+};
+
 
 /**
  * FBECameraModeView
  *
- *	View data produced by the camera mode that is used to blend camera modes.
+ *	CameraMode のブレンドに使用される CameraMode によって生成されたデータ
  */
 struct FBECameraModeView
 {
-public:
-
 	FBECameraModeView();
 
-	void Blend(const FBECameraModeView& Other, float OtherWeight);
-
 public:
+	void Blend(const FBECameraModeView& Other, float OtherWeight);
 
 	FVector Location;
 	FRotator Rotation;
@@ -75,157 +77,180 @@ public:
 };
 
 
-// =================================
-//  クラス
-// =================================
-
 /**
  * UBECameraMode
  *
- *	Base class for all camera modes.
+ *	カメラの仕様を決めるための CameraMode の基本クラス
  */
 UCLASS(Abstract, NotBlueprintable)
 class BECORE_API UBECameraMode : public UObject
 {
 	GENERATED_BODY()
 
-	// =================================
-	//  初期化
-	// =================================
-public:
 	UBECameraMode();
-
-	// Called when this camera mode is activated on the camera mode stack.
-	virtual void OnActivation() {};
-
-	// Called when this camera mode is deactivated on the camera mode stack.
-	virtual void OnDeactivation() {};
-
-
-	// =================================
-	//  ユーティリティ
-	// =================================
+	
 public:
-	UBECameraComponent* GetBECameraComponent() const;
-
-	virtual UWorld* GetWorld() const override;
-
-	AActor* GetTargetActor() const;
-
-	const FBECameraModeView& GetCameraModeView() const { return View; }
-
-	virtual void DrawDebug(UCanvas* Canvas) const;
-
-
-	// =================================
-	//  カメラ
-	// =================================
-public:
-	void UpdateCameraMode(float DeltaTime);
-
-	float GetBlendTime() const { return BlendTime; }
-	float GetBlendWeight() const { return BlendWeight; }
-	void SetBlendWeight(float Weight);
-
-	FGameplayTag GetCameraTypeTag() const
-	{
-		return CameraTypeTag;
-	}
+	/**
+	 * SetActivationState
+	 *
+	 *  CameraMode の ActivationState を変更する
+	 */
+	virtual void SetActivationState(EBECameraModeActivationState NewActivationState);
 
 protected:
+	/**
+	 * PreActivateMode
+	 *
+	 *  CameraMode が Active になる前の Blend が開始する際に呼び出される
+	 */
+	virtual void PreActivateMode() {};
+
+	/**
+	 * PostActivateMode
+	 *
+	 *  CameraMode の Blend が終了し Active になった際に呼び出される
+	 */
+	virtual void PostActivateMode() {};
+
+	/**
+	 * PreDeactivateMode
+	 *
+	 *  CameraMode が Deactive になる前の Blend が開始する際に呼び出される
+	 */
+	virtual void PreDeactivateMode() {};
+
+	/**
+	 * PostDeactivateMode
+	 *
+	 *  CameraMode の Blend が終了し Deactive になった際に呼び出される
+	 */
+	virtual void PostDeactivateMode() {};
+
 	virtual FVector GetPivotLocation() const;
 	virtual FRotator GetPivotRotation() const;
 
 	virtual void UpdateView(float DeltaTime);
 	virtual void UpdateBlending(float DeltaTime);
 
-	// A tag that can be queried by gameplay code that cares when a kind of camera mode is active
-	// without having to ask about a specific mode (e.g., when aiming downsights to get more accuracy)
-	UPROPERTY(EditDefaultsOnly, Category = "Blending")
-	FGameplayTag CameraTypeTag;
-
-	// View output produced by the camera mode.
+	// CameraMode の最終的な出力データ
 	FBECameraModeView View;
 
-	// The horizontal field of view (in degrees).
+	// CameraMode を識別するための Tag
+	// 例えば ADS 中かどうかを判断するときに便利です
+	UPROPERTY(EditDefaultsOnly, Category = "Blending", meta = (Categories = "Camera.Type"))
+	FGameplayTag CameraTypeTag;
+
 	UPROPERTY(EditDefaultsOnly, Category = "View", Meta = (UIMin = "5.0", UIMax = "170", ClampMin = "5.0", ClampMax = "170.0"))
 	float FieldOfView;
 
-	// Minimum view pitch (in degrees).
 	UPROPERTY(EditDefaultsOnly, Category = "View", Meta = (UIMin = "-89.9", UIMax = "89.9", ClampMin = "-89.9", ClampMax = "89.9"))
 	float ViewPitchMin;
 
-	// Maximum view pitch (in degrees).
 	UPROPERTY(EditDefaultsOnly, Category = "View", Meta = (UIMin = "-89.9", UIMax = "89.9", ClampMin = "-89.9", ClampMax = "89.9"))
 	float ViewPitchMax;
 
-	// How long it takes to blend in this mode.
+	// CameraMode の Blend にかかる時間
 	UPROPERTY(EditDefaultsOnly, Category = "Blending")
 	float BlendTime;
 
-	// Function used for blending.
+	// CameraMode のブレンド関数
 	UPROPERTY(EditDefaultsOnly, Category = "Blending")
 	EBECameraModeBlendFunction BlendFunction;
 
-	// Exponent used by blend functions to control the shape of the curve.
+	// 曲線の形状を制御するためにブレンド関数で使用される指数
 	UPROPERTY(EditDefaultsOnly, Category = "Blending")
 	float BlendExponent;
 
-	// Linear blend alpha used to determine the blend weight.
+	// Blend の計算に用いる値
 	float BlendAlpha;
 
-	// Blend weight calculated using the blend alpha and function.
+	// CameraMode がどのくらい Blend されたかの値
+	// 1.0 以上は Blend が完了されたということになる
 	float BlendWeight;
 
-protected:
-	/** If true, skips all interpolation and puts camera in ideal location.  Automatically set to false next frame. */
+	// CameraMode の有効化状態
+	EBECameraModeActivationState ActivationState;
+
+	// true の場合、すべての補間をスキップし、カメラを理想的な場所に配置します。次のフレームで自動的に false に設定されます
 	UPROPERTY(transient)
 	uint32 bResetInterpolation:1;
+
+public:
+	void UpdateCameraMode(float DeltaTime);
+
+	void SetBlendWeight(float Weight);
+
+	float GetBlendTime() const { return BlendTime; }
+	float GetBlendWeight() const { return BlendWeight; }
+	const FBECameraModeView& GetCameraModeView() const { return View; }
+	FGameplayTag GetCameraTypeTag() const { return CameraTypeTag; }
+
+
+public:
+	UBECameraComponent* GetBECameraComponent() const;
+
+	AActor* GetTargetActor() const;
+
+	virtual UWorld* GetWorld() const override;
 };
 
 
 /**
  * UBECameraModeStack
  *
- *	Stack used for blending camera modes.
+ *	CameraMode を Blend するため Stack
  */
 UCLASS()
 class UBECameraModeStack : public UObject
 {
 	GENERATED_BODY()
 
-public:
-
 	UBECameraModeStack();
 
-	void ActivateStack();
-	void DeactivateStack();
+protected:
+	UBECameraMode* GetCameraModeInstance(TSubclassOf<UBECameraMode> CameraModeClass);
 
-	bool IsStackActivate() const { return bIsActive; }
+	/**
+	 * UpdateStack
+	 *
+	 *  Stack 内の CameraMode の更新を行う。
+	 *	ブレンドが完了した CameraMode を判定して Stack から除外する。
+	 */
+	void UpdateStack(float DeltaTime);
 
+	/**
+	 * BlendStack
+	 *
+	 *	Stack 内の CameraMode の Blend を行う
+	 */
+	void BlendStack(FBECameraModeView& OutCameraModeView) const;
+
+public:
+	/**
+	 * PushCameraMode
+	 *
+	 *	Stack の最初に新しく CameraMode を追加し Blend を始める
+	 */
 	void PushCameraMode(TSubclassOf<UBECameraMode> CameraModeClass);
 
-	bool EvaluateStack(float DeltaTime, FBECameraModeView& OutCameraModeView);
+	/**
+	 * EvaluateStack
+	 *
+	 *	CameraComponent から呼び出され Stack の更新と最終的な出力データを返す
+	 */
+	void EvaluateStack(float DeltaTime, FBECameraModeView& OutCameraModeView);
 
-	void DrawDebug(UCanvas* Canvas) const;
-
-	// Gets the tag associated with the top layer and the blend weight of it
+	/**
+	 * GetBlendInfo
+	 *
+	 *	現在の Stack の Blend 情報を取得する
+	 */
 	void GetBlendInfo(float& OutWeightOfTopLayer, FGameplayTag& OutTagOfTopLayer) const;
 
 protected:
-
-	UBECameraMode* GetCameraModeInstance(TSubclassOf<UBECameraMode> CameraModeClass);
-
-	void UpdateStack(float DeltaTime);
-	void BlendStack(FBECameraModeView& OutCameraModeView) const;
-
-protected:
-
-	bool bIsActive;
+	UPROPERTY()
+	TArray<TObjectPtr<UBECameraMode>> CameraModeInstances;
 
 	UPROPERTY()
-	TArray<UBECameraMode*> CameraModeInstances;
-
-	UPROPERTY()
-	TArray<UBECameraMode*> CameraModeStack;
+	TArray<TObjectPtr<UBECameraMode>> CameraModeStack;
 };

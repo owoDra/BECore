@@ -9,7 +9,7 @@
 #include "BEPlayerState.h"
 #include "Camera/BEPlayerCameraManager.h"
 #include "UI/BEHUD.h"
-#include "Character/BEPawnData.h"
+#include "Character/BECharacterData.h"
 #include "Ability/BEAbilitySystemComponent.h"
 #include "BELocalPlayer.h"
 #include "Settings/BESettingsShared.h"

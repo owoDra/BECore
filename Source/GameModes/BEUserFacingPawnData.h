@@ -37,7 +37,7 @@ struct FBESubclassedPawnData
 public:
 
 	// PawnDataのプライマリーアセットID
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = PawnData, meta = (AllowedTypes = "BEPawnData"))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = PawnData, meta = (AllowedTypes = "BECharacterData"))
 		FPrimaryAssetId PawnData;
 
 	// サブクラスのタイトル

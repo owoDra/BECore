@@ -18,7 +18,7 @@
 
 #include "BEPlayerState.generated.h"
 
-class UBEPawnData;
+class UBECharacterData;
 class ABEPlayerController;
 class UBEExperienceDefinition;
 class UBEAbilitySystemComponent;
@@ -75,10 +75,10 @@ public:
 	template <class T>
 	const T* GetPawnData() const { return Cast<T>(PawnData); }
 
-	void SetPawnData(const UBEPawnData* InPawnData, bool Override = false);
+	void SetPawnData(const UBECharacterData* InPawnData, bool Override = false);
 
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "PlayerState", meta = (DisplayName = "SetPawnData"))
-	void K2_SetPawnData(const UBEPawnData* InPawnData, bool Override = false);
+	void K2_SetPawnData(const UBECharacterData* InPawnData, bool Override = false);
 
 	//~AActor interface
 	virtual void PreInitializeComponents() override;
@@ -151,7 +151,7 @@ protected:
 protected:
 
 	UPROPERTY(ReplicatedUsing = OnRep_PawnData)
-	TObjectPtr<const UBEPawnData> PawnData;
+	TObjectPtr<const UBECharacterData> PawnData;
 
 private:
 	UPROPERTY(VisibleAnywhere)

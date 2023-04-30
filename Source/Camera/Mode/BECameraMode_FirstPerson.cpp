@@ -4,7 +4,7 @@
 #include "GameFramework/Controller.h"
 #include "GameFramework/Character.h"
 #include "Character/BECharacter.h"
-#include "BECameraComponent.h"
+#include "BECharacterCameraComponent.h"
 #include "Components/CapsuleComponent.h"
 
 
@@ -67,7 +67,7 @@ void UBECameraMode_FirstPerson::OnActivation()
 				});
 			}
 
-			Target->GetMesh()->AttachToComponent(GetBECameraComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+			Target->GetMesh()->AttachToComponent(GetBECharacterCameraComponent(), FAttachmentTransformRules::KeepRelativeTransform);
 		}
 	}
 }
