@@ -40,6 +40,7 @@ class BECORE_API UBECharacterPlayableComponent : public UPawnComponent, public I
 {
 	GENERATED_BODY()
 
+public:
 	UBECharacterPlayableComponent(const FObjectInitializer& ObjectInitializer);
 
 	// このコンポーネントを実装する際の FeatureName

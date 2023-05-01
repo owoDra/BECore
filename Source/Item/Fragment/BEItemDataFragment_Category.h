@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "BEItemData.h"
+#include "Item/BEItemData.h"
 
 #include "UObject/UObjectGlobals.h"
 
@@ -17,7 +17,9 @@ class UBEItemDataFragment_Category : public UBEItemDataFragment
 	GENERATED_BODY()
 
 public:
-	// 何も指定しない場合は全てのカテゴリーに格納可能
+	// Inventory に追加する際に追加可能なカテゴリーを定義する
+	// 何も指定しなければすべてのカテゴリーに追加可能
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item", meta = (Categories = "Inventory.Category"))
 	FGameplayTagContainer AllowedCategoryTags;
 };

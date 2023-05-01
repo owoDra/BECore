@@ -4,6 +4,8 @@
 
 #include "Camera/CameraComponent.h"
 
+#include "Mode/BECameraMode.h"
+
 #include "Templates/SubclassOf.h"
 #include "UObject/UObjectGlobals.h"
 #include "GameplayTagContainer.h"
@@ -42,6 +44,7 @@ class UBECameraComponent : public UCameraComponent
 {
 	GENERATED_BODY()
 
+public:
 	UBECameraComponent(const FObjectInitializer& ObjectInitializer);
 
 protected:
@@ -143,6 +146,6 @@ public:
 	 *
 	 *	Stack の最初に新しく CameraMode を追加し Blend を始める
 	 */
-	UFUNCTION(BlueprintPure, Category = "Camera")
+	UFUNCTION(BlueprintCallable, Category = "Camera")
 	void PushCameraMode(TSubclassOf<UBECameraMode> CameraModeClass);
 };

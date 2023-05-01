@@ -3,11 +3,11 @@
 
 #include "BEDamageExecution.h"
 
-#include "Ability/Attributes/BEHealthSet.h"
-#include "Ability/Attributes/BECombatSet.h"
+#include "Ability/Attribute/BEHealthSet.h"
+#include "Ability/Attribute/BECombatSet.h"
 #include "Ability/BEGameplayEffectContext.h"
 #include "Ability/BEAbilitySourceInterface.h"
-#include "Teams/BETeamSubsystem.h"
+#include "Team/BETeamSubsystem.h"
 
 #include "GameplayEffectTypes.h"
 #include "Engine/World.h"

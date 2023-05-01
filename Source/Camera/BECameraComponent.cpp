@@ -2,8 +2,6 @@
 
 #include "BECameraComponent.h"
 
-#include "Mode/BECameraMode.h"
-
 #include "Camera/CameraTypes.h"
 #include "Engine/Engine.h"
 #include "Engine/Scene.h"
@@ -71,7 +69,11 @@ void UBECameraComponent::ComputeCameraView(float DeltaTime, FMinimalViewInfo& De
 	DesiredView.bConstrainAspectRatio = bConstrainAspectRatio;
 	DesiredView.bUseFieldOfViewForLOD = bUseFieldOfViewForLOD;
 	DesiredView.ProjectionMode = ProjectionMode;
-	DesiredView.PostProcessBlendWeight = (PostProcessBlendWeight > 0.0f) ? PostProcessSettings : PostProcessBlendWeight;
+	DesiredView.PostProcessBlendWeight = PostProcessBlendWeight;
+	if (PostProcessBlendWeight > 0.0f)
+	{
+		DesiredView.PostProcessSettings = PostProcessSettings;
+	}
 }
 
 void UBECameraComponent::ComputeRecoilAmount(float DeltaTime, FBECameraModeView& CameraModeView)
@@ -114,7 +116,7 @@ void UBECameraComponent::ComputeRecoilAmount(float DeltaTime, FBECameraModeView&
 		// リコイルの適応が終わったか判定し、終わっていたら RecoilState を None にする。
 		if (RecoilAmountToAdd.IsNearlyZero())
 		{
-			RecoilAmountToAdd = 0.0;
+			RecoilAmountToAdd = FRotator::ZeroRotator;
 			RecoilState = EBECameraRecoilState::None;
 		}
 	}
@@ -132,7 +134,7 @@ void UBECameraComponent::ComputeRecoilAmount(float DeltaTime, FBECameraModeView&
 		// Recovery の適応が終わったか判定し、終わっていたら RecoilState を None にする。
 		if (CurrentRecoilAmount.IsNearlyZero())
 		{
-			CurrentRecoilAmount = 0.0;
+			CurrentRecoilAmount = FRotator::ZeroRotator;
 			RecoilState = EBECameraRecoilState::None;
 		}
 	}
@@ -171,7 +173,7 @@ void UBECameraComponent::AddRecoilOffset(FVector2D Offset, float RecoveryDelay)
 
 void UBECameraComponent::HandleRecoilRecovery()
 {
-	RecoilAmountToAdd = 0.0;
+	RecoilAmountToAdd = FRotator::ZeroRotator;
 	RecoilState = EBECameraRecoilState::Recovery;
 }
 

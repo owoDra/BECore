@@ -3,7 +3,7 @@
 
 #include "BEPlayerBotController.h"
 
-#include "GameModes/BEGameMode.h"
+#include "GameMode/BEGameMode.h"
 #include "BELogChannels.h"
 
 #include "AbilitySystemComponent.h"

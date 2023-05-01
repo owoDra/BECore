@@ -3,7 +3,7 @@
 
 #include "BEFrontendStateComponent.h"
 
-#include "GameModes/BEExperienceManagerComponent.h"
+#include "GameMode/Experience/BEExperienceManagerComponent.h"
 #include "BEGameplayTags.h"
 
 #include "CommonActivatableWidget.h"

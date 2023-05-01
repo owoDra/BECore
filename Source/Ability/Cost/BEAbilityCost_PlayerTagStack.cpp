@@ -4,7 +4,7 @@
 #include "BEAbilityCost_PlayerTagStack.h"
 
 #include "Player/BEPlayerState.h"
-#include "Ability/Abilities/BEGameplayAbility.h"
+#include "Ability/BEGameplayAbility.h"
 
 #include "Abilities/GameplayAbilityTypes.h"
 #include "GameFramework/Controller.h"

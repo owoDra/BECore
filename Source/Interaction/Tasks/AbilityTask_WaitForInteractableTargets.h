@@ -49,7 +49,7 @@ protected:
 
 	FCollisionProfileName TraceProfile;
 
-	// Does the trace affect the aiming pitch
+	// Does the trace affect the Targeting pitch
 	bool bTraceAffectsAimPitch = true;
 
 	TArray<FInteractionOption> CurrentOptions;

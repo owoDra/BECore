@@ -4,7 +4,7 @@
 #include "BEHealthSet.h"
 
 #include "Ability/BEAbilitySystemComponent.h"
-#include "Messages/BEVerbMessage.h"
+#include "Message/BEVerbMessage.h"
 #include "BEGameplayTags.h"
 
 #include "Engine/World.h"

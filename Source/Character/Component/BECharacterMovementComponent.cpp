@@ -226,8 +226,8 @@ void UBECharacterMovementComponent::InitializeWithAbilitySystem(UBEAbilitySystem
 		return;
 	}
 
-	MovementSet = NewObject<UBEMovementSet>(GetOwner(), UBEMovementSet::StaticClass());
-	AbilitySystemComponent->AddAttributeSetSubobject(MovementSet);
+	UAttributeSet* NewSet = NewObject<UAttributeSet>(GetOwner(), UBEMovementSet::StaticClass());
+	MovementSet = Cast<UBEMovementSet>(AbilitySystemComponent->AddAttributeSetSubobject(NewSet));
 	if (!MovementSet)
 	{
 		UE_LOG(LogBE, Error, TEXT("BECharacterMovementComponent: Cannot initialize Character movement component for owner [%s] with NULL movement set on the ability system."), *GetNameSafe(Owner));
@@ -242,7 +242,7 @@ void UBECharacterMovementComponent::InitializeWithAbilitySystem(UBEAbilitySystem
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UBEMovementSet::GetWalkSpeedAttribute()).AddUObject(this, &ThisClass::HandleWalkSpeedChanged);
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UBEMovementSet::GetWalkSpeedCrouchedAttribute()).AddUObject(this, &ThisClass::HandleWalkSpeedCrouchedChanged);
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UBEMovementSet::GetWalkSpeedRunningAttribute()).AddUObject(this, &ThisClass::HandleWalkSpeedRunningChanged);
-	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UBEMovementSet::GetWalkSpeedAimingAttribute()).AddUObject(this, &ThisClass::HandleWalkSpeedAimingChanged);
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UBEMovementSet::GetWalkSpeedTargetingAttribute()).AddUObject(this, &ThisClass::HandleWalkSpeedTargetingChanged);
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UBEMovementSet::GetSwimSpeedAttribute()).AddUObject(this, &ThisClass::HandleSwimSpeedChanged);
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UBEMovementSet::GetFlySpeedAttribute()).AddUObject(this, &ThisClass::HandleFlySpeedChanged);
 
@@ -257,14 +257,14 @@ void UBECharacterMovementComponent::InitializeWithAbilitySystem(UBEAbilitySystem
 	AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetWalkSpeedAttribute(), MaxWalkSpeed);
 	AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetWalkSpeedCrouchedAttribute(), MaxWalkSpeedCrouched);
 	AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetWalkSpeedRunningAttribute(), MaxWalkSpeedRunning);
-	AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetWalkSpeedAimingAttribute(), MaxWalkSpeedAiming);
+	AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetWalkSpeedTargetingAttribute(), MaxWalkSpeedTargeting);
 	AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetSwimSpeedAttribute(), MaxSwimSpeed);
 	AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetFlySpeedAttribute(), MaxFlySpeed);
 
 	AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetJumpPowerAttribute(), JumpZVelocity);
 	AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetAirControlAttribute(), AirControl);
 
-	InitializeGameplayTags
+	InitializeGameplayTags();
 }
 
 void UBECharacterMovementComponent::UninitializeFromAbilitySystem()
@@ -542,12 +542,12 @@ void UBECharacterMovementComponent::UpdateCharacterStateBeforeMovement(float Del
 			Run(false);
 		}
 
-		const bool bIsAiming = IsTargeting();
-		if (bIsAiming && (!bWantsToTarget || !CanTargetInCurrentState()))
+		const bool bIsTargeting = IsTargeting();
+		if (bIsTargeting && (!bWantsToTarget || !CanTargetInCurrentState()))
 		{
 			UnTarget(false);
 		}
-		else if (!bIsAiming && bWantsToTarget && CanTargetInCurrentState())
+		else if (!bIsTargeting && bWantsToTarget && CanTargetInCurrentState())
 		{
 			Target(false);
 		}
@@ -725,7 +725,7 @@ float UBECharacterMovementComponent::GetSpeed2D() const
 }
 
 
-void UBECharacterMovementComponent::SetMovementModeTag(EMovementMode MovementMode, uint8 CustomMovementMode, bool bTagEnabled)
+void UBECharacterMovementComponent::SetMovementModeTag(EMovementMode InMovementMode, uint8 InCustomMovementMode, bool bTagEnabled)
 {
 	if (AbilitySystemComponent)
 	{
@@ -817,7 +817,7 @@ void UBECharacterMovementComponent::PhysCustom(float deltaTime, int32 Iterations
 {
 	Super::PhysCustom(deltaTime, Iterations);
 
-	if (const UBECharacterMovementFragment* Fragment = Fragments[CustomMovementMode])
+	if (UBECharacterMovementFragment* Fragment = Fragments[CustomMovementMode])
 	{
 		Fragment->PhysMovement(this, deltaTime, Iterations);
 	}
@@ -844,7 +844,7 @@ bool UBECharacterMovementComponent::CanRunInCurrentState() const
 		}
 	}
 
-	return !IsAiming() && (IsFalling() || IsMovingOnGround());
+	return !IsTargeting() && (IsFalling() || IsMovingOnGround());
 }
 
 void UBECharacterMovementComponent::Run(bool bClientSimulation)

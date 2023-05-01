@@ -9,8 +9,8 @@
 #include "Ability/Attribute/BEHealthSet.h"
 #include "System/BEAssetManager.h"
 #include "System/BEGameData.h"
-#include "Messages/BEVerbMessage.h"
-#include "Messages/BEVerbMessageHelpers.h"
+#include "Message/BEVerbMessage.h"
+#include "Message/BEVerbMessageHelpers.h"
 
 #include "BEGameplayTags.h"
 #include "BELogChannels.h"
@@ -34,12 +34,12 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Death_Dead, "Status.Death.Dead");
 const FName UBECharacterHealthComponent::NAME_ActorFeatureName("CharacterHealth");
 
 
-static AActor* GetInstigatorFromAttrChangeData(const FOnAttributeChangeData& ChangeData)
+static APawn* GetInstigatorFromAttrChangeData(const FOnAttributeChangeData& ChangeData)
 {
 	if (ChangeData.GEModData != nullptr)
 	{
 		const FGameplayEffectContextHandle& EffectContext = ChangeData.GEModData->EffectSpec.GetEffectContext();
-		return EffectContext.GetOriginalInstigator();
+		return Cast<APawn>(EffectContext.GetOriginalInstigator());
 	}
 
 	return nullptr;
@@ -134,8 +134,9 @@ void UBECharacterHealthComponent::InitializeWithAbilitySystem(UBEAbilitySystemCo
 		return;
 	}
 
-	HealthSet = NewObject<UBEHealthSet>(GetOwner(), UBEHealthSet::StaticClass());
-	AbilitySystemComponent->AddAttributeSetSubobject(HealthSet);
+
+	UAttributeSet* NewSet = NewObject<UAttributeSet>(GetOwner(), UBEHealthSet::StaticClass());
+	HealthSet = Cast<UBEHealthSet>(AbilitySystemComponent->AddAttributeSetSubobject(NewSet));
 	if (!HealthSet)
 	{
 		UE_LOG(LogBE, Error, TEXT("BECharacterHealthComponent: Cannot initialize health component for owner [%s] with NULL health set on the ability system."), *GetNameSafe(Owner));
@@ -370,7 +371,7 @@ void UBECharacterHealthComponent::StartDeath()
 		AbilitySystemComponent->SetLooseGameplayTagCount(TAG_Status_Death_Dying, 1);
 	}
 
-	AActor* Owner = GetOwner();
+	APawn* Owner = GetOwner<APawn>();
 	check(Owner);
 
 	OnDeathStarted.Broadcast(Owner);
@@ -392,7 +393,7 @@ void UBECharacterHealthComponent::FinishDeath()
 		AbilitySystemComponent->SetLooseGameplayTagCount(TAG_Status_Death_Dead, 1);
 	}
 
-	AActor* Owner = GetOwner();
+	APawn* Owner = GetOwner<APawn>();
 	check(Owner);
 
 	OnDeathFinished.Broadcast(Owner);
@@ -505,6 +506,12 @@ void UBECharacterHealthComponent::OnRep_DeathState(EBEDeathState OldDeathState)
 	}
 
 	ensureMsgf((DeathState == NewDeathState), TEXT("BECharacterHealthComponent: Death transition failed [%d] -> [%d] for owner [%s]."), (uint8)OldDeathState, (uint8)NewDeathState, *GetNameSafe(GetOwner()));
+}
+
+
+UBECharacterHealthComponent* UBECharacterHealthComponent::FindCharacterHealthComponent(const APawn* Pawn)
+{
+	return (Pawn ? Pawn->FindComponentByClass<UBECharacterHealthComponent>() : nullptr);
 }
 
 

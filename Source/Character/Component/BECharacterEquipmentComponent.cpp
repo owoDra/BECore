@@ -7,7 +7,7 @@
 #include "Character/BECharacterData.h"
 #include "Player/BEPlayerController.h"
 #include "Player/BEPlayerState.h"
-#include "Equipment/BEEquipmentInstance.h"
+#include "Item/Equipment/BEEquipmentInstance.h"
 #include "Item/BEItemData.h"
 #include "Item/Fragment/BEItemDataFragment_Equippable.h"
 #include "BEGameplayTags.h"
@@ -139,6 +139,11 @@ UBEEquipmentInstance* FBEEquipmentList::AddEntry(const UBEItemData* ItemData, FG
 {
 	const UBEItemDataFragment_Equippable* Fragment = ItemData->FindFragmentByClass<UBEItemDataFragment_Equippable>();
 	if (Fragment == nullptr)
+	{
+		return nullptr;
+	}
+
+	if (!Fragment->AllowedSlotTags.HasTag(SlotTag))
 	{
 		return nullptr;
 	}
@@ -383,11 +388,11 @@ void UBECharacterEquipmentComponent::HandleChangeInitState(UGameFrameworkCompone
 
 		if (const UBECharacterBasicComponent* CharacterBasic = UBECharacterBasicComponent::FindCharacterBasicComponent(Pawn))
 		{
-			if (const UBECharacterData* CharacterData = CharacterBasic->GetCharacterData())
+			if (const UBECharacterData* CharacterData = CharacterBasic->GetCharacterData<UBECharacterData>())
 			{
-				if (!CharacterData->DefaultEquipments.IsEmpty())
+				if (const UBEEquipmentSet* EquipmentSet= CharacterData->EquipmentSet)
 				{
-					AddEquipments(CharacterData->DefaultEquipments, CharacterData->DefaultActiveSlotTag);
+					AddEquipments(EquipmentSet->Entries, EquipmentSet->DefaultActiveSlotTag);
 				}
 			}
 		}
@@ -503,28 +508,28 @@ bool UBECharacterEquipmentComponent::AddEquipment(FGameplayTag SlotTag, const UB
 	return false;
 }
 
-void UBECharacterEquipmentComponent::AddEquipments(const TMap<FGameplayTag, const UBEItemData*>& ItemDatas, FGameplayTag ActivateSlotTag)
+void UBECharacterEquipmentComponent::AddEquipments(const TArray<FBEEquipmentSetEntry>& Entries, FGameplayTag ActivateSlotTag)
 {
 	check(GetOwner()->HasAuthority());
 
 	UBEAbilitySystemComponent* ASC = GetAbilitySystemComponent();
 	check(ASC != nullptr);
 
-	for (const auto& KVP : ItemDatas)
+	for (FBEEquipmentSetEntry Entry : Entries)
 	{
-		if ((!KVP.Key.IsValid()) || (KVP.Value == nullptr) || (AddedSlotTags.Contains(KVP.Key)))
+		if ((!Entry.SlotTag.IsValid()) || (Entry.ItemData == nullptr) || (AddedSlotTags.Contains(Entry.SlotTag)))
 		{
 			continue;
 		}
 
-		if (UBEEquipmentInstance* Result = EquipmentList.AddEntry(KVP.Value, KVP.Key, ASC))
+		if (UBEEquipmentInstance* Result = EquipmentList.AddEntry(Entry.ItemData, Entry.SlotTag, ASC))
 		{
 			if (IsUsingRegisteredSubObjectList() && IsReadyForReplication())
 			{
 				AddReplicatedSubObject(Result);
 			}
 
-			AddedSlotTags.Add(KVP.Key);
+			AddedSlotTags.Add(Entry.SlotTag);
 		}
 	}
 
@@ -563,7 +568,7 @@ bool UBECharacterEquipmentComponent::RemoveEquipment(FGameplayTag SlotTag)
 			}
 			
 			EquipmentList.RemoveEntry(EntryIt.GetIndex(), ASC);
-			EquipmentList.Entries.RemoveAt(Index);
+			EquipmentList.Entries.RemoveAt(EntryIt.GetIndex());
 			EquipmentList.MarkArrayDirty();
 
 			AddedSlotTags.Remove(Entry.SlotTag);
@@ -579,13 +584,13 @@ void UBECharacterEquipmentComponent::RemoveAllEquipments()
 {
 	if (!GetOwner()->HasAuthority())
 	{
-		return false;
+		return;
 	}
 
 	UBEAbilitySystemComponent* ASC = GetAbilitySystemComponent();
 	if (ASC == nullptr)
 	{
-		return false;
+		return;
 	}
 
 	for (auto EntryIt = EquipmentList.Entries.CreateIterator(); EntryIt; ++EntryIt)
@@ -602,7 +607,7 @@ void UBECharacterEquipmentComponent::RemoveAllEquipments()
 		AddedSlotTags.Remove(Entry.SlotTag);
 	}
 
-	EquipmentList.Entries.RemoveAll();
+	EquipmentList.Entries.Empty();
 	EquipmentList.MarkArrayDirty();
 }
 
@@ -615,7 +620,8 @@ void UBECharacterEquipmentComponent::SetActiveSlot(FGameplayTag SlotTag)
 	UBEAbilitySystemComponent* ASC = GetAbilitySystemComponent();
 	check(ASC != nullptr);
 
-	int32 LastActiveIndex, NewActiveIndex = INDEX_NONE;
+	int32 LastActiveIndex = INDEX_NONE; 
+	int32 NewActiveIndex = INDEX_NONE;
 	for (auto EntryIt = EquipmentList.Entries.CreateIterator(); EntryIt; ++EntryIt)
 	{
 		FBEEquipmentEntry& Entry = *EntryIt;
@@ -642,19 +648,18 @@ void UBECharacterEquipmentComponent::SetActiveSlot(FGameplayTag SlotTag)
 	EquipmentList.ActivateEntry(NewActiveIndex, ASC);
 }
 
-bool UBECharacterEquipmentComponent::GetActiveSlotItem(FGameplayTag& SlotTag, const UBEItemData*& ItemData, UBEEquipmentInstance*& Instance)
+bool UBECharacterEquipmentComponent::GetActiveSlotInfo(FBEEquipmentSlotChangedMessage& SlotInfo)
 {
-	SlotTag  = FGameplayTag::EmptyTag;
-	ItemData = nullptr;
-	Instance = nullptr;
+	SlotInfo = FBEEquipmentSlotChangedMessage();
 
 	for (FBEEquipmentEntry Entry : EquipmentList.Entries)
 	{
 		if (Entry.Activated == true)
 		{
-			SlotTag  = Entry.SlotTag;
-			ItemData = Entry.ItemData;
-			Instance = Entry.Instance;
+			SlotInfo.OwnerComponent = this;
+			SlotInfo.SlotTag = Entry.SlotTag;
+			SlotInfo.Instance = Entry.Instance;
+			SlotInfo.ItemData = Entry.ItemData;
 			return true;
 		}
 	}
@@ -662,17 +667,18 @@ bool UBECharacterEquipmentComponent::GetActiveSlotItem(FGameplayTag& SlotTag, co
 	return false;
 }
 
-bool UBECharacterEquipmentComponent::GetSlotItem(FGameplayTag SlotTag, const UBEItemData*& ItemData, UBEEquipmentInstance*& Instance)
+bool UBECharacterEquipmentComponent::GetSlotInfo(FGameplayTag SlotTag, FBEEquipmentSlotChangedMessage& SlotInfo)
 {
-	ItemData = nullptr;
-	Instance = nullptr;
+	SlotInfo = FBEEquipmentSlotChangedMessage();
 
 	for (FBEEquipmentEntry Entry : EquipmentList.Entries)
 	{
 		if (Entry.SlotTag == SlotTag)
 		{
-			ItemData = Entry.ItemData;
-			Instance = Entry.Instance;
+			SlotInfo.OwnerComponent = this;
+			SlotInfo.SlotTag = Entry.SlotTag;
+			SlotInfo.Instance = Entry.Instance;
+			SlotInfo.ItemData = Entry.ItemData;
 			return true;
 		}
 	}

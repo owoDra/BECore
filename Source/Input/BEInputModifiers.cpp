@@ -5,7 +5,7 @@
 
 #include "Input/BEAimSensitivityData.h"
 #include "Player/BELocalPlayer.h"
-#include "Settings/BESettingsShared.h"
+#include "Setting/BESettingsShared.h"
 
 #include "EnhancedPlayerInput.h"
 #include "GameFramework/PlayerController.h"

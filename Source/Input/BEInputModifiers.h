@@ -107,7 +107,7 @@ enum class EBETargetingType : uint8
 	/** Sensitivity to be applied why normally looking around */
 	Normal = 0,
 
-	/** The sensitivity that should be applied while Aiming Down Sights */
+	/** The sensitivity that should be applied while Targeting Down Sights */
 	ADS = 1,
 };
 

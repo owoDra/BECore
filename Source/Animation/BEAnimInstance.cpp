@@ -5,7 +5,7 @@
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
 #include "Character/BECharacter.h"
-#include "Character/BECharacterMovementComponent.h"
+#include "Character/Component/BECharacterMovementComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BEAnimInstance)
 

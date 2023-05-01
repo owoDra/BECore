@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Ability/Abilities/BEGameplayAbility.h"
+#include "Ability/BEGameplayAbility.h"
 
 #include "GameplayAbilitySpec.h"
 #include "UObject/UObjectGlobals.h"

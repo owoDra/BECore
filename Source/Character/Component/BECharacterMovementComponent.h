@@ -109,6 +109,7 @@ class BECORE_API UBECharacterMovementComponent : public UCharacterMovementCompon
 		virtual FSavedMovePtr AllocateNewMove() override;
 	};
 	
+public:
 	UBECharacterMovementComponent(const FObjectInitializer& ObjectInitializer);
 
 	// このコンポーネントを実装する際の FeatureName
@@ -185,7 +186,7 @@ public:
 	virtual float GetSpeed2D() const;
 
 protected:
-	void SetMovementModeTag(EMovementMode MovementMode, uint8 CustomMovementMode, bool bTagEnabled);
+	void SetMovementModeTag(EMovementMode InMovementMode, uint8 InCustomMovementMode, bool bTagEnabled);
 
 	virtual void OnMovementModeChanged(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode) override;
 	virtual void PhysCustom(float deltaTime, int32 Iterations);

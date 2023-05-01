@@ -21,7 +21,6 @@ FBEGameplayTags FBEGameplayTags::GameplayTags;
 
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_ActivateFail_IsDead, "Ability.ActivateFail.IsDead");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_ActivateFail_Cooldown, "Ability.ActivateFail.Cooldown");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_ActivateFail_Cost, "Ability.ActivateFail.Cost");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_ActivateFail_TagsBlocked, "Ability.ActivateFail.TagsBlocked");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_ActivateFail_TagsMissing, "Ability.ActivateFail.TagsMissing");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_ActivateFail_Networking, "Ability.ActivateFail.Networking");
@@ -336,10 +335,6 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_Cosmetic, "Cosmetic");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Status_IsPlayer, "Status.IsPlayer");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Spawning, "Status.Spawning");
 
-UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Crouching, "Status.Crouching");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Running, "Status.Running");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Sprinting, "Status.Sprinting");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Aiming, "Status.Aiming");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Reloading, "Status.Reloading");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Fireing, "Status.Fireing");
 

@@ -14,7 +14,7 @@ UBEMovementSet::UBEMovementSet()
 	, WalkSpeed(200.0f)
 	, WalkSpeedCrouched(200.0f)
 	, WalkSpeedRunning(400.0f)
-	, WalkSpeedAiming(200.0f)
+	, WalkSpeedTargeting(200.0f)
 	, SwimSpeed(400.0f)
 	, FlySpeed(400.0f)
 	, JumpPower(400.0f)
@@ -33,7 +33,7 @@ void UBEMovementSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	DOREPLIFETIME_CONDITION_NOTIFY(UBEMovementSet, OverallSpeedMultiplier, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UBEMovementSet, WalkSpeedCrouched, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UBEMovementSet, WalkSpeedRunning, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UBEMovementSet, WalkSpeedAiming, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UBEMovementSet, WalkSpeedTargeting, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UBEMovementSet, SwimSpeed, COND_None, REPNOTIFY_Always);
 	DOREPLIFETIME_CONDITION_NOTIFY(UBEMovementSet, FlySpeed, COND_None, REPNOTIFY_Always);
 
@@ -73,9 +73,9 @@ void UBEMovementSet::OnRep_WalkSpeedRunning(const FGameplayAttributeData& OldVal
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UBEMovementSet, WalkSpeedRunning, OldValue);
 }
 
-void UBEMovementSet::OnRep_WalkSpeedAiming(const FGameplayAttributeData& OldValue)
+void UBEMovementSet::OnRep_WalkSpeedTargeting(const FGameplayAttributeData& OldValue)
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UBEMovementSet, WalkSpeedAiming, OldValue);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UBEMovementSet, WalkSpeedTargeting, OldValue);
 }
 
 void UBEMovementSet::OnRep_SwimSpeed(const FGameplayAttributeData& OldValue)

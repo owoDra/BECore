@@ -1,6 +1,6 @@
 // Copyright Eigi Chin
 
-#include "BEItemData.h"
+#include "Item/BEItemData.h"
 
 #include "UObject/Class.h"
 

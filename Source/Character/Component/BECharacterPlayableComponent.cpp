@@ -11,8 +11,7 @@
 #include "Ability/BEAbilitySystemComponent.h"
 #include "Input/BEInputConfig.h"
 #include "Input/BEInputComponent.h"
-#include "Camera/BECharacterCameraComponent.h"
-#include "Settings/BESettingsLocal.h"
+#include "Setting/BESettingsLocal.h"
 #include "System/BEAssetManager.h"
 #include "BELogChannels.h"
 #include "BEGameplayTags.h"
@@ -193,7 +192,7 @@ void UBECharacterPlayableComponent::HandleChangeInitState(UGameFrameworkComponen
 		}
 
 		const bool bIsLocallyControlled = Pawn->IsLocallyControlled();
-		const UBECharacterData* PawnData = nullptr;
+		const UBECharacterData* CharacterData = nullptr;
 
 		if (ABEPlayerController* BEPC = GetController<ABEPlayerController>())
 		{
@@ -252,9 +251,9 @@ void UBECharacterPlayableComponent::InitializePlayerInput(UInputComponent* Playe
 
 	Subsystem->ClearAllMappings();
 
-	if (const UBECharacterBasicComponent* PawnExtComp = UBECharacterBasicComponent::FindCharacterBasicComponent(Pawn))
+	if (const UBECharacterBasicComponent* CharacterBasic = UBECharacterBasicComponent::FindCharacterBasicComponent(Pawn))
 	{
-		if (const UBECharacterData* CharacterData = PawnExtComp->GetCharacterData<UBECharacterData>())
+		if (const UBECharacterData* CharacterData = CharacterBasic->GetCharacterData<UBECharacterData>())
 		{
 			if (const UBEInputConfig* InputConfig = CharacterData->InputConfig)
 			{
@@ -303,7 +302,7 @@ void UBECharacterPlayableComponent::AddAdditionalInputConfig(const UBEInputConfi
 	UEnhancedInputLocalPlayerSubsystem* Subsystem = LP->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>();
 	check(Subsystem);
 
-	if (const UBECharacterBasicComponent* PawnExtComp = UBECharacterBasicComponent::FindCharacterBasicComponent(Pawn))
+	if (const UBECharacterBasicComponent* CharacterBasic = UBECharacterBasicComponent::FindCharacterBasicComponent(Pawn))
 	{
 		BEIC->BindAbilityActions(InputConfig, this, &ThisClass::Input_AbilityInputTagPressed, &ThisClass::Input_AbilityInputTagReleased, /*out*/ BindHandles);
 	}
@@ -323,9 +322,9 @@ void UBECharacterPlayableComponent::Input_AbilityInputTagPressed(FGameplayTag In
 {
 	if (const APawn* Pawn = GetPawn<APawn>())
 	{
-		if (const UBECharacterBasicComponent* PawnExtComp = UBECharacterBasicComponent::FindCharacterBasicComponent(Pawn))
+		if (const UBECharacterBasicComponent* CharacterBasic = UBECharacterBasicComponent::FindCharacterBasicComponent(Pawn))
 		{
-			if (UBEAbilitySystemComponent* BEASC = PawnExtComp->GetBEAbilitySystemComponent())
+			if (UBEAbilitySystemComponent* BEASC = CharacterBasic->GetBEAbilitySystemComponent())
 			{
 				BEASC->AbilityInputTagPressed(InputTag);
 			}
@@ -341,9 +340,9 @@ void UBECharacterPlayableComponent::Input_AbilityInputTagReleased(FGameplayTag I
 		return;
 	}
 
-	if (const UBECharacterBasicComponent* PawnExtComp = UBECharacterBasicComponent::FindCharacterBasicComponent(Pawn))
+	if (const UBECharacterBasicComponent* CharacterBasic = UBECharacterBasicComponent::FindCharacterBasicComponent(Pawn))
 	{
-		if (UBEAbilitySystemComponent* BEASC = PawnExtComp->GetBEAbilitySystemComponent())
+		if (UBEAbilitySystemComponent* BEASC = CharacterBasic->GetBEAbilitySystemComponent())
 		{
 			BEASC->AbilityInputTagReleased(InputTag);
 		}

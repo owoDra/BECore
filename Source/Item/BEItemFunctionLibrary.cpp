@@ -2,7 +2,7 @@
 
 #include "BEItemFunctionLibrary.h"
 
-#include "BEItemData.h"
+#include "Item/BEItemData.h"
 
 #include "UObject/Class.h"
 

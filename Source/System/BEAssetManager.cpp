@@ -33,7 +33,7 @@ static FAutoConsoleCommand CVarDumpLoadedAssets(
 
 UBEAssetManager::UBEAssetManager()
 {
-	DefaultPawnData = nullptr;
+	DefaultCharacterData = nullptr;
 }
 
 UBEAssetManager& UBEAssetManager::Get()
@@ -145,9 +145,9 @@ const UBEGameData& UBEAssetManager::GetGameData()
 	return GetOrLoadTypedGameData<UBEGameData>(BEGameDataPath);
 }
 
-const UBECharacterData* UBEAssetManager::GetDefaultPawnData() const
+const UBECharacterData* UBEAssetManager::GetDefaultCharacterData() const
 {
-	return GetAsset(DefaultPawnData);
+	return GetAsset(DefaultCharacterData);
 }
 
 UPrimaryDataAsset* UBEAssetManager::LoadGameDataOfClass(TSubclassOf<UPrimaryDataAsset> DataClass, const TSoftObjectPtr<UPrimaryDataAsset>& DataClassPath, FPrimaryAssetType PrimaryAssetType)

@@ -5,7 +5,7 @@
 
 #include "AbilitySystemComponent.h"
 
-#include "Ability/Abilities/BEGameplayAbility.h"
+#include "Ability/BEGameplayAbility.h"
 
 #include "Containers/Array.h"
 #include "Engine/EngineTypes.h"

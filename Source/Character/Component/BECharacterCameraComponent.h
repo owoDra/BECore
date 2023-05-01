@@ -25,6 +25,7 @@ class BECORE_API UBECharacterCameraComponent : public UBECameraComponent, public
 {
 	GENERATED_BODY()
 
+public:
 	UBECharacterCameraComponent(const FObjectInitializer& ObjectInitializer);
 
 	// このコンポーネントを実装する際の FeatureName
@@ -56,14 +57,10 @@ protected:
 	TSubclassOf<UBECameraMode> DetermineCameraMode() const;
 
 protected:
-	// Stack used to blend the camera modes.
-	UPROPERTY()
-	TObjectPtr<UBECameraModeStack> CameraModeStack;
-
-	// Camera mode set by an ability.
+	// Ability によって設定される一時的な CameraMode
 	TSubclassOf<UBECameraMode> AbilityCameraMode;
 
-	// Spec handle for the last ability to set a camera mode.
+	// 最後に CameraMode を設定した Ability のハンドル
 	FGameplayAbilitySpecHandle AbilityCameraModeOwningSpecHandle;
 
 

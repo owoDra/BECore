@@ -1,7 +1,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 // Copyright Eigi Chin
 
-#include "BEGameplayEffectContext.h"
+#include "Ability/BEGameplayEffectContext.h"
 
 #include "Ability/BEAbilitySourceInterface.h"
 #include "Engine/HitResult.h"

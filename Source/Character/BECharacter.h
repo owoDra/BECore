@@ -3,7 +3,7 @@
 #pragma once
 
 #include "ModularCharacter.h"
-#include "Teams/BETeamAgentInterface.h"
+#include "Team/BETeamAgentInterface.h"
 #include "AbilitySystemInterface.h"
 #include "GameplayCueInterface.h"
 #include "GameplayTagAssetInterface.h"
@@ -62,6 +62,7 @@ class BECORE_API ABECharacter
 {
 	GENERATED_BODY()
 
+public:
 	ABECharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 private:

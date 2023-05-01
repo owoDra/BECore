@@ -5,7 +5,7 @@
 
 #include "CommonPlayerController.h"
 #include "Camera/BECameraAssistInterface.h"
-#include "Teams/BETeamAgentInterface.h"
+#include "Team/BETeamAgentInterface.h"
 
 #include "Containers/Set.h"
 #include "Containers/UnrealString.h"

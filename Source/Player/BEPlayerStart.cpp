@@ -52,14 +52,14 @@ EBEPlayerStartLocationOccupancy ABEPlayerStart::GetLocationOccupancy(AController
 
 bool ABEPlayerStart::IsClaimed() const
 {
-	return ClaimingController != nullptr;
+	return ClTargetingController != nullptr;
 }
 
 bool ABEPlayerStart::TryClaim(AController* OccupyingController)
 {
 	if (OccupyingController != nullptr && !IsClaimed())
 	{
-		ClaimingController = OccupyingController;
+		ClTargetingController = OccupyingController;
 		if (UWorld* World = GetWorld())
 		{
 			World->GetTimerManager().SetTimer(ExpirationTimerHandle, FTimerDelegate::CreateUObject(this, &ABEPlayerStart::CheckUnclaimed), ExpirationCheckInterval, true);
@@ -71,9 +71,9 @@ bool ABEPlayerStart::TryClaim(AController* OccupyingController)
 
 void ABEPlayerStart::CheckUnclaimed()
 {
-	if (ClaimingController != nullptr && ClaimingController->GetPawn() != nullptr && GetLocationOccupancy(ClaimingController) == EBEPlayerStartLocationOccupancy::Empty)
+	if (ClTargetingController != nullptr && ClTargetingController->GetPawn() != nullptr && GetLocationOccupancy(ClTargetingController) == EBEPlayerStartLocationOccupancy::Empty)
 	{
-		ClaimingController = nullptr;
+		ClTargetingController = nullptr;
 		if (UWorld* World = GetWorld())
 		{
 			World->GetTimerManager().ClearTimer(ExpirationTimerHandle);

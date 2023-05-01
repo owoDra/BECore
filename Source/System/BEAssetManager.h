@@ -52,7 +52,7 @@ public:
 	static void DumpLoadedAssets();
 
 	const UBEGameData& GetGameData();
-	const UBECharacterData* GetDefaultPawnData() const;
+	const UBECharacterData* GetDefaultCharacterData() const;
 
 protected:
 	template <typename GameDataClass>
@@ -95,7 +95,7 @@ protected:
 
 	// Pawn data used when spawning player pawns if there isn't one set on the player state.
 	UPROPERTY(Config)
-		TSoftObjectPtr<UBECharacterData> DefaultPawnData;
+		TSoftObjectPtr<UBECharacterData> DefaultCharacterData;
 
 private:
 	// Flushes the StartupJobs array. Processes all startup work.

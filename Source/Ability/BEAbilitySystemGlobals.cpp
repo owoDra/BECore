@@ -3,7 +3,7 @@
 
 #include "BEAbilitySystemGlobals.h"
 
-#include "BEGameplayEffectContext.h"
+#include "Ability/BEGameplayEffectContext.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BEAbilitySystemGlobals)
 

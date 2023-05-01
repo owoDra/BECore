@@ -5,8 +5,8 @@
 
 #include "ModularPlayerState.h"
 
-#include "Messages/BEVerbMessage.h"
-#include "Teams/BETeamAgentInterface.h"
+#include "Message/BEVerbMessage.h"
+#include "Team/BETeamAgentInterface.h"
 #include "Ability/BEAbilitySet.h"
 
 #include "AbilitySystemInterface.h"
@@ -73,12 +73,12 @@ public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 	template <class T>
-	const T* GetPawnData() const { return Cast<T>(PawnData); }
+	const T* GetCharacterData() const { return Cast<T>(CharacterData); }
 
-	void SetPawnData(const UBECharacterData* InPawnData, bool Override = false);
+	void SetCharacterData(const UBECharacterData* InCharacterData, bool Override = false);
 
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "PlayerState", meta = (DisplayName = "SetPawnData"))
-	void K2_SetPawnData(const UBECharacterData* InPawnData, bool Override = false);
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "PlayerState", meta = (DisplayName = "SetCharacterData"))
+	void K2_SetCharacterData(const UBECharacterData* InCharacterData, bool Override = false);
 
 	//~AActor interface
 	virtual void PreInitializeComponents() override;
@@ -146,12 +146,12 @@ private:
 
 protected:
 	UFUNCTION()
-	void OnRep_PawnData();
+	void OnRep_CharacterData();
 
 protected:
 
-	UPROPERTY(ReplicatedUsing = OnRep_PawnData)
-	TObjectPtr<const UBECharacterData> PawnData;
+	UPROPERTY(ReplicatedUsing = OnRep_CharacterData)
+	TObjectPtr<const UBECharacterData> CharacterData;
 
 private:
 	UPROPERTY(VisibleAnywhere)
@@ -181,7 +181,7 @@ private:
 	UPROPERTY(Replicated)
 	FGameplayTagStackContainer StatTags;
 
-	FBEAbilitySet_GrantedHandles PawnDataAbilityHandles;
+	FBEAbilitySet_GrantedHandles CharacterDataAbilityHandles;
 
 private:
 	UFUNCTION()

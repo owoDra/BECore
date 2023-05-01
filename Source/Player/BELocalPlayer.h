@@ -5,7 +5,7 @@
 
 #include "CommonLocalPlayer.h"
 
-#include "Teams/BETeamAgentInterface.h"
+#include "Team/BETeamAgentInterface.h"
 
 #include "AudioMixerBlueprintLibrary.h"
 #include "Containers/UnrealString.h"

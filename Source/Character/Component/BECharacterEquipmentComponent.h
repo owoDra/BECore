@@ -8,6 +8,7 @@
 
 #include "Character/Component/BECharacterBasicComponent.h"
 #include "Ability/BEAbilitySet.h"
+#include "Item/Equipment/BEEquipmentSet.h"
 
 #include "Containers/Array.h"
 #include "Containers/ArrayView.h"
@@ -188,6 +189,7 @@ class BECORE_API UBECharacterEquipmentComponent : public UPawnComponent, public 
 {
 	GENERATED_BODY()
 
+public:
 	UBECharacterEquipmentComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	// このコンポーネントを実装する際の FeatureName
@@ -243,7 +245,7 @@ public:
 	 * ActivateSlotTag に SlotTag を指定することで Active にすることができる。
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Equipment", meta = (GameplayTagFilter = "Equipment.Slot"))
-	void AddEquipments(const TMap<FGameplayTag, const UBEItemData*>& ItemDatas, FGameplayTag ActivateSlotTag = FGameplayTag());
+	void AddEquipments(const TArray<FBEEquipmentSetEntry>& Entries, FGameplayTag ActivateSlotTag = FGameplayTag());
 
 	/**
 	 * RemoveEquipment
@@ -273,20 +275,20 @@ public:
 	void SetActiveSlot(FGameplayTag SlotTag);
 
 	/**
-	 * GetActiveSlotItem
+	 * GetActiveSlotInfo
 	 *
 	 * Active な Slot の ItemData および Equipment、SlotTag を返す
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Equipment")
-	bool GetActiveSlotItem(FGameplayTag& SlotTag, const UBEItemData*& ItemData, UBEEquipmentInstance*& Instance);
+	bool GetActiveSlotInfo(FBEEquipmentSlotChangedMessage& SlotInfo);
 
 	/**
-	 * GetSlotItem
+	 * GetSlotInfo
 	 *
 	 * 指定した Slot の ItemData および Equipment、SlotTag を返す
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Equipment", meta = (GameplayTagFilter = "Equipment.Slot"))
-	bool GetSlotItem(FGameplayTag SlotTag, const UBEItemData*& ItemData, UBEEquipmentInstance*& Instance);
+	bool GetSlotInfo(FGameplayTag SlotTag, FBEEquipmentSlotChangedMessage& SlotInfo);
 
 private:
 	UPROPERTY(Replicated)

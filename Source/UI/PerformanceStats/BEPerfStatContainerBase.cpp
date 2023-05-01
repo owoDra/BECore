@@ -1,7 +1,7 @@
 // Copyright Eigi Chin
 
 #include "BEPerfStatContainerBase.h"
-#include "Settings/BESettingsLocal.h"
+#include "Setting/BESettingsLocal.h"
 #include "BEPerfStatWidgetBase.h"
 #include "Blueprint/WidgetTree.h"
 

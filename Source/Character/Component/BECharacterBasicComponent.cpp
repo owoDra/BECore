@@ -282,7 +282,7 @@ void UBECharacterBasicComponent::InitializeAbilitySystem(UBEAbilitySystemCompone
 	}
 
 	APawn* Pawn = GetPawnChecked<APawn>();
-	AActor* ExistingAvatar = InASC->GetAvatarActor();
+	APawn* ExistingAvatar = Cast<APawn>(InASC->GetAvatarActor());
 
 	UE_LOG(LogBE, Verbose, TEXT("Setting up ASC [%s] on pawn [%s] owner [%s], existing [%s] "), *GetNameSafe(InASC), *GetNameSafe(Pawn), *GetNameSafe(InOwnerActor), *GetNameSafe(ExistingAvatar));
 

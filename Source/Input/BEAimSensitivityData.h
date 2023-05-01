@@ -5,7 +5,7 @@
 
 #include "Engine/DataAsset.h"
 
-#include "Settings/BESettingsShared.h"
+#include "Setting/BESettingsShared.h"
 
 #include "Containers/Map.h"
 #include "UObject/UObjectGlobals.h"

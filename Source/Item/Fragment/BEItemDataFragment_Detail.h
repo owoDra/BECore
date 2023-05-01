@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "BEItemData.h"
+#include "Item/BEItemData.h"
 
 #include "Internationalization/Text.h"
 #include "UObject/ObjectPtr.h"

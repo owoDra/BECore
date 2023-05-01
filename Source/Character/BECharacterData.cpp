@@ -11,4 +11,5 @@ UBECharacterData::UBECharacterData(const FObjectInitializer& ObjectInitializer)
 	PawnClass = nullptr;
 	InputConfig = nullptr;
 	DefaultCameraMode = nullptr;
+	EquipmentSet = nullptr;
 }

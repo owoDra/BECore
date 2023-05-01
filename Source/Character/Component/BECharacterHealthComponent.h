@@ -49,6 +49,7 @@ class BECORE_API UBECharacterHealthComponent : public UPawnComponent, public IGa
 {
 	GENERATED_BODY()
 
+public:
 	UBECharacterHealthComponent(const FObjectInitializer& ObjectInitializer);
 
 	// このコンポーネントを実装する際の FeatureName

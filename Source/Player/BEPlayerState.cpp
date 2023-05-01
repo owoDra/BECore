@@ -3,14 +3,14 @@
 
 #include "BEPlayerState.h"
 
-#include "Ability/Attributes/BECombatSet.h"
-#include "Ability/Attributes/BEHealthSet.h"
-#include "Ability/Attributes/BEMovementSet.h"
+#include "Ability/Attribute/BECombatSet.h"
+#include "Ability/Attribute/BEHealthSet.h"
+#include "Ability/Attribute/BEMovementSet.h"
 #include "Ability/BEAbilitySystemComponent.h"
 #include "Character/BECharacterData.h"
-#include "Character/BEPawnExtensionComponent.h"
-#include "GameModes/BEExperienceManagerComponent.h"
-#include "GameModes/BEGameMode.h"
+#include "Character/Component/BECharacterBasicComponent.h"
+#include "GameMode/Experience/BEExperienceManagerComponent.h"
+#include "GameMode/BEGameMode.h"
 #include "BELogChannels.h"
 #include "BEPlayerController.h"
 
@@ -78,9 +78,9 @@ void ABEPlayerState::ClientInitialize(AController* C)
 {
 	Super::ClientInitialize(C);
 
-	if (UBEPawnExtensionComponent* PawnExtComp = UBEPawnExtensionComponent::FindPawnExtensionComponent(GetPawn()))
+	if (UBECharacterBasicComponent* CharacterBasic = UBECharacterBasicComponent::FindCharacterBasicComponent(GetPawn()))
 	{
-		PawnExtComp->CheckDefaultInitialization();
+		CharacterBasic->CheckDefaultInitialization();
 	}
 }
 
@@ -128,13 +128,13 @@ void ABEPlayerState::OnExperienceLoaded(const UBEExperienceDefinition* /*Current
 {
 	if (ABEGameMode* BEGameMode = GetWorld()->GetAuthGameMode<ABEGameMode>())
 	{
-		if (const UBECharacterData* NewPawnData = BEGameMode->GetPawnDataForController(GetOwningController()))
+		if (const UBECharacterData* NewCharacterData = BEGameMode->GetCharacterDataForController(GetOwningController()))
 		{
-			SetPawnData(NewPawnData);
+			SetCharacterData(NewCharacterData);
 		}
 		else
 		{
-			UE_LOG(LogBE, Error, TEXT("ABEPlayerState::OnExperienceLoaded(): Unable to find PawnData to initialize player state [%s]!"), *GetNameSafe(this));
+			UE_LOG(LogBE, Error, TEXT("ABEPlayerState::OnExperienceLoaded(): Unable to find CharacterData to initialize player state [%s]!"), *GetNameSafe(this));
 		}
 	}
 }
@@ -146,7 +146,7 @@ void ABEPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 	FDoRepLifetimeParams SharedParams;
 	SharedParams.bIsPushBased = true;
 
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, PawnData, SharedParams);
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, CharacterData, SharedParams);
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, MyPlayerConnectionType, SharedParams)
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, MyTeamID, SharedParams);
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, MySquadID, SharedParams);
@@ -181,39 +181,39 @@ void ABEPlayerState::PostInitializeComponents()
 	}
 }
 
-void ABEPlayerState::SetPawnData(const UBECharacterData* InPawnData, bool Override)
+void ABEPlayerState::SetCharacterData(const UBECharacterData* InCharacterData, bool Override)
 {
-	check(InPawnData);
+	check(InCharacterData);
 
 	if (GetLocalRole() != ROLE_Authority)
 	{
 		return;
 	}
 
-	if (PawnData)
+	if (CharacterData)
 	{
-		// PawnDataが既に設定されている場合に上書き
+		// CharacterDataが既に設定されている場合に上書き
 		if (Override)
 		{
-			PawnDataAbilityHandles.TakeFromAbilitySystem(AbilitySystemComponent);
+			CharacterDataAbilityHandles.TakeFromAbilitySystem(AbilitySystemComponent);
 		}
 
-		// PawnDataが既に設定されている場合に処理を中断
+		// CharacterDataが既に設定されている場合に処理を中断
 		else
 		{
-			UE_LOG(LogBE, Error, TEXT("Trying to set PawnData [%s] on player state [%s] that already has valid PawnData [%s]."), *GetNameSafe(InPawnData), *GetNameSafe(this), *GetNameSafe(PawnData));
+			UE_LOG(LogBE, Error, TEXT("Trying to set CharacterData [%s] on player state [%s] that already has valid CharacterData [%s]."), *GetNameSafe(InCharacterData), *GetNameSafe(this), *GetNameSafe(CharacterData));
 			return;
 		}
 	}
 
-	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, PawnData, this);
-	PawnData = InPawnData;
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, CharacterData, this);
+	CharacterData = InCharacterData;
 
-	for (const UBEAbilitySet* AbilitySet : PawnData->AbilitySets)
+	for (const UBEAbilitySet* AbilitySet : CharacterData->AbilitySets)
 	{
 		if (AbilitySet)
 		{
-			AbilitySet->GiveToAbilitySystem(AbilitySystemComponent, &PawnDataAbilityHandles);
+			AbilitySet->GiveToAbilitySystem(AbilitySystemComponent, &CharacterDataAbilityHandles);
 		}
 	}
 
@@ -222,12 +222,12 @@ void ABEPlayerState::SetPawnData(const UBECharacterData* InPawnData, bool Overri
 	ForceNetUpdate();
 }
 
-void ABEPlayerState::K2_SetPawnData(const UBECharacterData* InPawnData, bool Override)
+void ABEPlayerState::K2_SetCharacterData(const UBECharacterData* InCharacterData, bool Override)
 {
-	SetPawnData(InPawnData, Override);
+	SetCharacterData(InCharacterData, Override);
 }
 
-void ABEPlayerState::OnRep_PawnData()
+void ABEPlayerState::OnRep_CharacterData()
 {
 }
 

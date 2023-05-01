@@ -44,7 +44,7 @@ public:
 	/** Did this player start get claimed by a controller already? */
 	bool IsClaimed() const;
 
-	/** If this PlayerStart was not claimed, claim it for ClaimingController */
+	/** If this PlayerStart was not claimed, claim it for ClTargetingController */
 	bool TryClaim(AController* OccupyingController);
 
 protected:
@@ -53,10 +53,10 @@ protected:
 
 	/** The controller that claimed this PlayerStart */
 	UPROPERTY(Transient)
-	TObjectPtr<AController> ClaimingController = nullptr;
+	TObjectPtr<AController> ClTargetingController = nullptr;
 
 	/** Interval in which we'll check if this player start is not colliding with anyone anymore */
-	UPROPERTY(EditDefaultsOnly, Category = "Player Start Claiming")
+	UPROPERTY(EditDefaultsOnly, Category = "Player Start ClTargeting")
 	float ExpirationCheckInterval = 1.f;
 
 	/** Tags to identify this player start */

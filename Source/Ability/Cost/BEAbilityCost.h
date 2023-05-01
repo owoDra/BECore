@@ -3,12 +3,17 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "UObject/UObjectGlobals.h"
+
 #include "GameplayAbilitySpec.h"
-#include "Abilities/GameplayAbility.h"
+#include "NativeGameplayTags.h"
+
 #include "BEAbilityCost.generated.h"
 
 class UBEGameplayAbility;
+
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_ActivateFail_Cost);
+
 
 /**
  * UBEAbilityCost

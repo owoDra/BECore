@@ -5,7 +5,7 @@
 
 #include "ModularAIController.h"
 
-#include "Teams/BETeamAgentInterface.h"
+#include "Team/BETeamAgentInterface.h"
 
 #include "GameFramework/Actor.h"
 #include "GenericTeamAgentInterface.h"

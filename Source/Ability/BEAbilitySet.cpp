@@ -4,7 +4,7 @@
 #include "BEAbilitySet.h"
 
 #include "Ability/BEAbilitySystemComponent.h"
-#include "Ability/Abilities/BEGameplayAbility.h"
+#include "Ability/BEGameplayAbility.h"
 #include "BELogChannels.h"
 
 #include "AttributeSet.h"

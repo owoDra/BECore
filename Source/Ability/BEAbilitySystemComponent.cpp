@@ -8,14 +8,14 @@
 #include "BEGlobalAbilitySystem.h"
 #include "GameplayTagContainer.h"
 #include "GameplayAbilitySpec.h"
-#include "Abilities/BEGameplayAbility.h"
+#include "BEGameplayAbility.h"
 #include "Animation/BEAnimInstance.h"
 #include "Ability/BEAbilityTagRelationshipMapping.h"
 
 
 #include "BEAbilitySystemComponent.h"
 
-#include "Ability/Abilities/BEGameplayAbility.h"
+#include "Ability/BEGameplayAbility.h"
 #include "Ability/BEAbilityTagRelationshipMapping.h"
 #include "Ability/BEGlobalAbilitySystem.h"
 #include "Animation/BEAnimInstance.h"

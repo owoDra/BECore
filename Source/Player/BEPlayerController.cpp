@@ -4,15 +4,14 @@
 #include "BEPlayerController.h"
 
 #include "BELogChannels.h"
-#include "GameModes/BEGameMode.h"
+#include "GameMode/BEGameMode.h"
 #include "BECheatManager.h"
 #include "BEPlayerState.h"
-#include "Camera/BEPlayerCameraManager.h"
 #include "UI/BEHUD.h"
 #include "Character/BECharacterData.h"
 #include "Ability/BEAbilitySystemComponent.h"
 #include "BELocalPlayer.h"
-#include "Settings/BESettingsShared.h"
+#include "Setting/BESettingsShared.h"
 #include "Development/BEDeveloperSettings.h"
 #include "BEGameplayTags.h"
 
@@ -38,8 +37,6 @@ namespace BE
 ABEPlayerController::ABEPlayerController(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	PlayerCameraManagerClass = ABEPlayerCameraManager::StaticClass();
-
 #if USING_CHEAT_MANAGER
 	CheatClass = UBECheatManager::StaticClass();
 #endif // #if USING_CHEAT_MANAGER

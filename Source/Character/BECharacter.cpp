@@ -33,7 +33,6 @@
 #include "Math/Vector.h"
 #include "Misc/AssertionMacros.h"
 #include "Net/UnrealNetwork.h"
-#include "SignificanceManager.h"
 #include "Templates/Casts.h"
 #include "TimerManager.h"
 #include "Trace/Detail/Channel.h"
@@ -76,8 +75,6 @@ ABECharacter::ABECharacter(const FObjectInitializer& ObjectInitializer)
 	MeshComp->SetCollisionProfileName(NAME_BECharacterCollisionProfile_Mesh);
 
 	CharacterBasicComponent = CreateDefaultSubobject<UBECharacterBasicComponent>(TEXT("BasicComponent"));
-	CharacterBasicComponent->OnAbilitySystemInitialized_RegisterAndCall(FSimpleMulticastDelegate::FDelegate::CreateUObject(this, &ThisClass::OnAbilitySystemInitialized));
-	CharacterBasicComponent->OnAbilitySystemUninitialized_Register(FSimpleMulticastDelegate::FDelegate::CreateUObject(this, &ThisClass::OnAbilitySystemUninitialized));
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = true;

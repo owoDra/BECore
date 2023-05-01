@@ -5,7 +5,7 @@
 
 #include "Input/BEMappableConfigPair.h"
 #include "Player/BELocalPlayer.h"
-#include "Settings/BESettingsLocal.h"
+#include "Setting/BESettingsLocal.h"
 
 #include "EnhancedInputSubsystems.h"
 #include "InputCoreTypes.h"

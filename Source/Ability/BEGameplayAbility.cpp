@@ -3,15 +3,16 @@
 
 #include "Ability/BEGameplayAbility.h"
 
-#include "Ability/Abilities/BEAbilitySimpleFailureMessage.h"
-#include "Ability/Abilities/BEAbilityCost.h"
+#include "Ability/BEAbilitySimpleFailureMessage.h"
+#include "Ability/Cost/BEAbilityCost.h"
 #include "Ability/BEAbilitySystemComponent.h"
 #include "Ability/BEAbilitySourceInterface.h"
 #include "Ability/BEGameplayEffectContext.h"
 #include "Player/BEPlayerController.h"
 #include "Character/BECharacter.h"
 #include "Character/Component/BECharacterCameraComponent.h"
-#include "Camera/BECameraMode.h"
+#include "Character/Component/BECharacterHealthComponent.h"
+#include "Camera/Mode/BECameraMode.h"
 #include "BEGameplayTags.h"
 #include "BELogChannels.h"
 

@@ -3,8 +3,8 @@
 
 #include "BEHealExecution.h"
 
-#include "Ability/Attributes/BEHealthSet.h"
-#include "Ability/Attributes/BECombatSet.h"
+#include "Ability/Attribute/BEHealthSet.h"
+#include "Ability/Attribute/BECombatSet.h"
 
 #include "GameplayEffectTypes.h"
 

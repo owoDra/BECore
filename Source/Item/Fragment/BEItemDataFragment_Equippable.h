@@ -30,7 +30,8 @@ class UBEItemDataFragment_Equippable : public UBEItemDataFragment
 	GENERATED_BODY()
 
 public:
-	// 何も指定しない場合は全てのスロットに格納可能
+	// 装備を追加可能な Slot を指定する
+	// 何も設定しない場合はすべての Slot に追加可能 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item", meta = (Categories = "Equipment.Slot"))
 	FGameplayTagContainer AllowedSlotTags;
 

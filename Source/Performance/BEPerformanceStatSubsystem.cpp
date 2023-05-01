@@ -3,7 +3,7 @@
 
 #include "BEPerformanceStatSubsystem.h"
 
-#include "GameModes/BEGameState.h"
+#include "GameMode/BEGameState.h"
 #include "Performance/BEPerformanceStatTypes.h"
 
 #include "Engine/Engine.h"

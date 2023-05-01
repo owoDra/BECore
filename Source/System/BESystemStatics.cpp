@@ -7,7 +7,7 @@
 #include "Engine/AssetManager.h"
 #include "BELogChannels.h"
 #include "Components/MeshComponent.h"
-#include "GameModes/BEUserFacingExperienceDefinition.h"
+#include "GameMode/Experience/BEUserFacingExperienceDefinition.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BESystemStatics)
 

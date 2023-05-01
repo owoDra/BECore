@@ -16,9 +16,8 @@ class UBEAbilitySet;
 class UBEInputConfig;
 class UBEAbilityTagRelationshipMapping;
 class UBECameraMode;
-class UBEItemData;
+class UBEEquipmentSet;
 class UObject;
-struct FGameplayTag;
 
 
 /**
@@ -31,18 +30,19 @@ class UBECharacterData : public UPrimaryDataAsset
 {
 	GENERATED_BODY()
 
+public:
 	UBECharacterData(const FObjectInitializer& ObjectInitializer);
 
 public:
-	// スポーンする Pawn のクラス (通常、ABEPawn または ABECharacter から派生する必要があります)
+	// スポーンする Character のクラス (通常、ABEPawn または ABECharacter から派生する必要があります)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Pawn")
 	TSubclassOf<APawn> PawnClass;
 
-	// この Pawn の AbilitySystem に付与する AbilitySet 
+	// この Character の AbilitySystem に付与する AbilitySet 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Abilities")
 	TArray<TObjectPtr<UBEAbilitySet>> AbilitySets;
 
-	// この Pawn が実行する GameplayAbility に使用する Tag のマッピング
+	// この Character が実行する GameplayAbility に使用する Tag のマッピング
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Abilities")
 	TObjectPtr<UBEAbilityTagRelationshipMapping> TagRelationshipMapping;
 
@@ -50,15 +50,11 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<UBEInputConfig> InputConfig;
 
-	// プレイヤーが制御する Pawn が使用するデフォルトの CameraMode
+	// プレイヤーが制御する Character が使用するデフォルトの CameraMode
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Camera")
 	TSubclassOf<UBECameraMode> DefaultCameraMode;
 
-	// プレイヤーが制御する Pawn に適応されるデフォルトの Equipments
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment", meta = (Categories = "Equipment.Slot"))
-	TMap<FGameplayTag, TObjectPtr<UBEItemData>> DefaultEquipments;
-
-	// プレイヤーが制御する Pawn に適応されるデフォルトの Active は Slot
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment", meta = (Categories = "Equipment.Slot"))
-	FGameplayTag DefaultActiveSlotTag;
+	// デフォルトで装備している Equipments
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
+	TObjectPtr<UBEEquipmentSet> EquipmentSet;
 };
