@@ -3,7 +3,7 @@
 
 #include "BECharacterMovementComponent.h"
 
-#include "Character/Component/BECharacterBasicComponent.h"
+#include "Character/Component/BEPawnBasicComponent.h"
 #include "Character/Movement/BECharacterMovementFragment.h"
 #include "Character/BECharacter.h"
 #include "Ability/BEAbilitySystemComponent.h"
@@ -348,7 +348,7 @@ bool UBECharacterMovementComponent::CanChangeInitState(UGameFrameworkComponentMa
 	{
 		// CharacterBasicComponent が DataInitialized に到達しているか
 		// つまり、他のすべての Feature が DataAvailable に到達しているか
-		return Manager->HasFeatureReachedInitState(CharacterOwner, UBECharacterBasicComponent::NAME_ActorFeatureName, TAG_InitState_DataInitialized);
+		return Manager->HasFeatureReachedInitState(CharacterOwner, UBEPawnBasicComponent::NAME_ActorFeatureName, TAG_InitState_DataInitialized);
 	}
 
 	/**
@@ -383,7 +383,7 @@ void UBECharacterMovementComponent::HandleChangeInitState(UGameFrameworkComponen
 			return;
 		}
 
-		if (UBECharacterBasicComponent* CharacterBasic = UBECharacterBasicComponent::FindCharacterBasicComponent(CharacterOwner))
+		if (UBEPawnBasicComponent* CharacterBasic = UBEPawnBasicComponent::FindPawnBasicComponent(CharacterOwner))
 		{
 			InitializeWithAbilitySystem(CharacterBasic->GetBEAbilitySystemComponent());
 		}
@@ -394,7 +394,7 @@ void UBECharacterMovementComponent::OnActorInitStateChanged(const FActorInitStat
 {
 	// CharacterBasicComponent が DataInitialized に到達しているか
 	// つまり、他のすべての Feature が DataAvailable に到達しているか
-	if (Params.FeatureName == UBECharacterBasicComponent::NAME_ActorFeatureName)
+	if (Params.FeatureName == UBEPawnBasicComponent::NAME_ActorFeatureName)
 	{
 		if (Params.FeatureState == TAG_InitState_DataInitialized)
 		{

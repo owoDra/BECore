@@ -1,7 +1,7 @@
 // Copyright Eigi Chin
 
 #include "ApplyFrontendPerfSettingsAction.h"
-#include "Setting/BESettingsLocal.h"
+#include "GameSetting/BESettingsLocal.h"
 
 //////////////////////////////////////////////////////////////////////
 // UApplyFrontendPerfSettingsAction

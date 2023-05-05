@@ -10,8 +10,8 @@
 #include "Ability/BEGameplayEffectContext.h"
 #include "Player/BEPlayerController.h"
 #include "Character/BECharacter.h"
-#include "Character/Component/BECharacterCameraComponent.h"
-#include "Character/Component/BECharacterHealthComponent.h"
+#include "Character/Component/BEPawnCameraComponent.h"
+#include "Character/Component/BEPawnHealthComponent.h"
 #include "Camera/Mode/BECameraMode.h"
 #include "BEGameplayTags.h"
 #include "BELogChannels.h"
@@ -98,9 +98,9 @@ ABECharacter* UBEGameplayAbility::GetBECharacterFromActorInfo() const
 	return (CurrentActorInfo ? Cast<ABECharacter>(CurrentActorInfo->AvatarActor.Get()) : nullptr);
 }
 
-UBECharacterCameraComponent* UBEGameplayAbility::GetCharacterCameraComponentFromActorInfo() const
+UBEPawnCameraComponent* UBEGameplayAbility::GetCharacterCameraComponentFromActorInfo() const
 {
-	return (CurrentActorInfo ? UBECharacterCameraComponent::FindCharacterCameraComponent(Cast<APawn>(CurrentActorInfo->AvatarActor.Get())) : nullptr);
+	return (CurrentActorInfo ? UBEPawnCameraComponent::FindPawnCameraComponent(Cast<APawn>(CurrentActorInfo->AvatarActor.Get())) : nullptr);
 }
 
 void UBEGameplayAbility::NativeOnAbilityFailedToActivate(const FGameplayTagContainer& FailedReason) const
@@ -552,7 +552,7 @@ void UBEGameplayAbility::SetCameraMode(TSubclassOf<UBECameraMode> CameraMode)
 {
 	ENSURE_ABILITY_IS_INSTANTIATED_OR_RETURN(SetCameraMode, );
 
-	if (UBECharacterCameraComponent* CameraComponent = GetCharacterCameraComponentFromActorInfo())
+	if (UBEPawnCameraComponent* CameraComponent = GetCharacterCameraComponentFromActorInfo())
 	{
 		CameraComponent->SetAbilityCameraMode(CameraMode, CurrentSpecHandle);
 		ActiveCameraMode = CameraMode;
@@ -565,7 +565,7 @@ void UBEGameplayAbility::ClearCameraMode()
 
 	if (ActiveCameraMode)
 	{
-		if (UBECharacterCameraComponent* CameraComponent = GetCharacterCameraComponentFromActorInfo())
+		if (UBEPawnCameraComponent* CameraComponent = GetCharacterCameraComponentFromActorInfo())
 		{
 			CameraComponent->ClearAbilityCameraMode(CurrentSpecHandle);
 		}

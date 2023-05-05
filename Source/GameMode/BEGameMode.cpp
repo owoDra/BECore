@@ -11,14 +11,14 @@
 #include "Player/BEPlayerState.h"
 #include "Character/BECharacter.h"
 #include "UI/BEHUD.h"
-#include "Character/Component/BECharacterBasicComponent.h"
-#include "Character/BECharacterData.h"
+#include "Character/Component/BEPawnBasicComponent.h"
+#include "Character/BEPawnData.h"
 #include "GameMode/BEWorldSettings.h"
 #include "GameMode/Experience/BEExperienceDefinition.h"
 #include "GameMode/Experience/BEExperienceManagerComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "Development/BEDeveloperSettings.h"
-#include "Player/BEPlayerSpawningManagerComponent.h"
+#include "Development/BEDeveloperGameSettings.h"
+#include "GameMode/BESpawningManagerComponent.h"
 #include "TimerManager.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BEGameMode)
@@ -36,16 +36,16 @@ ABEGameMode::ABEGameMode(const FObjectInitializer& ObjectInitializer)
 	HUDClass = ABEHUD::StaticClass();
 }
 
-const UBECharacterData* ABEGameMode::GetCharacterDataForController(const AController* InController) const
+const UBEPawnData* ABEGameMode::GetPawnDataForController(const AController* InController) const
 {
 	// See if pawn data is already set on the player state
 	if (InController != nullptr)
 	{
 		if (const ABEPlayerState* BEPS = InController->GetPlayerState<ABEPlayerState>())
 		{
-			if (const UBECharacterData* CharacterData = BEPS->GetCharacterData<UBECharacterData>())
+			if (const UBEPawnData* PawnData = BEPS->GetPawnData())
 			{
-				return CharacterData;
+				return PawnData;
 			}
 		}
 	}
@@ -58,13 +58,13 @@ const UBECharacterData* ABEGameMode::GetCharacterDataForController(const AContro
 	if (ExperienceComponent->IsExperienceLoaded())
 	{
 		const UBEExperienceDefinition* Experience = ExperienceComponent->GetCurrentExperienceChecked();
-		if (Experience->DefaultCharacterData != nullptr)
+		if (Experience->DefaultPawnData != nullptr)
 		{
-			return Experience->DefaultCharacterData;
+			return Experience->DefaultPawnData;
 		}
 
 		// Experience is loaded and there's still no pawn data, fall back to the default for now
-		return UBEAssetManager::Get().GetDefaultCharacterData();
+		return UBEAssetManager::Get().GetDefaultPawnData();
 	}
 
 	// Experience not loaded yet, so there is no pawn data to be had
@@ -103,7 +103,7 @@ void ABEGameMode::HandleMatchAssignmentIfNotExpectingOne()
 
 	if (!ExperienceId.IsValid() && World->IsPlayInEditor())
 	{
-		ExperienceId = GetDefault<UBEDeveloperSettings>()->ExperienceOverride;
+		ExperienceId = GetDefault<UBEDeveloperGameSettings>()->ExperienceOverride;
 		ExperienceIdSource = TEXT("DeveloperSettings");
 	}
 
@@ -194,11 +194,11 @@ bool ABEGameMode::IsExperienceLoaded() const
 
 UClass* ABEGameMode::GetDefaultPawnClassForController_Implementation(AController* InController)
 {
-	if (const UBECharacterData* CharacterData = GetCharacterDataForController(InController))
+	if (const UBEPawnData* PawnData = GetPawnDataForController(InController))
 	{
-		if (CharacterData->PawnClass)
+		if (PawnData->PawnClass)
 		{
-			return CharacterData->PawnClass;
+			return PawnData->PawnClass;
 		}
 	}
 
@@ -216,15 +216,15 @@ APawn* ABEGameMode::SpawnDefaultPawnAtTransform_Implementation(AController* NewP
 	{
 		if (APawn* SpawnedPawn = GetWorld()->SpawnActor<APawn>(PawnClass, SpawnTransform, SpawnInfo))
 		{
-			if (UBECharacterBasicComponent* CharacterBasic = UBECharacterBasicComponent::FindCharacterBasicComponent(SpawnedPawn))
+			if (UBEPawnBasicComponent* CharacterBasic = UBEPawnBasicComponent::FindPawnBasicComponent(SpawnedPawn))
 			{
-				if (const UBECharacterData* CharacterData = GetCharacterDataForController(NewPlayer))
+				if (const UBEPawnData* PawnData = GetPawnDataForController(NewPlayer))
 				{
-					CharacterBasic->SetCharacterData(CharacterData);
+					CharacterBasic->SetPawnData(PawnData);
 				}
 				else
 				{
-					UE_LOG(LogBE, Error, TEXT("Game mode was unable to set CharacterData on the spawned pawn [%s]."), *GetNameSafe(SpawnedPawn));
+					UE_LOG(LogBE, Error, TEXT("Game mode was unable to set PawnData on the spawned pawn [%s]."), *GetNameSafe(SpawnedPawn));
 				}
 			}
 
@@ -263,7 +263,7 @@ void ABEGameMode::HandleStartingNewPlayer_Implementation(APlayerController* NewP
 
 AActor* ABEGameMode::ChoosePlayerStart_Implementation(AController* Player)
 {
-	if (UBEPlayerSpawningManagerComponent* PlayerSpawningComponent = GameState->FindComponentByClass<UBEPlayerSpawningManagerComponent>())
+	if (UBESpawningManagerComponent* PlayerSpawningComponent = GameState->FindComponentByClass<UBESpawningManagerComponent>())
 	{
 		return PlayerSpawningComponent->ChoosePlayerStart(Player);
 	}
@@ -273,7 +273,7 @@ AActor* ABEGameMode::ChoosePlayerStart_Implementation(AController* Player)
 
 void ABEGameMode::FinishRestartPlayer(AController* NewPlayer, const FRotator& StartRotation)
 {
-	if (UBEPlayerSpawningManagerComponent* PlayerSpawningComponent = GameState->FindComponentByClass<UBEPlayerSpawningManagerComponent>())
+	if (UBESpawningManagerComponent* PlayerSpawningComponent = GameState->FindComponentByClass<UBESpawningManagerComponent>())
 	{
 		PlayerSpawningComponent->FinishRestartPlayer(NewPlayer, StartRotation);
 	}
@@ -304,7 +304,7 @@ bool ABEGameMode::ControllerCanRestart(AController* Controller)
 		}
 	}
 
-	if (UBEPlayerSpawningManagerComponent* PlayerSpawningComponent = GameState->FindComponentByClass<UBEPlayerSpawningManagerComponent>())
+	if (UBESpawningManagerComponent* PlayerSpawningComponent = GameState->FindComponentByClass<UBESpawningManagerComponent>())
 	{
 		return PlayerSpawningComponent->ControllerCanRestart(Controller);
 	}

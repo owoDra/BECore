@@ -3,8 +3,8 @@
 
 #include "BELocalPlayer.h"
 
-#include "Setting/BESettingsLocal.h"
-#include "Setting/BESettingsShared.h"
+#include "GameSetting/BESettingsLocal.h"
+#include "GameSetting/BESettingsShared.h"
 
 #include "AudioMixerBlueprintLibrary.h"
 #include "Delegates/Delegate.h"

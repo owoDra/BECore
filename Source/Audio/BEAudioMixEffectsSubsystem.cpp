@@ -4,7 +4,7 @@
 #include "Audio/BEAudioMixEffectsSubsystem.h"
 
 #include "BEAudioSettings.h"
-#include "Setting/BESettingsLocal.h"
+#include "GameSetting/BESettingsLocal.h"
 
 #include "AudioMixerBlueprintLibrary.h"
 #include "AudioModulationStatics.h"

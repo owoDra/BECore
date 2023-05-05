@@ -6,7 +6,7 @@
 #include "CommonUISettings.h"
 #include "ICommonUIModule.h"
 #include "PlayerMappableInputConfig.h"
-#include "Setting/BESettingsLocal.h"
+#include "GameSetting/BESettingsLocal.h"
 #include "System/BEAssetManager.h"
 #include "Templates/Casts.h"
 

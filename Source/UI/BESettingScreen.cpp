@@ -7,7 +7,7 @@
 #include "Delegates/Delegate.h"
 #include "Input/CommonUIInputTypes.h"
 #include "Player/BELocalPlayer.h"
-#include "Setting/Registry/BEGameSettingRegistry.h"
+#include "GameSetting/Registry/BEGameSettingRegistry.h"
 #include "Templates/Casts.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BESettingScreen)

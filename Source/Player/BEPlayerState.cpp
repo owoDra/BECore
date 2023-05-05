@@ -1,4 +1,3 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
 // Copyright Eigi Chin
 
 #include "BEPlayerState.h"
@@ -7,8 +6,8 @@
 #include "Ability/Attribute/BEHealthSet.h"
 #include "Ability/Attribute/BEMovementSet.h"
 #include "Ability/BEAbilitySystemComponent.h"
-#include "Character/BECharacterData.h"
-#include "Character/Component/BECharacterBasicComponent.h"
+#include "Character/BEPawnData.h"
+#include "Character/Component/BEPawnBasicComponent.h"
 #include "GameMode/Experience/BEExperienceManagerComponent.h"
 #include "GameMode/BEGameMode.h"
 #include "BELogChannels.h"
@@ -53,20 +52,50 @@ ABEPlayerState::ABEPlayerState(const FObjectInitializer& ObjectInitializer)
 	AbilitySystemComponent->SetIsReplicated(true);
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
 
-	HealthSet = CreateDefaultSubobject<UBEHealthSet>(TEXT("HealthSet"));
-	CombatSet = CreateDefaultSubobject<UBECombatSet>(TEXT("CombatSet"));
-	MovementSet = CreateDefaultSubobject<UBEMovementSet>(TEXT("MovementSet"));
-
-	// AbilitySystemComponent needs to be updated at a high frequency.
+	// 安定して AbilitySystemComponent を利用するために
+	// ネットワークの更新頻度を高く設定
 	NetUpdateFrequency = 100.0f;
 
 	MyTeamID = FGenericTeamId::NoTeam;
 	MySquadID = INDEX_NONE;
 }
 
+void ABEPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	FDoRepLifetimeParams SharedParams;
+	SharedParams.bIsPushBased = true;
+
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, PawnData, SharedParams);
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, MyPlayerConnectionType, SharedParams);
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, MyTeamID, SharedParams);
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, MySquadID, SharedParams);
+
+	DOREPLIFETIME(ThisClass, StatTags);
+}
+
+
 void ABEPlayerState::PreInitializeComponents()
 {
 	Super::PreInitializeComponents();
+}
+
+void ABEPlayerState::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	check(AbilitySystemComponent);
+	AbilitySystemComponent->InitAbilityActorInfo(this, GetPawn());
+
+	if (GetNetMode() != NM_Client)
+	{
+		AGameStateBase* GameState = GetWorld()->GetGameState();
+		check(GameState);
+		UBEExperienceManagerComponent* ExperienceComponent = GameState->FindComponentByClass<UBEExperienceManagerComponent>();
+		check(ExperienceComponent);
+		ExperienceComponent->CallOrRegister_OnExperienceLoaded(FOnBEExperienceLoaded::FDelegate::CreateUObject(this, &ThisClass::OnExperienceLoaded));
+	}
 }
 
 void ABEPlayerState::Reset()
@@ -78,7 +107,7 @@ void ABEPlayerState::ClientInitialize(AController* C)
 {
 	Super::ClientInitialize(C);
 
-	if (UBECharacterBasicComponent* CharacterBasic = UBECharacterBasicComponent::FindCharacterBasicComponent(GetPawn()))
+	if (UBEPawnBasicComponent* CharacterBasic = UBEPawnBasicComponent::FindPawnBasicComponent(GetPawn()))
 	{
 		CharacterBasic->CheckDefaultInitialization();
 	}
@@ -88,7 +117,17 @@ void ABEPlayerState::CopyProperties(APlayerState* PlayerState)
 {
 	Super::CopyProperties(PlayerState);
 
-	//@TODO: Copy stats
+	if (const ABEPlayerState* BEPS = Cast<ABEPlayerState>(PlayerState))
+	{
+		if (const UBEPawnData* OldPawnData = BEPS->GetPawnData())
+		{
+			SetPawnData(OldPawnData);
+		}
+		
+		SetGenericTeamId(BEPS->GetGenericTeamId());
+		SetSquadID(BEPS->GetSquadId());
+		SetStatTags(BEPS->GetStatTags());
+	}
 }
 
 void ABEPlayerState::OnDeactivated()
@@ -128,108 +167,59 @@ void ABEPlayerState::OnExperienceLoaded(const UBEExperienceDefinition* /*Current
 {
 	if (ABEGameMode* BEGameMode = GetWorld()->GetAuthGameMode<ABEGameMode>())
 	{
-		if (const UBECharacterData* NewCharacterData = BEGameMode->GetCharacterDataForController(GetOwningController()))
+		if (const UBEPawnData* NewPawnData = BEGameMode->GetPawnDataForController(GetOwningController()))
 		{
-			SetCharacterData(NewCharacterData);
+			SetPawnData(NewPawnData);
 		}
 		else
 		{
-			UE_LOG(LogBE, Error, TEXT("ABEPlayerState::OnExperienceLoaded(): Unable to find CharacterData to initialize player state [%s]!"), *GetNameSafe(this));
+			UE_LOG(LogBE, Error, TEXT("ABEPlayerState::OnExperienceLoaded(): Unable to find PawnData to initialize player state [%s]!"), *GetNameSafe(this));
 		}
 	}
 }
 
-void ABEPlayerState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+
+void ABEPlayerState::SetPawnData(const UBEPawnData* InPawnData)
 {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	FDoRepLifetimeParams SharedParams;
-	SharedParams.bIsPushBased = true;
-
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, CharacterData, SharedParams);
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, MyPlayerConnectionType, SharedParams)
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, MyTeamID, SharedParams);
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, MySquadID, SharedParams);
-
-	DOREPLIFETIME(ThisClass, StatTags);
-}
-
-ABEPlayerController* ABEPlayerState::GetBEPlayerController() const
-{
-	return Cast<ABEPlayerController>(GetOwner());
-}
-
-UAbilitySystemComponent* ABEPlayerState::GetAbilitySystemComponent() const
-{
-	return GetBEAbilitySystemComponent();
-}
-
-void ABEPlayerState::PostInitializeComponents()
-{
-	Super::PostInitializeComponents();
-
-	check(AbilitySystemComponent);
-	AbilitySystemComponent->InitAbilityActorInfo(this, GetPawn());
-
-	if (GetNetMode() != NM_Client)
-	{
-		AGameStateBase* GameState = GetWorld()->GetGameState();
-		check(GameState);
-		UBEExperienceManagerComponent* ExperienceComponent = GameState->FindComponentByClass<UBEExperienceManagerComponent>();
-		check(ExperienceComponent);
-		ExperienceComponent->CallOrRegister_OnExperienceLoaded(FOnBEExperienceLoaded::FDelegate::CreateUObject(this, &ThisClass::OnExperienceLoaded));
-	}
-}
-
-void ABEPlayerState::SetCharacterData(const UBECharacterData* InCharacterData, bool Override)
-{
-	check(InCharacterData);
+	check(InPawnData);
 
 	if (GetLocalRole() != ROLE_Authority)
 	{
 		return;
 	}
 
-	if (CharacterData)
+	if (PawnData == InPawnData)
 	{
-		// CharacterDataが既に設定されている場合に上書き
-		if (Override)
-		{
-			CharacterDataAbilityHandles.TakeFromAbilitySystem(AbilitySystemComponent);
-		}
-
-		// CharacterDataが既に設定されている場合に処理を中断
-		else
-		{
-			UE_LOG(LogBE, Error, TEXT("Trying to set CharacterData [%s] on player state [%s] that already has valid CharacterData [%s]."), *GetNameSafe(InCharacterData), *GetNameSafe(this), *GetNameSafe(CharacterData));
-			return;
-		}
+		return;
 	}
 
-	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, CharacterData, this);
-	CharacterData = InCharacterData;
+	// PawnDataが既に設定されている場合に PawnData によって付与された Ability を削除する
+	if (PawnData)
+	{
+		PawnDataAbilityHandles.TakeFromAbilitySystem(AbilitySystemComponent);
+	}
 
-	for (const UBEAbilitySet* AbilitySet : CharacterData->AbilitySets)
+	MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, PawnData, this);
+	PawnData = InPawnData;
+
+	for (const UBEAbilitySet* AbilitySet : PawnData->AbilitySets)
 	{
 		if (AbilitySet)
 		{
-			AbilitySet->GiveToAbilitySystem(AbilitySystemComponent, &CharacterDataAbilityHandles);
+			AbilitySet->GiveToAbilitySystem(AbilitySystemComponent, &PawnDataAbilityHandles);
 		}
 	}
 
 	UGameFrameworkComponentManager::SendGameFrameworkComponentExtensionEvent(this, NAME_BEAbilityReady);
-	
+
 	ForceNetUpdate();
 }
 
-void ABEPlayerState::K2_SetCharacterData(const UBECharacterData* InCharacterData, bool Override)
+void ABEPlayerState::K2_SetPawnData(const UBEPawnData* InPawnData)
 {
-	SetCharacterData(InCharacterData, Override);
+	SetPawnData(InPawnData);
 }
 
-void ABEPlayerState::OnRep_CharacterData()
-{
-}
 
 void ABEPlayerState::SetPlayerConnectionType(EBEPlayerConnectionType NewType)
 {
@@ -237,14 +227,15 @@ void ABEPlayerState::SetPlayerConnectionType(EBEPlayerConnectionType NewType)
 	MyPlayerConnectionType = NewType;
 }
 
-void ABEPlayerState::SetSquadID(int32 NewSquadId)
-{
-	if (HasAuthority())
-	{
-		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, MySquadID, this);
 
-		MySquadID = NewSquadId;
-	}
+void ABEPlayerState::OnRep_MyTeamID(FGenericTeamId OldTeamID)
+{
+	ConditionalBroadcastTeamChanged(this, OldTeamID, MyTeamID);
+}
+
+void ABEPlayerState::OnRep_MySquadID()
+{
+	//@TODO: Let the squad subsystem know (once that exists)
 }
 
 void ABEPlayerState::SetGenericTeamId(const FGenericTeamId& NewTeamID)
@@ -273,15 +264,16 @@ FOnBETeamIndexChangedDelegate* ABEPlayerState::GetOnTeamIndexChangedDelegate()
 	return &OnTeamChangedDelegate;
 }
 
-void ABEPlayerState::OnRep_MyTeamID(FGenericTeamId OldTeamID)
+void ABEPlayerState::SetSquadID(int32 NewSquadId)
 {
-	ConditionalBroadcastTeamChanged(this, OldTeamID, MyTeamID);
+	if (HasAuthority())
+	{
+		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, MySquadID, this);
+
+		MySquadID = NewSquadId;
+	}
 }
 
-void ABEPlayerState::OnRep_MySquadID()
-{
-	//@TODO: Let the squad subsystem know (once that exists)
-}
 
 void ABEPlayerState::AddStatTagStack(FGameplayTag Tag, int32 StackCount)
 {
@@ -303,6 +295,7 @@ bool ABEPlayerState::HasStatTag(FGameplayTag Tag) const
 	return StatTags.ContainsTag(Tag);
 }
 
+
 void ABEPlayerState::ClientBroadcastMessage_Implementation(const FBEVerbMessage Message)
 {
 	// This check is needed to prevent running the action when in standalone mode
@@ -310,4 +303,15 @@ void ABEPlayerState::ClientBroadcastMessage_Implementation(const FBEVerbMessage 
 	{
 		UGameplayMessageSubsystem::Get(this).BroadcastMessage(Message.Verb, Message);
 	}
+}
+
+
+ABEPlayerController* ABEPlayerState::GetBEPlayerController() const
+{
+	return GetOwner<ABEPlayerController>();
+}
+
+UAbilitySystemComponent* ABEPlayerState::GetAbilitySystemComponent() const
+{
+	return GetBEAbilitySystemComponent();
 }

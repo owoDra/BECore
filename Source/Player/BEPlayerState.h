@@ -1,4 +1,3 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
 // Copyright Eigi Chin
 
 #pragma once
@@ -18,13 +17,10 @@
 
 #include "BEPlayerState.generated.h"
 
-class UBECharacterData;
+class UBEPawnData;
 class ABEPlayerController;
 class UBEExperienceDefinition;
 class UBEAbilitySystemComponent;
-class UBEHealthSet;
-class UBECombatSet;
-class UBEMovementSet;
 class UAbilitySystemComponent;
 class AController;
 class APlayerState;
@@ -35,51 +31,47 @@ struct FGameplayTag;
 struct FBEAbilitySet_GrantedHandles;
 
 
-/** Defines the types of client connected */
+/**
+ * EBEPlayerConnectionType
+ *
+ *	Client がゲームにどの役割で接続(参加)しているかを示す
+ */
 UENUM()
 enum class EBEPlayerConnectionType : uint8
 {
-	// An active player
+	// 実際にゲームに参加して活動しているプレイヤー
 	Player = 0,
 
-	// Spectator connected to a running game
+	// リアルタイムなゲームに接続しているが参加はしていない観戦者
 	LiveSpectator,
 
-	// Spectating a demo recording offline
+	// 記録したゲームをリプレイしている観戦者
 	ReplaySpectator,
 
-	// A deactivated player (disconnected)
+	// 既にゲームから切断されているプレイヤー
 	InactivePlayer
 };
+
 
 /**
  * ABEPlayerState
  *
- *	Base player state class used by this project.
+ *	このプロジェクトで使用されるベースの PlayerState クラス。
  */
 UCLASS(Config = Game)
-class BECORE_API ABEPlayerState : public AModularPlayerState, public IAbilitySystemInterface, public IBETeamAgentInterface
+class BECORE_API ABEPlayerState 
+	: public AModularPlayerState
+	, public IAbilitySystemInterface
+	, public IBETeamAgentInterface
 {
 	GENERATED_BODY()
 
 public:
 	ABEPlayerState(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	UFUNCTION(BlueprintCallable, Category = "PlayerState")
-	ABEPlayerController* GetBEPlayerController() const;
+	static const FName NAME_BEAbilityReady;
 
-	UFUNCTION(BlueprintCallable, Category = "PlayerState")
-	UBEAbilitySystemComponent* GetBEAbilitySystemComponent() const { return AbilitySystemComponent; }
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-
-	template <class T>
-	const T* GetCharacterData() const { return Cast<T>(CharacterData); }
-
-	void SetCharacterData(const UBECharacterData* InCharacterData, bool Override = false);
-
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "PlayerState", meta = (DisplayName = "SetCharacterData"))
-	void K2_SetCharacterData(const UBECharacterData* InCharacterData, bool Override = false);
-
+public:
 	//~AActor interface
 	virtual void PreInitializeComponents() override;
 	virtual void PostInitializeComponents() override;
@@ -93,100 +85,169 @@ public:
 	virtual void OnReactivated() override;
 	//~End of APlayerState interface
 
+private:
+	void OnExperienceLoaded(const UBEExperienceDefinition* CurrentExperience);
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UBEAbilitySystemComponent> AbilitySystemComponent;
+
+	FBEAbilitySet_GrantedHandles PawnDataAbilityHandles;
+
+
+private:
+	// Player の Pawn または Character のスポーンに用いる 基本情報。
+	// GameMode はこの PawnData の情報をもとに Player の Pawn または Character をスポーンさせる
+	UPROPERTY(Replicated)
+	TObjectPtr<const UBEPawnData> PawnData;
+
+public:
+	/**
+	 * SetPawnData
+	 *
+	 *	Player の Pawn または Character のスポーンに用いるPawnData を設定する。
+	 *  実行にはサーバー権限が必要。
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "PlayerState", meta = (DisplayName = "SetPawnData"))
+	void K2_SetPawnData(const UBEPawnData* InPawnData);
+	void SetPawnData(const UBEPawnData* InPawnData);
+
+	/**
+	 * GetPawnData
+	 *
+	 *	Player の Pawn または Character のスポーンに用いるPawnData を返す
+	 */
+	const UBEPawnData* GetPawnData() const { return PawnData; }
+
+	
+private:
+	// Player のゲームへの接続(参加)状態
+	UPROPERTY(Replicated)
+	EBEPlayerConnectionType MyPlayerConnectionType;
+
+public:
+	/**
+	 * SetPlayerConnectionType
+	 *
+	 *	Player のゲームへの接続(参加)状態を設定する
+	 */
+	void SetPlayerConnectionType(EBEPlayerConnectionType NewType);
+
+	/**
+	 * GetPlayerConnectionType
+	 *
+	 *	Player のゲームへの接続(参加)状態を返す
+	 */
+	EBEPlayerConnectionType GetPlayerConnectionType() const { return MyPlayerConnectionType; }
+	
+
+private:
+	// Player が属する Team が変更された時に知らせるためのデリゲート
+	UPROPERTY()
+	FOnBETeamIndexChangedDelegate OnTeamChangedDelegate;
+
+	// PLayer が属する Team の ID
+	UPROPERTY(ReplicatedUsing = OnRep_MyTeamID)
+	FGenericTeamId MyTeamID;
+
+	// Player が属する Team 内での グループ分け用の ID
+	// 基本的には大人数での対戦ゲームなどで使用する。
+	UPROPERTY(ReplicatedUsing = OnRep_MySquadID)
+	int32 MySquadID;
+
+	UFUNCTION()
+	void OnRep_MyTeamID(FGenericTeamId OldTeamID);
+
+	UFUNCTION()
+	void OnRep_MySquadID();
+
+public:
 	//~IBETeamAgentInterface interface
 	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
 	virtual FGenericTeamId GetGenericTeamId() const override;
 	virtual FOnBETeamIndexChangedDelegate* GetOnTeamIndexChangedDelegate() override;
 	//~End of IBETeamAgentInterface interface
 
-	static const FName NAME_BEAbilityReady;
-
-	void SetPlayerConnectionType(EBEPlayerConnectionType NewType);
-	EBEPlayerConnectionType GetPlayerConnectionType() const { return MyPlayerConnectionType; }
-
-	/** Returns the Squad ID of the squad the player belongs to. */
+	/**
+	 * GetTeamId
+	 *
+	 *	Player の属する Team の ID を整数値として返す
+	 */
 	UFUNCTION(BlueprintCallable)
-	int32 GetSquadId() const
-	{
-		return MySquadID;
-	}
+	int32 GetTeamId() const { return GenericTeamIdToInteger(MyTeamID); }
 
-	/** Returns the Team ID of the team the player belongs to. */
-	UFUNCTION(BlueprintCallable)
-	int32 GetTeamId() const
-	{
-		return GenericTeamIdToInteger(MyTeamID);
-	}
-
+	/**
+	 * SetSquadID
+	 *
+	 *	Player が属する Team 内での グループ分け用の ID を設定する
+	 */
 	void SetSquadID(int32 NewSquadID);
 
-	// Adds a specified number of stacks to the tag (does nothing if StackCount is below 1)
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Teams)
-	void AddStatTagStack(FGameplayTag Tag, int32 StackCount);
+	/**
+	 * SetSquadID
+	 *
+	 *	Player が属する Team 内での グループ分け用の ID を返す
+	 */
+	UFUNCTION(BlueprintCallable)
+	int32 GetSquadId() const { return MySquadID; }
 
-	// Removes a specified number of stacks from the tag (does nothing if StackCount is below 1)
-	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Teams)
-	void RemoveStatTagStack(FGameplayTag Tag, int32 StackCount);
-
-	// Returns the stack count of the specified tag (or 0 if the tag is not present)
-	UFUNCTION(BlueprintCallable, Category=Teams)
-	int32 GetStatTagStackCount(FGameplayTag Tag) const;
-
-	// Returns true if there is at least one stack of the specified tag
-	UFUNCTION(BlueprintCallable, Category=Teams)
-	bool HasStatTag(FGameplayTag Tag) const;
-
-	// Send a message to just this player
-	// (use only for client notifications like accolades, quest toasts, etc... that can handle being occasionally lost)
-	UFUNCTION(Client, Unreliable, BlueprintCallable, Category = "PlayerState")
-	void ClientBroadcastMessage(const FBEVerbMessage Message);
 
 private:
-	void OnExperienceLoaded(const UBEExperienceDefinition* CurrentExperience);
-
-protected:
-	UFUNCTION()
-	void OnRep_CharacterData();
-
-protected:
-
-	UPROPERTY(ReplicatedUsing = OnRep_CharacterData)
-	TObjectPtr<const UBECharacterData> CharacterData;
-
-private:
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UBEAbilitySystemComponent> AbilitySystemComponent;
-
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UBEHealthSet> HealthSet;
-
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UBECombatSet> CombatSet;
-
-	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UBEMovementSet> MovementSet;
-
-	UPROPERTY(Replicated)
-	EBEPlayerConnectionType MyPlayerConnectionType;
-
-	UPROPERTY()
-	FOnBETeamIndexChangedDelegate OnTeamChangedDelegate;
-
-	UPROPERTY(ReplicatedUsing=OnRep_MyTeamID)
-	FGenericTeamId MyTeamID;
-
-	UPROPERTY(ReplicatedUsing=OnRep_MySquadID)
-	int32 MySquadID;
-
+	// Player が保有する 統計情報としてカウント可能な Tag の情報
 	UPROPERTY(Replicated)
 	FGameplayTagStackContainer StatTags;
 
-	FBEAbilitySet_GrantedHandles CharacterDataAbilityHandles;
+protected:
+	const FGameplayTagStackContainer& GetStatTags() const { return StatTags; }
+	void SetStatTags(const FGameplayTagStackContainer& InStatTags) { StatTags = InStatTags; }
 
-private:
-	UFUNCTION()
-	void OnRep_MyTeamID(FGenericTeamId OldTeamID);
+public:
+	/**
+	 * AddStatTagStack
+	 *
+	 * Player に統計情報として扱える Tag を追加する (StackCount が 0 以下の場合は何もしない)
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Teams)
+	void AddStatTagStack(FGameplayTag Tag, int32 StackCount);
 
-	UFUNCTION()
-	void OnRep_MySquadID();
+	/**
+	 * RemoveStatTagStack
+	 *
+	 * Player に統計情報として扱える Tag を削除する (StackCount が 0 以下の場合は何もしない)
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Teams)
+	void RemoveStatTagStack(FGameplayTag Tag, int32 StackCount);
+
+	/**
+	 * GetStatTagStackCount
+	 *
+	 * Player に統計情報として扱える Tag がいくつあるかを返す (存在しない場合は 0 を返す)
+	 */
+	UFUNCTION(BlueprintCallable, Category=Teams)
+	int32 GetStatTagStackCount(FGameplayTag Tag) const;
+
+	/**
+	 * HasStatTag
+	 *
+	 * Player に統計情報として扱える Tag が存在するかどうかを返す
+	 */
+	UFUNCTION(BlueprintCallable, Category=Teams)
+	bool HasStatTag(FGameplayTag Tag) const;
+
+	
+public:
+	/**
+	 * ClientBroadcastMessage
+	 *
+	 * この Player にのみメッセージを送信する。
+	 * 他のプレイヤーからの称賛などといった、必ずしも重要ではない処理にのみ使用
+	 */
+	UFUNCTION(Client, Unreliable, BlueprintCallable, Category = "PlayerState")
+	void ClientBroadcastMessage(const FBEVerbMessage Message);
+
+	UFUNCTION(BlueprintCallable, Category = "PlayerState")
+	ABEPlayerController* GetBEPlayerController() const;
+
+	UFUNCTION(BlueprintCallable, Category = "PlayerState")
+	UBEAbilitySystemComponent* GetBEAbilitySystemComponent() const { return AbilitySystemComponent; }
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 };

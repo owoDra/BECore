@@ -3,7 +3,7 @@
 
 #include "BEGameViewportClient.h"
 
-#include "BEGameplayTags.h"
+#include "Development/BEDevelopmentTags.h"
 
 #include "CommonUISettings.h"
 #include "GameplayTagContainer.h"

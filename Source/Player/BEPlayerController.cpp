@@ -5,14 +5,14 @@
 
 #include "BELogChannels.h"
 #include "GameMode/BEGameMode.h"
-#include "BECheatManager.h"
+#include "Development/BEDeveloperCheatManager.h"
 #include "BEPlayerState.h"
 #include "UI/BEHUD.h"
-#include "Character/BECharacterData.h"
+#include "Character/BEPawnData.h"
 #include "Ability/BEAbilitySystemComponent.h"
 #include "BELocalPlayer.h"
-#include "Setting/BESettingsShared.h"
-#include "Development/BEDeveloperSettings.h"
+#include "GameSetting/BESettingsShared.h"
+#include "Development/BEDeveloperCheatSettings.h"
 #include "BEGameplayTags.h"
 
 #include "EngineUtils.h"
@@ -38,7 +38,7 @@ ABEPlayerController::ABEPlayerController(const FObjectInitializer& ObjectInitial
 	: Super(ObjectInitializer)
 {
 #if USING_CHEAT_MANAGER
-	CheatClass = UBECheatManager::StaticClass();
+	CheatClass = UBEDeveloperCheatManager::StaticClass();
 #endif // #if USING_CHEAT_MANAGER
 }
 
@@ -238,7 +238,7 @@ void ABEPlayerController::OnPossess(APawn* InPawn)
 #if WITH_SERVER_CODE && WITH_EDITOR
 	if (GIsEditor && (InPawn != nullptr) && (GetPawn() == InPawn))
 	{
-		for (const FBECheatToRun& CheatRow : GetDefault<UBEDeveloperSettings>()->CheatsToRun)
+		for (const FBECheatToRun& CheatRow : GetDefault<UBEDeveloperCheatSettings>()->CheatsToRun)
 		{
 			if (CheatRow.Phase == ECheatExecutionTime::OnPlayerPawnPossession)
 			{

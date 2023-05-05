@@ -16,24 +16,7 @@ FBEGameplayTags FBEGameplayTags::GameplayTags;
 //  アビリティ
 // =================================
 
-////////////////////////////////////
-// 実行失敗
 
-UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_ActivateFail_IsDead, "Ability.ActivateFail.IsDead");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_ActivateFail_Cooldown, "Ability.ActivateFail.Cooldown");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_ActivateFail_TagsBlocked, "Ability.ActivateFail.TagsBlocked");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_ActivateFail_TagsMissing, "Ability.ActivateFail.TagsMissing");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_ActivateFail_Networking, "Ability.ActivateFail.Networking");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_ActivateFail_ActivationGroup, "Ability.ActivateFail.ActivationGroup");
-
-UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_ActivateFail_MagazineFull, "Ability.ActivateFail.MagazineFull");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_ActivateFail_NoAmmo, "Ability.ActivateFail.NoAmmo");
-
-
-////////////////////////////////////
-// ビヘイビアー
-
-UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Behavior_SurvivesDeath, "Ability.Behavior.SurvivesDeath");
 
 
 ////////////////////////////////////
@@ -108,11 +91,7 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_Message_Reset, "Message.Reset");
 //  入力
 // =================================
 
-UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Move_KM, "Input.Move.KM");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Move_Pad, "Input.Move.Pad");
 
-UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Look_KM, "Input.Look.KM");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Look_Pad, "Input.Look.Pad");
 
 UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Ability_Crouch, "Input.Ability.Crouch");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Ability_Run, "Input.Ability.Run");
@@ -273,29 +252,6 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_Camera_Type_Death, "Camera.Type.Death");
 
 
 // =================================
-//  プラットフォーム
-// =================================
-
-UE_DEFINE_GAMEPLAY_TAG(TAG_Platform_Trait_SupportsChangingAudioOutputDevice, "Platform.Trait.SupportsChangingAudioOutputDevice");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Platform_Trait_SupportsBackgroundAudio, "Platform.Trait.SupportsBackgroundAudio");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Platform_Trait_SupportsWindowedMode, "Platform.Trait.SupportsWindowedMode");
-
-UE_DEFINE_GAMEPLAY_TAG(TAG_Platform_Trait_NeedsBrightnessAdjustment, "Platform.Trait.NeedsBrightnessAdjustment");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Platform_Trait_BinauralSettingControlledByOS, "Platform.Trait.BinauralSettingControlledByOS");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Platform_Trait_SingleOnlineUser, "Platform.Trait.SingleOnlineUser");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Platform_Trait_CanExitApplication, "Platform.Trait.CanExitApplication");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Platform_Trait_PlayInEditor, "Platform.Trait.PlayInEditor");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Platform_Trait_RequiresStrictControllerMapping, "Platform.Trait.RequiresStrictControllerMapping");
-
-UE_DEFINE_GAMEPLAY_TAG(TAG_Platform_Trait_Input_HardwareCursor, "Platform.Trait.Input.HardwareCursor");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Platform_Trait_Input_PrimarilyControlled, "Platform.Trait.Input.PrimarilyControlled");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Platform_Trait_Input_PrimarilyTouchScreen, "Platform.Trait.Input.PrimarilyTouchScreen");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Platform_Trait_Input_SupportsMouseAndKeyboard, "Platform.Trait.Input.SupportsMouseAndKeyboard");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Platform_Trait_Input_SupportsGamepad, "Platform.Trait.Input.SupportsGamepad");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Platform_Trait_Input_SupportsTriggerHaptics, "Platform.Trait.Input.SupportsTriggerHaptics");
-
-
-// =================================
 //  ゲーム設定
 // =================================
 
@@ -348,16 +304,6 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_Status_RunBlocked, "Status.RunBlocked");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Status_SprintBlocked, "Status.SprintBlocked");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Status_MovementStopped, "Status.MovementStopped");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Status_DamageImmunity, "Status.DamageImmunity");
-
-
-// =================================
-//  初期化状態
-// =================================
-
-UE_DEFINE_GAMEPLAY_TAG(TAG_InitState_Spawned, "InitState.Spawned");
-UE_DEFINE_GAMEPLAY_TAG(TAG_InitState_DataAvailable, "InitState.DataAvailable");
-UE_DEFINE_GAMEPLAY_TAG(TAG_InitState_DataInitialized, "InitState.DataInitialized");
-UE_DEFINE_GAMEPLAY_TAG(TAG_InitState_GameplayReady, "InitState.GameplayReady");
 
 
 /// =================================

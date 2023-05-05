@@ -2,9 +2,9 @@
 
 #include "BECharacter.h"
 
-#include "Character/Component/BECharacterBasicComponent.h"
+#include "Character/Component/BEPawnBasicComponent.h"
 #include "Character/Component/BECharacterMovementComponent.h"
-#include "Character/Component/BECharacterCameraComponent.h"
+#include "Character/Component/BEPawnCameraComponent.h"
 #include "Character/Movement/BECharacterMovementFragment.h"
 #include "Ability/BEAbilitySystemComponent.h"
 #include "Player/BEPlayerController.h"
@@ -74,7 +74,11 @@ ABECharacter::ABECharacter(const FObjectInitializer& ObjectInitializer)
 	MeshComp->SetRelativeRotation(FRotator(0.0f, -90.0f, 0.0f));
 	MeshComp->SetCollisionProfileName(NAME_BECharacterCollisionProfile_Mesh);
 
-	CharacterBasicComponent = CreateDefaultSubobject<UBECharacterBasicComponent>(TEXT("BasicComponent"));
+	CharacterBasicComponent = CreateDefaultSubobject<UBEPawnBasicComponent>(TEXT("BasicComponent"));
+	CharacterBasicComponent->OnPawnInitialized_Register(FSimpleMulticastDelegate::FDelegate::CreateUObject(this, &ThisClass::OnPawnBasicInitialized));
+	CharacterBasicComponent->OnAbilitySystemInitialized_Register(FSimpleMulticastDelegate::FDelegate::CreateUObject(this, &ThisClass::OnAbilitySystemInitialized));
+	CharacterBasicComponent->OnAbilitySystemUninitialized_Register(FSimpleMulticastDelegate::FDelegate::CreateUObject(this, &ThisClass::OnAbilitySystemUninitialized));
+
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = true;

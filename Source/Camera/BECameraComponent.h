@@ -40,7 +40,7 @@ enum class EBECameraRecoilState : uint8
  *	プレイヤーが視点操作可能にするための処理を行う
  */
 UCLASS()
-class UBECameraComponent : public UCameraComponent
+class BECORE_API UBECameraComponent : public UCameraComponent
 {
 	GENERATED_BODY()
 
@@ -148,4 +148,12 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Camera")
 	void PushCameraMode(TSubclassOf<UBECameraMode> CameraModeClass);
+
+	/**
+	 * GetPrevControlRotation
+	 *
+	 *	キャッシュした直前のフレームでの ControlRotation を返す
+	 */
+	UFUNCTION(BlueprintPure, Category = "Camera")
+		FRotator GetPrevControlRotation() const { return PreviousControlRotation; }
 };

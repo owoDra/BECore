@@ -5,7 +5,7 @@
 #include "BELogChannels.h"
 #include "BEGameData.h"
 #include "AbilitySystemGlobals.h"
-#include "Character/BECharacterData.h"
+#include "Character/BEPawnData.h"
 #include "Stats/StatsMisc.h"
 #include "Engine/Engine.h"
 #include "Ability/BEGameplayCueManager.h"
@@ -33,7 +33,7 @@ static FAutoConsoleCommand CVarDumpLoadedAssets(
 
 UBEAssetManager::UBEAssetManager()
 {
-	DefaultCharacterData = nullptr;
+	DefaultPawnData = nullptr;
 }
 
 UBEAssetManager& UBEAssetManager::Get()
@@ -145,9 +145,9 @@ const UBEGameData& UBEAssetManager::GetGameData()
 	return GetOrLoadTypedGameData<UBEGameData>(BEGameDataPath);
 }
 
-const UBECharacterData* UBEAssetManager::GetDefaultCharacterData() const
+const UBEPawnData* UBEAssetManager::GetDefaultPawnData() const
 {
-	return GetAsset(DefaultCharacterData);
+	return GetAsset(DefaultPawnData);
 }
 
 UPrimaryDataAsset* UBEAssetManager::LoadGameDataOfClass(TSubclassOf<UPrimaryDataAsset> DataClass, const TSoftObjectPtr<UPrimaryDataAsset>& DataClassPath, FPrimaryAssetType PrimaryAssetType)

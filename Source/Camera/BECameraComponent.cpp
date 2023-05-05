@@ -53,7 +53,7 @@ void UBECameraComponent::ComputeCameraView(float DeltaTime, FMinimalViewInfo& De
 	
 	ComputeRecoilAmount(DeltaTime, CameraModeView);
 	ComputeZoomAmount(DeltaTime, CameraModeView);
-
+	
 	SetWorldLocationAndRotation(CameraModeView.Location, CameraModeView.Rotation);
 	PlayerController->SetControlRotation(CameraModeView.ControlRotation);
 	PreviousControlRotation = CameraModeView.ControlRotation;

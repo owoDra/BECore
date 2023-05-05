@@ -19,7 +19,7 @@
 
 class FProperty;
 class UEnhancedPlayerInput;
-class UBEAimSensitivityData;
+class UBETargetingSensitivityData;
 class UObject;
 
 
@@ -124,7 +124,7 @@ public:
 
 	/** Asset that gives us access to the float scalar value being used for sensitivty */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta=(AssetBundles="Client,Server"))
-	TObjectPtr<const UBEAimSensitivityData> SensitivityLevelTable;
+	TObjectPtr<const UBETargetingSensitivityData> SensitivityLevelTable;
 
 protected:
 	virtual FInputActionValue ModifyRaw_Implementation(const UEnhancedPlayerInput* PlayerInput, FInputActionValue CurrentValue, float DeltaTime) override;

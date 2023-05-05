@@ -12,7 +12,7 @@
 #include "Misc/CString.h"
 #include "DeviceProfiles/DeviceProfileManager.h"
 #include "DeviceProfiles/DeviceProfile.h"
-#include "Setting/BESettingsLocal.h"
+#include "GameSetting/BESettingsLocal.h"
 #include "TimerManager.h"
 #include "HAL/MemoryMisc.h"
 

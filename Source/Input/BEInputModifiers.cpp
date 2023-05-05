@@ -3,9 +3,9 @@
 
 #include "BEInputModifiers.h"
 
-#include "Input/BEAimSensitivityData.h"
+#include "Input/BETargetingSensitivityData.h"
 #include "Player/BELocalPlayer.h"
-#include "Setting/BESettingsShared.h"
+#include "GameSetting/BESettingsShared.h"
 
 #include "EnhancedPlayerInput.h"
 #include "GameFramework/PlayerController.h"

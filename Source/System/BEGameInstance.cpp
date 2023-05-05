@@ -4,7 +4,7 @@
 #include "BEGameInstance.h"
 
 #include "Player/BEPlayerController.h"
-#include "BEGameplayTags.h"
+#include "Character/BEPawnInitializeTags.h"
 
 #include "CommonSessionSubsystem.h"
 #include "Components/GameFrameworkComponentManager.h"

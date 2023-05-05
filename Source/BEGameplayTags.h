@@ -17,21 +17,7 @@ class UGameplayTagsManager;
 //  アビリティ
 // =================================
 
-////////////////////////////////////
-// 実行失敗
 
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_ActivateFail_IsDead);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_ActivateFail_Cooldown);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_ActivateFail_TagsBlocked);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_ActivateFail_TagsMissing);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_ActivateFail_Networking);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_ActivateFail_ActivationGroup);
-
-
-////////////////////////////////////
-// ビヘイビアー
-
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Behavior_SurvivesDeath);
 
 
 ////////////////////////////////////
@@ -98,11 +84,7 @@ UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Message_Reset);
 //  入力
 // =================================
 
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Move_KM);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Move_Pad);
 
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Look_KM);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Look_Pad);
 
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Ability_Crouch);
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Ability_Run);
@@ -237,29 +219,6 @@ UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Camera_Type_Death);
 
 
 // =================================
-//  プラットフォーム
-// =================================
-
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Platform_Trait_SupportsChangingAudioOutputDevice);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Platform_Trait_SupportsBackgroundAudio);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Platform_Trait_SupportsWindowedMode);
-
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Platform_Trait_NeedsBrightnessAdjustment);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Platform_Trait_BinauralSettingControlledByOS);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Platform_Trait_SingleOnlineUser);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Platform_Trait_CanExitApplication);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Platform_Trait_PlayInEditor);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Platform_Trait_RequiresStrictControllerMapping);
-
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Platform_Trait_Input_HardwareCursor);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Platform_Trait_Input_PrimarilyControlled);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Platform_Trait_Input_PrimarilyTouchScreen);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Platform_Trait_Input_SupportsMouseAndKeyboard);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Platform_Trait_Input_SupportsGamepad);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Platform_Trait_Input_SupportsTriggerHaptics);
-
-
-// =================================
 //  ゲーム設定
 // =================================
 
@@ -309,16 +268,6 @@ UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_RunBlocked);
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_SprintBlocked);
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_MovementStopped);
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_DamageImmunity);
-
-
-// =================================
-//  初期化状態
-// =================================
-
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_InitState_Spawned);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_InitState_DataAvailable);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_InitState_DataInitialized);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_InitState_GameplayReady);
 
 
 /// =================================

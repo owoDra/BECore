@@ -8,7 +8,7 @@
 #include "BEExperienceDefinition.generated.h"
 
 class UGameFeatureAction;
-class UBECharacterData;
+class UBEPawnData;
 class UBEExperienceActionSet;
 
 
@@ -43,7 +43,7 @@ public:
 	/** The default pawn class to spawn for players */
 	//@TODO: Make soft?
 	UPROPERTY(EditDefaultsOnly, Category=Gameplay)
-	TObjectPtr<const UBECharacterData> DefaultCharacterData;
+	TObjectPtr<const UBEPawnData> DefaultPawnData;
 
 	// List of actions to perform as this experience is loaded/activated/deactivated/unloaded
 	UPROPERTY(EditDefaultsOnly, Instanced, Category="Actions")

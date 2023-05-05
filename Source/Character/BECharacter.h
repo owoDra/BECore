@@ -17,7 +17,7 @@
 
 #include "BECharacter.generated.h"
 
-class UBECharacterBasicComponent;
+class UBEPawnBasicComponent;
 
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Crouching);
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Running);
@@ -65,10 +65,11 @@ class BECORE_API ABECharacter
 public:
 	ABECharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-private:
+protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", Meta = (AllowPrivateAccess = "true"))
-	TObjectPtr<UBECharacterBasicComponent> CharacterBasicComponent;
+	TObjectPtr<UBEPawnBasicComponent> CharacterBasicComponent;
 
+private:
 	UPROPERTY(Transient, ReplicatedUsing = OnRep_ReplicatedAcceleration)
 	FBEReplicatedAcceleration ReplicatedAcceleration;
 
@@ -97,6 +98,9 @@ protected:
 
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
+	virtual void OnPawnBasicInitialized() {}
+	virtual void OnAbilitySystemInitialized() {}
+	virtual void OnAbilitySystemUninitialized() {}
 
 protected:
 	virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
@@ -191,7 +195,7 @@ public:
 	ABEPlayerState* GetBEPlayerState() const;
 
 	UFUNCTION(BlueprintCallable, Category = "Character")
-	UBEAbilitySystemComponent* GetBEAbilitySystemComponent() const;
+	virtual UBEAbilitySystemComponent* GetBEAbilitySystemComponent() const;
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 public:

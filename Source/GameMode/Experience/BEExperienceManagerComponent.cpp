@@ -11,7 +11,7 @@
 #include "GameFeatureAction.h"
 #include "GameFeaturesSubsystemSettings.h"
 #include "TimerManager.h"
-#include "Setting/BESettingsLocal.h"
+#include "GameSetting/BESettingsLocal.h"
 #include "BELogChannels.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BEExperienceManagerComponent)
