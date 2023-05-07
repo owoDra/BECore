@@ -32,39 +32,28 @@ struct FFrame;
 /**
  * ABEPlayerController
  *
- *	The base player controller class used by this project.
+ *	このプロジェクトで使用される基本 PlayerController クラス。
  */
-UCLASS(Config = Game, Meta = (ShortTooltip = "The base player controller class used by this project."))
-class BECORE_API ABEPlayerController : public ACommonPlayerController, public IBECameraAssistInterface, public IBETeamAgentInterface
+UCLASS(Config = Game)
+class BECORE_API ABEPlayerController 
+	: public ACommonPlayerController
+	, public IBECameraAssistInterface
+	, public IBETeamAgentInterface
 {
 	GENERATED_BODY()
 
 public:
-
 	ABEPlayerController(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	UFUNCTION(BlueprintCallable, Category = "BE|PlayerController")
-	ABEPlayerState* GetBEPlayerState() const;
-
-	UFUNCTION(BlueprintCallable, Category = "BE|PlayerController")
-	UBEAbilitySystemComponent* GetBEAbilitySystemComponent() const;
-
-	UFUNCTION(BlueprintCallable, Category = "BE|PlayerController")
-	ABEHUD* GetBEHUD() const;
-
-	// Run a cheat command on the server.
-	UFUNCTION(Reliable, Server, WithValidation)
-	void ServerCheat(const FString& Msg);
-
-	// Run a cheat command on the server for all players.
-	UFUNCTION(Reliable, Server, WithValidation)
-	void ServerCheatAll(const FString& Msg);
-
+public:
 	//~AActor interface
-	virtual void PreInitializeComponents() override;
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	//~End of AActor interface
+
+	//~ACommonPlayerController interface
+	virtual void OnPossess(APawn* InPawn) override;
+	//~End of ACommonPlayerController interface
 
 	//~AController interface
 	virtual void OnUnPossess() override;
@@ -74,38 +63,6 @@ public:
 	virtual void ReceivedPlayer() override;
 	virtual void PlayerTick(float DeltaTime) override;
 	//~End of APlayerController interface
-
-	//~IBECameraAssistInterface interface
-	virtual void OnCameraPenetratingTarget() override;
-	//~End of IBECameraAssistInterface interface
-
-	//~ACommonPlayerController interface
-	virtual void OnPossess(APawn* InPawn) override;
-	//~End of ACommonPlayerController interface
-	
-	//~IBETeamAgentInterface interface
-	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
-	virtual FGenericTeamId GetGenericTeamId() const override;
-	virtual FOnBETeamIndexChangedDelegate* GetOnTeamIndexChangedDelegate() override;
-	//~End of IBETeamAgentInterface interface
-
-private:
-	UPROPERTY()
-	FOnBETeamIndexChangedDelegate OnTeamChangedDelegate;
-
-	UPROPERTY()
-	TObjectPtr<APlayerState> LastSeenPlayerState;
-
-private:
-	UFUNCTION()
-	void OnPlayerStateChangedTeam(UObject* TeamAgent, int32 OldTeam, int32 NewTeam);
-
-protected:
-	// Called when the player state is set or cleared
-	virtual void OnPlayerStateChanged();
-
-private:
-	void BroadcastOnPlayerStateChanged();
 
 protected:
 	//~AController interface
@@ -125,17 +82,56 @@ protected:
 	virtual void PostProcessInput(const float DeltaTime, const bool bGamePaused) override;
 	//~End of APlayerController interface
 
-	void OnSettingsChanged(UBESettingsShared* Settings);
+	// Called when the player state is set or cleared
+	virtual void OnPlayerStateChanged();
 
 	bool bHideViewTargetPawnNextFrame = false;
+
+private:
+	void BroadcastOnPlayerStateChanged();
+
+	
+public:
+	//~IBECameraAssistInterface interface
+	virtual void OnCameraPenetratingTarget() override;
+	//~End of IBECameraAssistInterface interface
+
+
+public:
+	//~IBETeamAgentInterface interface
+	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
+	virtual FGenericTeamId GetGenericTeamId() const override;
+	virtual FOnBETeamIndexChangedDelegate* GetOnTeamIndexChangedDelegate() override;
+	//~End of IBETeamAgentInterface interface
+
+private:
+	UPROPERTY()
+	FOnBETeamIndexChangedDelegate OnTeamChangedDelegate;
+
+	UPROPERTY()
+	TObjectPtr<APlayerState> LastSeenPlayerState;
+
+private:
+	UFUNCTION()
+	void OnPlayerStateChangedTeam(UObject* TeamAgent, int32 OldTeam, int32 NewTeam);
+
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "PlayerController")
+	ABEPlayerState* GetBEPlayerState() const;
+
+	UFUNCTION(BlueprintCallable, Category = "PlayerController")
+	UBEAbilitySystemComponent* GetBEAbilitySystemComponent() const;
+
+	UFUNCTION(BlueprintCallable, Category = "PlayerController")
+	ABEHUD* GetBEHUD() const;
+
+	// Run a cheat command on the server.
+	UFUNCTION(Reliable, Server, WithValidation)
+	void ServerCheat(const FString& Msg);
+
+	// Run a cheat command on the server for all players.
+	UFUNCTION(Reliable, Server, WithValidation)
+	void ServerCheatAll(const FString& Msg);
 };
 
-
-// A player controller used for replay capture and playback
-UCLASS()
-class ABEReplayPlayerController : public ABEPlayerController
-{
-	GENERATED_BODY()
-
-	virtual void SetPlayer(UPlayer* InPlayer) override;
-};

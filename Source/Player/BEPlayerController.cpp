@@ -42,10 +42,6 @@ ABEPlayerController::ABEPlayerController(const FObjectInitializer& ObjectInitial
 #endif // #if USING_CHEAT_MANAGER
 }
 
-void ABEPlayerController::PreInitializeComponents()
-{
-	Super::PreInitializeComponents();
-}
 
 void ABEPlayerController::BeginPlay()
 {
@@ -56,179 +52,6 @@ void ABEPlayerController::BeginPlay()
 void ABEPlayerController::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
-}
-
-void ABEPlayerController::ReceivedPlayer()
-{
-	Super::ReceivedPlayer();
-}
-
-void ABEPlayerController::PlayerTick(float DeltaTime)
-{
-	Super::PlayerTick(DeltaTime);
-
-}
-
-ABEPlayerState* ABEPlayerController::GetBEPlayerState() const
-{
-	return CastChecked<ABEPlayerState>(PlayerState, ECastCheckedType::NullAllowed);
-}
-
-UBEAbilitySystemComponent* ABEPlayerController::GetBEAbilitySystemComponent() const
-{
-	const ABEPlayerState* BEPS = GetBEPlayerState();
-	return (BEPS ? BEPS->GetBEAbilitySystemComponent() : nullptr);
-}
-
-ABEHUD* ABEPlayerController::GetBEHUD() const
-{
-	return CastChecked<ABEHUD>(GetHUD(), ECastCheckedType::NullAllowed);
-}
-
-void ABEPlayerController::OnPlayerStateChangedTeam(UObject* TeamAgent, int32 OldTeam, int32 NewTeam)
-{
-	ConditionalBroadcastTeamChanged(this, IntegerToGenericTeamId(OldTeam), IntegerToGenericTeamId(NewTeam));
-}
-
-void ABEPlayerController::OnPlayerStateChanged()
-{
-	// Empty, place for derived classes to implement without having to hook all the other events
-}
-
-void ABEPlayerController::BroadcastOnPlayerStateChanged()
-{
-	OnPlayerStateChanged();
-
-	// Unbind from the old player state, if any
-	FGenericTeamId OldTeamID = FGenericTeamId::NoTeam;
-	if (LastSeenPlayerState != nullptr)
-	{
-		if (IBETeamAgentInterface* PlayerStateTeamInterface = Cast<IBETeamAgentInterface>(LastSeenPlayerState))
-		{
-			OldTeamID = PlayerStateTeamInterface->GetGenericTeamId();
-			PlayerStateTeamInterface->GetTeamChangedDelegateChecked().RemoveAll(this);
-		}
-	}
-
-	// Bind to the new player state, if any
-	FGenericTeamId NewTeamID = FGenericTeamId::NoTeam;
-	if (PlayerState != nullptr)
-	{
-		if (IBETeamAgentInterface* PlayerStateTeamInterface = Cast<IBETeamAgentInterface>(PlayerState))
-		{
-			NewTeamID = PlayerStateTeamInterface->GetGenericTeamId();
-			PlayerStateTeamInterface->GetTeamChangedDelegateChecked().AddDynamic(this, &ThisClass::OnPlayerStateChangedTeam);
-		}
-	}
-
-	// Broadcast the team change (if it really has)
-	ConditionalBroadcastTeamChanged(this, OldTeamID, NewTeamID);
-
-	LastSeenPlayerState = PlayerState;
-}
-
-void ABEPlayerController::InitPlayerState()
-{
-	Super::InitPlayerState();
-	BroadcastOnPlayerStateChanged();
-}
-
-void ABEPlayerController::CleanupPlayerState()
-{
-	Super::CleanupPlayerState();
-	BroadcastOnPlayerStateChanged();
-}
-
-void ABEPlayerController::OnRep_PlayerState()
-{
-	Super::OnRep_PlayerState();
-	BroadcastOnPlayerStateChanged();
-}
-
-void ABEPlayerController::SetPlayer(UPlayer* InPlayer)
-{
-	Super::SetPlayer(InPlayer);
-
-	if (const UBELocalPlayer* BELocalPlayer = Cast<UBELocalPlayer>(InPlayer))
-	{
-		UBESettingsShared* UserSettings = BELocalPlayer->GetSharedSettings();
-		UserSettings->OnSettingChanged.AddUObject(this, &ThisClass::OnSettingsChanged);
-
-		OnSettingsChanged(UserSettings);
-	}
-}
-
-void ABEPlayerController::OnSettingsChanged(UBESettingsShared* InSettings)
-{
-	bForceFeedbackEnabled = InSettings->GetForceFeedbackEnabled();
-}
-
-void ABEPlayerController::AddCheats(bool bForce)
-{
-#if USING_CHEAT_MANAGER
-	Super::AddCheats(true);
-#else //#if USING_CHEAT_MANAGER
-	Super::AddCheats(bForce);
-#endif // #else //#if USING_CHEAT_MANAGER
-}
-
-void ABEPlayerController::ServerCheat_Implementation(const FString& Msg)
-{
-#if USING_CHEAT_MANAGER
-	if (CheatManager)
-	{
-		UE_LOG(LogBE, Warning, TEXT("ServerCheat: %s"), *Msg);
-		ClientMessage(ConsoleCommand(Msg));
-	}
-#endif // #if USING_CHEAT_MANAGER
-}
-
-bool ABEPlayerController::ServerCheat_Validate(const FString& Msg)
-{
-	return true;
-}
-
-void ABEPlayerController::ServerCheatAll_Implementation(const FString& Msg)
-{
-#if USING_CHEAT_MANAGER
-	if (CheatManager)
-	{
-		UE_LOG(LogBE, Warning, TEXT("ServerCheatAll: %s"), *Msg);
-		for (TActorIterator<ABEPlayerController> It(GetWorld()); It; ++It)
-		{
-			ABEPlayerController* BEPC = (*It);
-			if (BEPC)
-			{
-				BEPC->ClientMessage(BEPC->ConsoleCommand(Msg));
-			}
-		}
-	}
-#endif // #if USING_CHEAT_MANAGER
-}
-
-bool ABEPlayerController::ServerCheatAll_Validate(const FString& Msg)
-{
-	return true;
-}
-
-void ABEPlayerController::PreProcessInput(const float DeltaTime, const bool bGamePaused)
-{
-	Super::PreProcessInput(DeltaTime, bGamePaused);
-}
-
-void ABEPlayerController::PostProcessInput(const float DeltaTime, const bool bGamePaused)
-{
-	if (UBEAbilitySystemComponent* BEASC = GetBEAbilitySystemComponent())
-	{
-		BEASC->ProcessAbilityInput(DeltaTime, bGamePaused);
-	}
-
-	Super::PostProcessInput(DeltaTime, bGamePaused);
-}
-
-void ABEPlayerController::OnCameraPenetratingTarget()
-{
-	bHideViewTargetPawnNextFrame = true;
 }
 
 void ABEPlayerController::OnPossess(APawn* InPawn)
@@ -250,6 +73,66 @@ void ABEPlayerController::OnPossess(APawn* InPawn)
 
 }
 
+void ABEPlayerController::OnUnPossess()
+{
+	// Make sure the pawn that is being unpossessed doesn't remain our ASC's avatar actor
+	if (APawn* PawnBeingUnpossessed = GetPawn())
+	{
+		if (UAbilitySystemComponent* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(PlayerState))
+		{
+			if (ASC->GetAvatarActor() == PawnBeingUnpossessed)
+			{
+				ASC->SetAvatarActor(nullptr);
+			}
+		}
+	}
+
+	Super::OnUnPossess();
+}
+
+
+void ABEPlayerController::InitPlayerState()
+{
+	Super::InitPlayerState();
+	BroadcastOnPlayerStateChanged();
+}
+
+void ABEPlayerController::CleanupPlayerState()
+{
+	Super::CleanupPlayerState();
+	BroadcastOnPlayerStateChanged();
+}
+
+void ABEPlayerController::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+	BroadcastOnPlayerStateChanged();
+}
+
+
+void ABEPlayerController::SetPlayer(UPlayer* InPlayer)
+{
+	Super::SetPlayer(InPlayer);
+
+	if (const UBELocalPlayer* BELocalPlayer = Cast<UBELocalPlayer>(InPlayer))
+	{
+		UBESettingsShared* UserSettings = BELocalPlayer->GetSharedSettings();
+		UserSettings->OnSettingChanged.AddUObject(this, &ThisClass::OnSettingsChanged);
+
+		OnSettingsChanged(UserSettings);
+	}
+}
+
+void ABEPlayerController::AddCheats(bool bForce)
+{
+#if USING_CHEAT_MANAGER
+	Super::AddCheats(true);
+#else //#if USING_CHEAT_MANAGER
+	Super::AddCheats(bForce);
+#endif // #else //#if USING_CHEAT_MANAGER
+}
+
+
 void ABEPlayerController::UpdateForceFeedback(IInputInterface* InputInterface, const int32 ControllerId)
 {
 	if (bForceFeedbackEnabled)
@@ -264,7 +147,7 @@ void ABEPlayerController::UpdateForceFeedback(IInputInterface* InputInterface, c
 			}
 		}
 	}
-	
+
 	InputInterface->SetForceFeedbackChannelValues(ControllerId, FForceFeedbackValues());
 }
 
@@ -322,6 +205,67 @@ void ABEPlayerController::UpdateHiddenComponents(const FVector& ViewLocation, TS
 	}
 }
 
+
+void ABEPlayerController::PreProcessInput(const float DeltaTime, const bool bGamePaused)
+{
+	Super::PreProcessInput(DeltaTime, bGamePaused);
+}
+
+void ABEPlayerController::PostProcessInput(const float DeltaTime, const bool bGamePaused)
+{
+	if (UBEAbilitySystemComponent* BEASC = GetBEAbilitySystemComponent())
+	{
+		BEASC->ProcessAbilityInput(DeltaTime, bGamePaused);
+	}
+
+	Super::PostProcessInput(DeltaTime, bGamePaused);
+}
+
+
+void ABEPlayerController::OnPlayerStateChanged()
+{
+	// Empty, place for derived classes to implement without having to hook all the other events
+}
+
+void ABEPlayerController::BroadcastOnPlayerStateChanged()
+{
+	OnPlayerStateChanged();
+
+	// Unbind from the old player state, if any
+	FGenericTeamId OldTeamID = FGenericTeamId::NoTeam;
+	if (LastSeenPlayerState != nullptr)
+	{
+		if (IBETeamAgentInterface* PlayerStateTeamInterface = Cast<IBETeamAgentInterface>(LastSeenPlayerState))
+		{
+			OldTeamID = PlayerStateTeamInterface->GetGenericTeamId();
+			PlayerStateTeamInterface->GetTeamChangedDelegateChecked().RemoveAll(this);
+		}
+	}
+
+	// Bind to the new player state, if any
+	FGenericTeamId NewTeamID = FGenericTeamId::NoTeam;
+	if (PlayerState != nullptr)
+	{
+		if (IBETeamAgentInterface* PlayerStateTeamInterface = Cast<IBETeamAgentInterface>(PlayerState))
+		{
+			NewTeamID = PlayerStateTeamInterface->GetGenericTeamId();
+			PlayerStateTeamInterface->GetTeamChangedDelegateChecked().AddDynamic(this, &ThisClass::OnPlayerStateChangedTeam);
+		}
+	}
+
+	// Broadcast the team change (if it really has)
+	ConditionalBroadcastTeamChanged(this, OldTeamID, NewTeamID);
+
+	LastSeenPlayerState = PlayerState;
+}
+
+
+void ABEPlayerController::OnCameraPenetratingTarget()
+{
+	bHideViewTargetPawnNextFrame = true;
+}
+
+
 void ABEPlayerController::SetGenericTeamId(const FGenericTeamId& NewTeamID)
 {
 	UE_LOG(LogBETeams, Error, TEXT("You can't set the team ID on a player controller (%s); it's driven by the associated player state"), *GetPathNameSafe(this));
@@ -341,27 +285,64 @@ FOnBETeamIndexChangedDelegate* ABEPlayerController::GetOnTeamIndexChangedDelegat
 	return &OnTeamChangedDelegate;
 }
 
-void ABEPlayerController::OnUnPossess()
+void ABEPlayerController::OnPlayerStateChangedTeam(UObject* TeamAgent, int32 OldTeam, int32 NewTeam)
 {
-	// Make sure the pawn that is being unpossessed doesn't remain our ASC's avatar actor
-	if (APawn* PawnBeingUnpossessed = GetPawn())
+	ConditionalBroadcastTeamChanged(this, IntegerToGenericTeamId(OldTeam), IntegerToGenericTeamId(NewTeam));
+}
+
+
+ABEPlayerState* ABEPlayerController::GetBEPlayerState() const
+{
+	return CastChecked<ABEPlayerState>(PlayerState, ECastCheckedType::NullAllowed);
+}
+
+UBEAbilitySystemComponent* ABEPlayerController::GetBEAbilitySystemComponent() const
+{
+	const ABEPlayerState* BEPS = GetBEPlayerState();
+	return (BEPS ? BEPS->GetBEAbilitySystemComponent() : nullptr);
+}
+
+ABEHUD* ABEPlayerController::GetBEHUD() const
+{
+	return CastChecked<ABEHUD>(GetHUD(), ECastCheckedType::NullAllowed);
+}
+
+
+void ABEPlayerController::ServerCheat_Implementation(const FString& Msg)
+{
+#if USING_CHEAT_MANAGER
+	if (CheatManager)
 	{
-		if (UAbilitySystemComponent* ASC = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(PlayerState))
+		UE_LOG(LogBE, Warning, TEXT("ServerCheat: %s"), *Msg);
+		ClientMessage(ConsoleCommand(Msg));
+	}
+#endif // #if USING_CHEAT_MANAGER
+}
+
+bool ABEPlayerController::ServerCheat_Validate(const FString& Msg)
+{
+	return true;
+}
+
+void ABEPlayerController::ServerCheatAll_Implementation(const FString& Msg)
+{
+#if USING_CHEAT_MANAGER
+	if (CheatManager)
+	{
+		UE_LOG(LogBE, Warning, TEXT("ServerCheatAll: %s"), *Msg);
+		for (TActorIterator<ABEPlayerController> It(GetWorld()); It; ++It)
 		{
-			if (ASC->GetAvatarActor() == PawnBeingUnpossessed)
+			ABEPlayerController* BEPC = (*It);
+			if (BEPC)
 			{
-				ASC->SetAvatarActor(nullptr);
+				BEPC->ClientMessage(BEPC->ConsoleCommand(Msg));
 			}
 		}
 	}
-
-	Super::OnUnPossess();
+#endif // #if USING_CHEAT_MANAGER
 }
 
-//////////////////////////////////////////////////////////////////////
-// ABEReplayPlayerController
-
-void ABEReplayPlayerController::SetPlayer(UPlayer* InPlayer)
+bool ABEPlayerController::ServerCheatAll_Validate(const FString& Msg)
 {
-	Super::SetPlayer(InPlayer);
+	return true;
 }
