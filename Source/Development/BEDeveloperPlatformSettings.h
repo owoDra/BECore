@@ -76,7 +76,7 @@ private:
 	UPROPERTY(EditAnywhere, config, Category = "BE|Platform", meta = (GetOptions = GetKnownPlatformIds))
 	FName PretendPlatform;
 
-	// The base device profile to pretend we are using when emulating device-specific device profiles applied from UBESettingsLocal
+	// The base device profile to pretend we are using when emulating device-specific device profiles applied from UBEGameDeviceSettings
 	UPROPERTY(EditAnywhere, config, Category = "BE|Platform", meta = (GetOptions = GetKnownDeviceProfiles, EditCondition = bApplyDeviceProfilesInPIE))
 	FName PretendBaseDeviceProfile;
 

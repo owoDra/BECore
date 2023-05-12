@@ -5,7 +5,7 @@
 
 #include "Engine/DataAsset.h"
 
-#include "GameSetting/BESettingsShared.h"
+#include "GameSetting/BEGameSharedSettings.h"
 
 #include "Containers/Map.h"
 #include "UObject/UObjectGlobals.h"

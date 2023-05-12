@@ -11,7 +11,7 @@
 #include "GameFeatureAction.h"
 #include "GameFeaturesSubsystemSettings.h"
 #include "TimerManager.h"
-#include "GameSetting/BESettingsLocal.h"
+#include "GameSetting/BEGameDeviceSettings.h"
 #include "BELogChannels.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BEExperienceManagerComponent)
@@ -354,7 +354,7 @@ void UBEExperienceManagerComponent::OnExperienceFullLoadCompleted()
 
 	// Apply any necessary scalability settings
 #if !UE_SERVER
-	UBESettingsLocal::Get()->OnExperienceLoaded();
+	UBEGameDeviceSettings::Get()->OnExperienceLoaded();
 #endif
 }
 

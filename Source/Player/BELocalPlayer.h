@@ -18,8 +18,8 @@
 
 class APlayerController;
 class UInputMappingContext;
-class UBESettingsLocal;
-class UBESettingsShared;
+class UBEGameDeviceSettings;
+class UBEGameSharedSettings;
 class UObject;
 class UWorld;
 struct FFrame;
@@ -35,11 +35,10 @@ UCLASS()
 class BECORE_API UBELocalPlayer : public UCommonLocalPlayer, public IBETeamAgentInterface
 {
 	GENERATED_BODY()
+public:
+	UBELocalPlayer() {}
 
 public:
-
-	UBELocalPlayer();
-
 	//~UObject interface
 	virtual void PostInitProperties() override;
 	//~End of UObject interface
@@ -53,24 +52,35 @@ public:
 	virtual void InitOnlineSession() override;
 	//~End of ULocalPlayer interface
 
-	//~IBETeamAgentInterface interface
-	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
-	virtual FGenericTeamId GetGenericTeamId() const override;
-	virtual FOnBETeamIndexChangedDelegate* GetOnTeamIndexChangedDelegate() override;
-	//~End of IBETeamAgentInterface interface
-
-public:
 	UFUNCTION()
-	UBESettingsLocal* GetLocalSettings() const;
+	UBEGameDeviceSettings* GetDeviceSettings() const;
 
 	UFUNCTION()
-	UBESettingsShared* GetSharedSettings() const;
+	UBEGameSharedSettings* GetSharedSettings() const;
+
+private:
+	UPROPERTY(Transient)
+	mutable TObjectPtr<UBEGameSharedSettings> GameSharedSettings;
+
+	UPROPERTY(Transient)
+	mutable TObjectPtr<const UInputMappingContext> InputMappingContext;
+
+	UPROPERTY()
+	TWeakObjectPtr<APlayerController> LastBoundPC;
 
 protected:
 	void OnAudioOutputDeviceChanged(const FString& InAudioOutputDeviceId);
 	
 	UFUNCTION()
 	void OnCompletedAudioDeviceSwap(const FSwapAudioOutputResult& SwapResult);
+
+
+public:
+	//~IBETeamAgentInterface interface
+	virtual void SetGenericTeamId(const FGenericTeamId& NewTeamID) override;
+	virtual FGenericTeamId GetGenericTeamId() const override;
+	virtual FOnBETeamIndexChangedDelegate* GetOnTeamIndexChangedDelegate() override;
+	//~End of IBETeamAgentInterface interface
 
 private:
 	void OnPlayerControllerChanged(APlayerController* NewController);
@@ -79,15 +89,6 @@ private:
 	void OnControllerChangedTeam(UObject* TeamAgent, int32 OldTeam, int32 NewTeam);
 
 private:
-	UPROPERTY(Transient)
-	mutable TObjectPtr<UBESettingsShared> SharedSettings;
-
-	UPROPERTY(Transient)
-	mutable TObjectPtr<const UInputMappingContext> InputMappingContext;
-
 	UPROPERTY()
 	FOnBETeamIndexChangedDelegate OnTeamChangedDelegate;
-
-	UPROPERTY()
-	TWeakObjectPtr<APlayerController> LastBoundPC;
 };

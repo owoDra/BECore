@@ -8,6 +8,7 @@
 #include "System/BEGameSession.h"
 #include "Player/BEPlayerController.h"
 #include "Player/BEPlayerBotController.h"
+#include "Player/BEPlayerReplayController.h"
 #include "Player/BEPlayerState.h"
 #include "Character/BECharacter.h"
 #include "UI/BEHUD.h"
@@ -30,7 +31,7 @@ ABEGameMode::ABEGameMode(const FObjectInitializer& ObjectInitializer)
 	GameStateClass = ABEGameState::StaticClass();
 	GameSessionClass = ABEGameSession::StaticClass();
 	PlayerControllerClass = ABEPlayerController::StaticClass();
-	ReplaySpectatorPlayerControllerClass = ABEReplayPlayerController::StaticClass();
+	ReplaySpectatorPlayerControllerClass = ABEPlayerReplayController::StaticClass();
 	PlayerStateClass = ABEPlayerState::StaticClass();
 	DefaultPawnClass = ABECharacter::StaticClass();
 	HUDClass = ABEHUD::StaticClass();

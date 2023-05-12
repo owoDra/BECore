@@ -3,8 +3,8 @@
 
 #include "BELocalPlayer.h"
 
-#include "GameSetting/BESettingsLocal.h"
-#include "GameSetting/BESettingsShared.h"
+#include "GameSetting/BEGameDeviceSettings.h"
+#include "GameSetting/BEGameSharedSettings.h"
 
 #include "AudioMixerBlueprintLibrary.h"
 #include "Delegates/Delegate.h"
@@ -17,18 +17,12 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BELocalPlayer)
 
-class UObject;
-
-
-UBELocalPlayer::UBELocalPlayer()
-{
-}
 
 void UBELocalPlayer::PostInitProperties()
 {
 	Super::PostInitProperties();
 
-	if (UBESettingsLocal* LocalSettings = GetLocalSettings())
+	if (UBEGameDeviceSettings* LocalSettings = GetDeviceSettings())
 	{
 		LocalSettings->OnAudioOutputDeviceChanged.AddUObject(this, &UBELocalPlayer::OnAudioOutputDeviceChanged);
 	}
@@ -57,27 +51,37 @@ void UBELocalPlayer::InitOnlineSession()
 	Super::InitOnlineSession();
 }
 
-void UBELocalPlayer::OnPlayerControllerChanged(APlayerController* NewController)
+
+UBEGameDeviceSettings* UBELocalPlayer::GetDeviceSettings() const
 {
-	// Stop listening for changes from the old controller
-	FGenericTeamId OldTeamID = FGenericTeamId::NoTeam;
-	if (IBETeamAgentInterface* ControllerAsTeamProvider = Cast<IBETeamAgentInterface>(LastBoundPC.Get()))
-	{
-		OldTeamID = ControllerAsTeamProvider->GetGenericTeamId();
-		ControllerAsTeamProvider->GetTeamChangedDelegateChecked().RemoveAll(this);
-	}
-
-	// Grab the current team ID and listen for future changes
-	FGenericTeamId NewTeamID = FGenericTeamId::NoTeam;
-	if (IBETeamAgentInterface* ControllerAsTeamProvider = Cast<IBETeamAgentInterface>(NewController))
-	{
-		NewTeamID = ControllerAsTeamProvider->GetGenericTeamId();
-		ControllerAsTeamProvider->GetTeamChangedDelegateChecked().AddDynamic(this, &ThisClass::OnControllerChangedTeam);
-		LastBoundPC = NewController;
-	}
-
-	ConditionalBroadcastTeamChanged(this, OldTeamID, NewTeamID);
+	return UBEGameDeviceSettings::Get();
 }
+
+UBEGameSharedSettings* UBELocalPlayer::GetSharedSettings() const
+{
+	if (!GameSharedSettings)
+	{
+		GameSharedSettings = UBEGameSharedSettings::LoadOrCreateSettings(this);
+	}
+
+	return GameSharedSettings;
+}
+
+
+void UBELocalPlayer::OnAudioOutputDeviceChanged(const FString& InAudioOutputDeviceId)
+{
+	FOnCompletedDeviceSwap DevicesSwappedCallback;
+	DevicesSwappedCallback.BindUFunction(this, FName("OnCompletedAudioDeviceSwap"));
+	UAudioMixerBlueprintLibrary::SwapAudioOutputDevice(GetWorld(), InAudioOutputDeviceId, DevicesSwappedCallback);
+}
+
+void UBELocalPlayer::OnCompletedAudioDeviceSwap(const FSwapAudioOutputResult& SwapResult)
+{
+	if (SwapResult.Result == ESwapAudioOutputDeviceResultState::Failure)
+	{
+	}
+}
+
 
 void UBELocalPlayer::SetGenericTeamId(const FGenericTeamId& NewTeamID)
 {
@@ -101,33 +105,26 @@ FOnBETeamIndexChangedDelegate* UBELocalPlayer::GetOnTeamIndexChangedDelegate()
 	return &OnTeamChangedDelegate;
 }
 
-UBESettingsLocal* UBELocalPlayer::GetLocalSettings() const
+void UBELocalPlayer::OnPlayerControllerChanged(APlayerController* NewController)
 {
-	return UBESettingsLocal::Get();
-}
-
-UBESettingsShared* UBELocalPlayer::GetSharedSettings() const
-{
-	if (!SharedSettings)
+	// Stop listening for changes from the old controller
+	FGenericTeamId OldTeamID = FGenericTeamId::NoTeam;
+	if (IBETeamAgentInterface* ControllerAsTeamProvider = Cast<IBETeamAgentInterface>(LastBoundPC.Get()))
 	{
-		SharedSettings = UBESettingsShared::LoadOrCreateSettings(this);
+		OldTeamID = ControllerAsTeamProvider->GetGenericTeamId();
+		ControllerAsTeamProvider->GetTeamChangedDelegateChecked().RemoveAll(this);
 	}
 
-	return SharedSettings;
-}
-
-void UBELocalPlayer::OnAudioOutputDeviceChanged(const FString& InAudioOutputDeviceId)
-{
-	FOnCompletedDeviceSwap DevicesSwappedCallback;
-	DevicesSwappedCallback.BindUFunction(this, FName("OnCompletedAudioDeviceSwap"));
-	UAudioMixerBlueprintLibrary::SwapAudioOutputDevice(GetWorld(), InAudioOutputDeviceId, DevicesSwappedCallback);
-}
-
-void UBELocalPlayer::OnCompletedAudioDeviceSwap(const FSwapAudioOutputResult& SwapResult)
-{
-	if (SwapResult.Result == ESwapAudioOutputDeviceResultState::Failure)
+	// Grab the current team ID and listen for future changes
+	FGenericTeamId NewTeamID = FGenericTeamId::NoTeam;
+	if (IBETeamAgentInterface* ControllerAsTeamProvider = Cast<IBETeamAgentInterface>(NewController))
 	{
+		NewTeamID = ControllerAsTeamProvider->GetGenericTeamId();
+		ControllerAsTeamProvider->GetTeamChangedDelegateChecked().AddDynamic(this, &ThisClass::OnControllerChangedTeam);
+		LastBoundPC = NewController;
 	}
+
+	ConditionalBroadcastTeamChanged(this, OldTeamID, NewTeamID);
 }
 
 void UBELocalPlayer::OnControllerChangedTeam(UObject* TeamAgent, int32 OldTeam, int32 NewTeam)

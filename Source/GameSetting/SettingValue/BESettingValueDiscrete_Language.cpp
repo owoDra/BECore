@@ -4,7 +4,7 @@
 #include "BESettingValueDiscrete_Language.h"
 
 #include "Player/BELocalPlayer.h"
-#include "GameSetting/BESettingsShared.h"
+#include "GameSetting/BEGameSharedSettings.h"
 
 #include "CoreTypes.h"
 #include "Engine/LocalPlayer.h"
@@ -78,7 +78,7 @@ void UBESettingValueDiscrete_Language::ResetToDefault()
 
 void UBESettingValueDiscrete_Language::RestoreToInitial()
 {
-	if (UBESettingsShared* Settings = CastChecked<UBELocalPlayer>(LocalPlayer)->GetSharedSettings())
+	if (UBEGameSharedSettings* Settings = CastChecked<UBELocalPlayer>(LocalPlayer)->GetSharedSettings())
 	{
 		Settings->ClearPendingCulture();
 		NotifySettingChanged(EGameSettingChangeReason::RestoreToInitial);
@@ -87,7 +87,7 @@ void UBESettingValueDiscrete_Language::RestoreToInitial()
 
 void UBESettingValueDiscrete_Language::SetDiscreteOptionByIndex(int32 Index)
 {
-	if (UBESettingsShared* Settings = CastChecked<UBELocalPlayer>(LocalPlayer)->GetSharedSettings())
+	if (UBEGameSharedSettings* Settings = CastChecked<UBELocalPlayer>(LocalPlayer)->GetSharedSettings())
 	{
 		if (Index == SettingSystemDefaultLanguageIndex)
 		{
@@ -104,7 +104,7 @@ void UBESettingValueDiscrete_Language::SetDiscreteOptionByIndex(int32 Index)
 
 int32 UBESettingValueDiscrete_Language::GetDiscreteOptionIndex() const
 {
-	if (const UBESettingsShared* Settings = CastChecked<UBELocalPlayer>(LocalPlayer)->GetSharedSettings())
+	if (const UBEGameSharedSettings* Settings = CastChecked<UBELocalPlayer>(LocalPlayer)->GetSharedSettings())
 	{
 		if (Settings->ShouldResetToDefaultCulture())
 		{

@@ -5,7 +5,7 @@
 
 #include "Input/BETargetingSensitivityData.h"
 #include "Player/BELocalPlayer.h"
-#include "GameSetting/BESettingsShared.h"
+#include "GameSetting/BEGameSharedSettings.h"
 
 #include "EnhancedPlayerInput.h"
 #include "GameFramework/PlayerController.h"
@@ -50,8 +50,8 @@ FInputActionValue UBESettingBasedScalar::ModifyRaw_Implementation(const UEnhance
 	{
 		if (UBELocalPlayer* LocalPlayer = BEInputModifiersHelpers::GetLocalPlayer(PlayerInput))
 		{
-			const UClass* SettingsClass = UBESettingsShared::StaticClass();
-			UBESettingsShared* SharedSettings = LocalPlayer->GetSharedSettings();
+			const UClass* SettingsClass = UBEGameSharedSettings::StaticClass();
+			UBEGameSharedSettings* SharedSettings = LocalPlayer->GetSharedSettings();
 			
 			const bool bHasCachedProperty = PropertyCache.Num() == 3;
 			
@@ -104,7 +104,7 @@ FInputActionValue UBEInputModifierDeadZone::ModifyRaw_Implementation(const UEnha
 		return CurrentValue;
 	}
 	
-	UBESettingsShared* Settings = LocalPlayer->GetSharedSettings();
+	UBEGameSharedSettings* Settings = LocalPlayer->GetSharedSettings();
 	ensure(Settings);
 
 	float LowerThreshold =
@@ -169,7 +169,7 @@ FInputActionValue UBEInputModifierGamepadSensitivity::ModifyRaw_Implementation(c
 		return CurrentValue;
 	}
 	
-	UBESettingsShared* Settings = LocalPlayer->GetSharedSettings();
+	UBEGameSharedSettings* Settings = LocalPlayer->GetSharedSettings();
 	ensure(Settings);
 
 	const EBEGamepadSensitivity Sensitivity = (TargetingType == EBETargetingType::Normal) ? Settings->GetGamepadLookSensitivityPreset() : Settings->GetGamepadTargetingSensitivityPreset();
@@ -190,7 +190,7 @@ FInputActionValue UBEInputModifierAimInversion::ModifyRaw_Implementation(const U
 		return CurrentValue;
 	}
 	
-	UBESettingsShared* Settings = LocalPlayer->GetSharedSettings();
+	UBEGameSharedSettings* Settings = LocalPlayer->GetSharedSettings();
 	ensure(Settings);
 
 	FVector NewValue = CurrentValue.Get<FVector>();

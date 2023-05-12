@@ -82,23 +82,23 @@ protected:
 	UPROPERTY(Transient)
 	TObjectPtr<USoundControlBusMix> UserMix = nullptr;
 
-	// Overall Sound Control Bus retrieved from the BE Audio Settings and linked to the UI and game settings in BESettingsLocal
+	// Overall Sound Control Bus retrieved from the BE Audio Settings and linked to the UI and game settings in BEGameDeviceSettings
 	UPROPERTY(Transient)
 	TObjectPtr<USoundControlBus> OverallControlBus = nullptr;
 
-	// Music Sound Control Bus retrieved from the BE Audio Settings and linked to the UI and game settings in BESettingsLocal
+	// Music Sound Control Bus retrieved from the BE Audio Settings and linked to the UI and game settings in BEGameDeviceSettings
 	UPROPERTY(Transient)
 	TObjectPtr<USoundControlBus> MusicControlBus = nullptr;
 
-	// SoundFX Sound Control Bus retrieved from the BE Audio Settings and linked to the UI and game settings in BESettingsLocal
+	// SoundFX Sound Control Bus retrieved from the BE Audio Settings and linked to the UI and game settings in BEGameDeviceSettings
 	UPROPERTY(Transient)
 	TObjectPtr<USoundControlBus> SoundFXControlBus = nullptr;
 
-	// Dialogue Sound Control Bus retrieved from the BE Audio Settings and linked to the UI and game settings in BESettingsLocal
+	// Dialogue Sound Control Bus retrieved from the BE Audio Settings and linked to the UI and game settings in BEGameDeviceSettings
 	UPROPERTY(Transient)
 	TObjectPtr<USoundControlBus> DialogueControlBus = nullptr;
 
-	// VoiceChat Sound Control Bus retrieved from the BE Audio Settings and linked to the UI and game settings in BESettingsLocal
+	// VoiceChat Sound Control Bus retrieved from the BE Audio Settings and linked to the UI and game settings in BEGameDeviceSettings
 	UPROPERTY(Transient)
 	TObjectPtr<USoundControlBus> VoiceChatControlBus = nullptr;
 

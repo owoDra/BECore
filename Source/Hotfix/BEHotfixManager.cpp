@@ -12,7 +12,7 @@
 #include "Misc/CString.h"
 #include "DeviceProfiles/DeviceProfileManager.h"
 #include "DeviceProfiles/DeviceProfile.h"
-#include "GameSetting/BESettingsLocal.h"
+#include "GameSetting/BEGameDeviceSettings.h"
 #include "TimerManager.h"
 #include "HAL/MemoryMisc.h"
 
@@ -54,7 +54,7 @@ void UBEHotfixManager::OnHotfixCompleted(EHotfixResult HotfixResult)
 		bHasPendingDeviceProfileHotfix = false;
 		UDeviceProfileManager::Get().ReapplyDeviceProfile();
 
-		UBESettingsLocal* GameSettings = UBESettingsLocal::Get();
+		UBEGameDeviceSettings* GameSettings = UBEGameDeviceSettings::Get();
 		GameSettings->OnHotfixDeviceProfileApplied();
 	}
 

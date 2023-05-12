@@ -6,7 +6,7 @@
 #include "CommonUISettings.h"
 #include "ICommonUIModule.h"
 #include "PlayerMappableInputConfig.h"
-#include "GameSetting/BESettingsLocal.h"
+#include "GameSetting/BEGameDeviceSettings.h"
 #include "System/BEAssetManager.h"
 #include "Templates/Casts.h"
 
@@ -36,7 +36,7 @@ bool FMappableConfigPair::RegisterPair(const FMappableConfigPair& Pair)
 {
 	UBEAssetManager& AssetManager = UBEAssetManager::Get();
 
-	if (UBESettingsLocal* Settings = UBESettingsLocal::Get())
+	if (UBEGameDeviceSettings* Settings = UBEGameDeviceSettings::Get())
 	{
 		// Register the pair with the settings, but do not activate it yet
 		if (const UPlayerMappableInputConfig* LoadedConfig = AssetManager.GetAsset(Pair.Config))
@@ -53,7 +53,7 @@ void FMappableConfigPair::UnregisterPair(const FMappableConfigPair& Pair)
 {
 	UBEAssetManager& AssetManager = UBEAssetManager::Get();
 
-	if (UBESettingsLocal* Settings = UBESettingsLocal::Get())
+	if (UBEGameDeviceSettings* Settings = UBEGameDeviceSettings::Get())
 	{
 		if (const UPlayerMappableInputConfig* LoadedConfig = AssetManager.GetAsset(Pair.Config))
 		{

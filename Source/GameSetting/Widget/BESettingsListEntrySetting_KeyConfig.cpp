@@ -3,7 +3,7 @@
 
 #include "GameSetting/Widget/BESettingsListEntrySetting_KeyConfig.h"
 
-#include "GameSetting/CustomSetting/BESettingValueKeyConfig.h"
+#include "GameSetting/SettingValue/BESettingValueKeyConfig.h"
 #include "UI/Foundation/BEButtonBase.h"
 #include "BEGameplayTags.h"
 

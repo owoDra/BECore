@@ -28,8 +28,8 @@ UBESettingAction_SafeZoneEditor::UBESettingAction_SafeZoneEditor()
 	SafeZoneValueSetting->SetDisplayName(LOCTEXT("SafeZoneValue_Name", "Safe Zone Value"));
 	SafeZoneValueSetting->SetDescriptionRichText(LOCTEXT("SafeZoneValue_Description", "The safezone area percentage."));
 	SafeZoneValueSetting->SetDefaultValue(0.0f);
-	SafeZoneValueSetting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetSafeZone));
-	SafeZoneValueSetting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetSafeZone));
+	SafeZoneValueSetting->SetDynamicGetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(GetSafeZone));
+	SafeZoneValueSetting->SetDynamicSetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(SetSafeZone));
 	SafeZoneValueSetting->SetDisplayFormat([](double SourceValue, double NormalizedValue){ return FText::AsNumber(SourceValue); });
 	SafeZoneValueSetting->SetSettingParent(this);
 }

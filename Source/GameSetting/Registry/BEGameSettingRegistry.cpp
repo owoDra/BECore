@@ -4,10 +4,9 @@
 #include "BEGameSettingRegistry.h"
 
 #include "Player/BELocalPlayer.h"
-#include "GameSetting/BESettingsLocal.h"
-#include "GameSetting/BESettingsShared.h"
+#include "GameSetting/BEGameDeviceSettings.h"
+#include "GameSetting/BEGameSharedSettings.h"
 
-#include "Engine/LocalPlayer.h"
 #include "GameSettingCollection.h"
 #include "HAL/Platform.h"
 #include "Templates/Casts.h"
@@ -16,25 +15,8 @@
 
 DEFINE_LOG_CATEGORY(LogBEGameSettingRegistry);
 
-///////////////////////////////////////////////////////////////
 
 #define LOCTEXT_NAMESPACE "BE"
-
-UBEGameSettingRegistry::UBEGameSettingRegistry()
-{
-}
-
-UBEGameSettingRegistry* UBEGameSettingRegistry::Get(UBELocalPlayer* InLocalPlayer)
-{
-	UBEGameSettingRegistry* Registry = FindObject<UBEGameSettingRegistry>(InLocalPlayer, TEXT("BEGameSettingRegistry"), true);
-	if (Registry == nullptr)
-	{
-		Registry = NewObject<UBEGameSettingRegistry>(InLocalPlayer, TEXT("BEGameSettingRegistry"));
-		Registry->Initialize(InLocalPlayer);
-	}
-
-	return Registry;
-}
 
 bool UBEGameSettingRegistry::IsFinishedInitializing() const
 {
@@ -94,7 +76,7 @@ void UBEGameSettingRegistry::SaveChanges()
 	if (UBELocalPlayer* LocalPlayer = Cast<UBELocalPlayer>(OwningLocalPlayer))
 	{
 		// Game user settings need to be applied to handle things like resolution, this saves indirectly
-		LocalPlayer->GetLocalSettings()->ApplySettings(false);
+		LocalPlayer->GetDeviceSettings()->ApplySettings(false);
 		
 		LocalPlayer->GetSharedSettings()->ApplySettings();
 		LocalPlayer->GetSharedSettings()->SaveSettings();

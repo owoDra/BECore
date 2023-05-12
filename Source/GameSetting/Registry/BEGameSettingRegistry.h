@@ -5,7 +5,7 @@
 
 #include "GameSettingRegistry.h"
 
-#include "GameSetting/BESettingsLocal.h" // IWYU pragma: keep
+#include "GameSetting/BEGameDeviceSettings.h" // IWYU pragma: keep
 
 #include "DataSource/GameSettingDataSourceDynamic.h" // IWYU pragma: keep
 #include "Logging/LogMacros.h"
@@ -26,13 +26,13 @@ DECLARE_LOG_CATEGORY_EXTERN(LogBEGameSettingRegistry, Log, Log);
 #define GET_SHARED_SETTINGS_FUNCTION_PATH(FunctionOrPropertyName)							\
 	MakeShared<FGameSettingDataSourceDynamic>(TArray<FString>({								\
 		GET_FUNCTION_NAME_STRING_CHECKED(UBELocalPlayer, GetSharedSettings),				\
-		GET_FUNCTION_NAME_STRING_CHECKED(UBESettingsShared, FunctionOrPropertyName)			\
+		GET_FUNCTION_NAME_STRING_CHECKED(UBEGameSharedSettings, FunctionOrPropertyName)		\
 	}))
 
-#define GET_LOCAL_SETTINGS_FUNCTION_PATH(FunctionOrPropertyName)							\
+#define GET_DEVICE_SETTINGS_FUNCTION_PATH(FunctionOrPropertyName)							\
 	MakeShared<FGameSettingDataSourceDynamic>(TArray<FString>({								\
-		GET_FUNCTION_NAME_STRING_CHECKED(UBELocalPlayer, GetLocalSettings),					\
-		GET_FUNCTION_NAME_STRING_CHECKED(UBESettingsLocal, FunctionOrPropertyName)			\
+		GET_FUNCTION_NAME_STRING_CHECKED(UBELocalPlayer, GetDeviceSettings),				\
+		GET_FUNCTION_NAME_STRING_CHECKED(UBEGameDeviceSettings, FunctionOrPropertyName)		\
 	}))
 
 ////////////////////////////////////////////////////////////////
@@ -44,68 +44,53 @@ UCLASS()
 class UBEGameSettingRegistry : public UGameSettingRegistry
 {
 	GENERATED_BODY()
-
-	//======================================
-	//	初期化
-	//======================================
 public:
-	UBEGameSettingRegistry();
+	UBEGameSettingRegistry() {}
 
 protected:
 	virtual void OnInitialize(ULocalPlayer* InLocalPlayer) override;
 	virtual bool IsFinishedInitializing() const override;
 
+public:
+	/**
+	 * 設定を保存する
+	 */
+	virtual void SaveChanges() override;
+
+
 protected:
-	UPROPERTY()
-		UGameSettingCollection* ControlSettings;
+	UPROPERTY() UGameSettingCollection* ControlSettings;
+	UPROPERTY() UGameSettingCollection* VideoSettings;
+	UPROPERTY() UGameSettingCollection* GameplaySettings;
+	UPROPERTY() UGameSettingCollection* AudioSettings;
 
-	UPROPERTY()
-		UGameSettingCollection* VideoSettings;
-
-	UPROPERTY()
-		UGameSettingCollection* GameplaySettings;
-
-	UPROPERTY()
-		UGameSettingCollection* AudioSettings;
-
-
-	//======================================
-	//	設定コレクション定義
-	//======================================
 protected:
 	/**
 	 * コントロール設定カテゴリー
 	 */
-	UGameSettingCollection* InitializeControlSettings(UBELocalPlayer* InLocalPlayer);
-	void AddKeyBindSettingsPage(UGameSettingCollection* Screen, UBELocalPlayer* InLocalPlayer);
+	virtual UGameSettingCollection* InitializeControlSettings(UBELocalPlayer* InLocalPlayer);
+	virtual void AddKeyBindSettingsSection(UGameSettingCollection* Screen, UBELocalPlayer* InLocalPlayer);
+	virtual void AddKeyboardMouseSettingsSection(UGameSettingCollection* Screen, UBELocalPlayer* InLocalPlayer);
+	virtual void AddGamepadSettingsSection(UGameSettingCollection* Screen, UBELocalPlayer* InLocalPlayer);
+	virtual void AddControllerSharedSettingsSection(UGameSettingCollection* Screen, UBELocalPlayer* InLocalPlayer);
 
 
 	/**
 	 * ビデオ設定カテゴリー
 	 */
-	UGameSettingCollection* InitializeVideoSettings(UBELocalPlayer* InLocalPlayer);
+	virtual UGameSettingCollection* InitializeVideoSettings(UBELocalPlayer* InLocalPlayer);
 
 
 	/**
 	 * ゲームプレイ設定カテゴリー
 	 */
-	UGameSettingCollection* InitializeGameplaySettings(UBELocalPlayer* InLocalPlayer);
-	void AddSubtitleSettingsPage(UGameSettingCollection* Screen, UBELocalPlayer* InLocalPlayer);
-	void AddReticleSettingsPage(UGameSettingCollection* Screen, UBELocalPlayer* InLocalPlayer);
-	void AddPrefStatSettingsPage(UGameSettingCollection* Screen, UBELocalPlayer* InLocalPlayer);
+	virtual UGameSettingCollection* InitializeGameplaySettings(UBELocalPlayer* InLocalPlayer);
+	virtual void AddAccessibilitySettingsSection(UGameSettingCollection* Screen, UBELocalPlayer* InLocalPlayer);
+	virtual void AddPrefStatSettingsSection(UGameSettingCollection* Screen, UBELocalPlayer* InLocalPlayer);
 
 
 	/**
 	 * オーディオ設定カテゴリー
 	 */
-	UGameSettingCollection* InitializeAudioSettings(UBELocalPlayer* InLocalPlayer);
-
-
-	//======================================
-	//	ユーティリティ
-	//======================================
-public:
-	static UBEGameSettingRegistry* Get(UBELocalPlayer* InLocalPlayer);
-
-	virtual void SaveChanges() override;
+	virtual UGameSettingCollection* InitializeAudioSettings(UBELocalPlayer* InLocalPlayer);
 };

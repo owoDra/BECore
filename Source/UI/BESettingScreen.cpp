@@ -3,11 +3,13 @@
 
 #include "BESettingScreen.h"
 
+#include "Player/BELocalPlayer.h"
+#include "GameSetting/Registry/BEGameSettingRegistry.h"
+#include "Development/BEDeveloperGameSettings.h"
+
 #include "Containers/Array.h"
 #include "Delegates/Delegate.h"
 #include "Input/CommonUIInputTypes.h"
-#include "Player/BELocalPlayer.h"
-#include "GameSetting/Registry/BEGameSettingRegistry.h"
 #include "Templates/Casts.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BESettingScreen)
@@ -26,8 +28,34 @@ void UBESettingScreen::NativeOnInitialized()
 
 UGameSettingRegistry* UBESettingScreen::CreateRegistry()
 {
-	UBEGameSettingRegistry* NewRegistry = NewObject<UBEGameSettingRegistry>();
+	UBEGameSettingRegistry* NewRegistry = nullptr;
+	UClass* RegistryClass = nullptr;
 
+	// DevSetting ‚©‚ç Regstry ‚ÌƒNƒ‰ƒX‚ğæ“¾
+	const UBEDeveloperGameSettings* DevSettings = GetDefault<UBEDeveloperGameSettings>();
+	check(DevSettings);
+
+	FSoftClassPath RegistryClassPath = DevSettings->SettingRegistryClass;
+	if (RegistryClassPath.IsValid())
+	{
+		RegistryClass = RegistryClassPath.ResolveClass();
+		if (!RegistryClass)
+		{
+			RegistryClass = RegistryClassPath.TryLoadClass<UClass>();
+		}
+	}
+
+	// Regstry ‚ğì¬
+	if (RegistryClass)
+	{
+		NewRegistry = NewObject<UBEGameSettingRegistry>(RegistryClass);
+	}
+	else
+	{
+		NewRegistry = NewObject<UBEGameSettingRegistry>();
+	}
+
+	// Registy ‚ğ‰Šú‰»
 	if (UBELocalPlayer* LocalPlayer = CastChecked<UBELocalPlayer>(GetOwningLocalPlayer()))
 	{
 		NewRegistry->Initialize(LocalPlayer);

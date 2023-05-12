@@ -8,12 +8,12 @@
 
 
 /**
- * ABEReplayPlayerController
+ * ABEPlayerReplayController
  *
  *	リプレイのキャプチャと再生に使用される PlayerController
  */
 UCLASS()
-class ABEReplayPlayerController : public ABEPlayerController
+class ABEPlayerReplayController : public ABEPlayerController
 {
 	GENERATED_BODY()
 

@@ -3,7 +3,7 @@
 
 #include "BESafeZoneEditor.h"
 
-#include "GameSetting/BESettingsLocal.h"
+#include "GameSetting/BEGameDeviceSettings.h"
 
 #include "CommonButtonBase.h"
 #include "CommonRichTextBlock.h"
@@ -56,7 +56,7 @@ void UBESafeZoneEditor::NativeOnActivated()
 {
 	Super::NativeOnActivated();
 
-	SSafeZone::SetGlobalSafeZoneScale(UBESettingsLocal::Get()->GetSafeZone());
+	SSafeZone::SetGlobalSafeZoneScale(UBEGameDeviceSettings::Get()->GetSafeZone());
 	
 	Button_Done->OnClicked().AddUObject(this, &UBESafeZoneEditor::HandleDoneClicked);
 
@@ -107,7 +107,7 @@ void UBESafeZoneEditor::HandleInputModeChanged(ECommonInputType InInputType)
 void UBESafeZoneEditor::HandleBackClicked()
 {
 	DeactivateWidget();
-	SSafeZone::SetGlobalSafeZoneScale(UBESettingsLocal::Get()->GetSafeZone());
+	SSafeZone::SetGlobalSafeZoneScale(UBEGameDeviceSettings::Get()->GetSafeZone());
 }
 
 void UBESafeZoneEditor::HandleDoneClicked()
@@ -118,7 +118,7 @@ void UBESafeZoneEditor::HandleDoneClicked()
 	}
 	else
 	{
-		UBESettingsLocal::Get()->SetSafeZone(SSafeZone::GetGlobalSafeZoneScale().Get(1.0f));
+		UBEGameDeviceSettings::Get()->SetSafeZone(SSafeZone::GetGlobalSafeZoneScale().Get(1.0f));
 	}
 	OnSafeZoneSet.Broadcast();
 	DeactivateWidget();

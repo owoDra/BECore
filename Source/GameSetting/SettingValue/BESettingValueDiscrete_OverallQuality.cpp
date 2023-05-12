@@ -3,7 +3,7 @@
 
 #include "BESettingValueDiscrete_OverallQuality.h"
 
-#include "GameSetting/BESettingsLocal.h"
+#include "GameSetting/BEGameDeviceSettings.h"
 
 #include "CoreTypes.h"
 #include "Engine/Engine.h"
@@ -26,7 +26,7 @@ void UBESettingValueDiscrete_OverallQuality::OnInitialized()
 {
 	Super::OnInitialized();
 
-	UBESettingsLocal* UserSettings = UBESettingsLocal::Get();
+	UBEGameDeviceSettings* UserSettings = UBEGameDeviceSettings::Get();
 	const int32 MaxQualityLevel = UserSettings->GetMaxSupportedOverallQualityLevel();
 
 	auto AddOptionIfPossible = [&](int Index, FText&& Value) { if ((MaxQualityLevel < 0) || (Index <= MaxQualityLevel)) { Options.Add(Value); }};

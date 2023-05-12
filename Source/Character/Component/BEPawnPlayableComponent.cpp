@@ -12,7 +12,7 @@
 #include "Ability/BEAbilitySystemComponent.h"
 #include "Input/BEInputConfig.h"
 #include "Input/BEInputComponent.h"
-#include "GameSetting/BESettingsLocal.h"
+#include "GameSetting/BEGameDeviceSettings.h"
 #include "System/BEAssetManager.h"
 #include "BELogChannels.h"
 

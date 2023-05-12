@@ -5,7 +5,7 @@
 
 #include "Input/BEMappableConfigPair.h"
 #include "Player/BELocalPlayer.h"
-#include "GameSetting/BESettingsLocal.h"
+#include "GameSetting/BEGameDeviceSettings.h"
 
 #include "EnhancedInputSubsystems.h"
 #include "InputCoreTypes.h"
@@ -30,7 +30,7 @@ void UBEInputComponent::AddInputMappings(const UBEInputConfig* InputConfig, UEnh
 	check(LocalPlayer);
 
 	// Add any registered input mappings from the settings!
-	if (UBESettingsLocal* LocalSettings = UBESettingsLocal::Get())
+	if (UBEGameDeviceSettings* LocalSettings = UBEGameDeviceSettings::Get())
 	{
 		// Tell enhanced input about any custom keymappings that the player may have customized
 		for (const TPair<FName, FKey>& Pair : LocalSettings->GetCustomPlayerInputConfig())
@@ -51,7 +51,7 @@ void UBEInputComponent::RemoveInputMappings(const UBEInputConfig* InputConfig, U
 	UBELocalPlayer* LocalPlayer = InputSubsystem->GetLocalPlayer<UBELocalPlayer>();
 	check(LocalPlayer);
 	
-	if (UBESettingsLocal* LocalSettings = UBESettingsLocal::Get())
+	if (UBEGameDeviceSettings* LocalSettings = UBEGameDeviceSettings::Get())
 	{
 		// Remove any registered input contexts
 		const TArray<FLoadedMappableConfigPair>& Configs = LocalSettings->GetAllRegisteredInputConfigs();

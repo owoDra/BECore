@@ -2,26 +2,23 @@
 
 #include "BEGameSettingRegistry.h"
 
+#include "Player/BELocalPlayer.h"
+#include "GameSetting/BEGameDeviceSettings.h"
+#include "GameSetting/SettingValue/BESettingValueDiscreteDynamic_AudioOutputDevice.h"
+#include "Development/BEDevelopmentTags.h"
+
 #include "GameSetting.h"
 #include "GameSettingValueDiscreteDynamic.h"
 #include "GameSettingValueScalar.h"
 #include "GameSettingValueScalarDynamic.h"
 #include "GameSettingCollection.h"
 #include "GameSettingAction.h"
-
-#include "Player/BELocalPlayer.h"
-#include "GameSetting/BESettingsLocal.h"
-#include "GameSetting/BESettingsShared.h"
-
 #include "EditCondition/WhenPlayingAsPrimaryPlayer.h"
 #include "EditCondition/WhenPlatformHasTrait.h"
 #include "EditCondition/WhenCondition.h"
-#include "GameSetting/CustomSetting/BESettingValueDiscreteDynamic_AudioOutputDevice.h"
-#include "BEGameplayTags.h"
-#include "Development/BEDevelopmentTags.h"
+
 
 #define LOCTEXT_NAMESPACE "BE"
-
 
 ///////////////////////////////////////////////////
 //	オーディオ設定
@@ -51,9 +48,9 @@ UGameSettingCollection* UBEGameSettingRegistry::InitializeAudioSettings(UBELocal
 			Setting->SetDisplayName(LOCTEXT("OverallVolume_Name", "Overall"));
 			Setting->SetDescriptionRichText(LOCTEXT("OverallVolume_Description", "Adjusts the volume of everything."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetOverallVolume));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetOverallVolume));
-			Setting->SetDefaultValue(GetDefault<UBESettingsLocal>()->GetOverallVolume());
+			Setting->SetDynamicGetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(GetOverallVolume));
+			Setting->SetDynamicSetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(SetOverallVolume));
+			Setting->SetDefaultValue(GetDefault<UBEGameDeviceSettings>()->GetOverallVolume());
 			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::ZeroToOnePercent);
 
 			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
@@ -70,9 +67,9 @@ UGameSettingCollection* UBEGameSettingRegistry::InitializeAudioSettings(UBELocal
 			Setting->SetDisplayName(LOCTEXT("MusicVolume_Name", "Music"));
 			Setting->SetDescriptionRichText(LOCTEXT("MusicVolume_Description", "Adjusts the volume of music."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetMusicVolume));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetMusicVolume));
-			Setting->SetDefaultValue(GetDefault<UBESettingsLocal>()->GetMusicVolume());
+			Setting->SetDynamicGetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(GetMusicVolume));
+			Setting->SetDynamicSetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(SetMusicVolume));
+			Setting->SetDefaultValue(GetDefault<UBEGameDeviceSettings>()->GetMusicVolume());
 			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::ZeroToOnePercent);
 
 			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
@@ -89,9 +86,9 @@ UGameSettingCollection* UBEGameSettingRegistry::InitializeAudioSettings(UBELocal
 			Setting->SetDisplayName(LOCTEXT("SoundEffectsVolume_Name", "Sound Effects"));
 			Setting->SetDescriptionRichText(LOCTEXT("SoundEffectsVolume_Description", "Adjusts the volume of sound effects."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetSoundFXVolume));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetSoundFXVolume));
-			Setting->SetDefaultValue(GetDefault<UBESettingsLocal>()->GetSoundFXVolume());
+			Setting->SetDynamicGetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(GetSoundFXVolume));
+			Setting->SetDynamicSetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(SetSoundFXVolume));
+			Setting->SetDefaultValue(GetDefault<UBEGameDeviceSettings>()->GetSoundFXVolume());
 			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::ZeroToOnePercent);
 
 			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
@@ -108,9 +105,9 @@ UGameSettingCollection* UBEGameSettingRegistry::InitializeAudioSettings(UBELocal
 			Setting->SetDisplayName(LOCTEXT("DialogueVolume_Name", "Dialogue"));
 			Setting->SetDescriptionRichText(LOCTEXT("DialogueVolume_Description", "Adjusts the volume of dialogue for game characters and voice overs."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetDialogueVolume));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetDialogueVolume));
-			Setting->SetDefaultValue(GetDefault<UBESettingsLocal>()->GetDialogueVolume());
+			Setting->SetDynamicGetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(GetDialogueVolume));
+			Setting->SetDynamicSetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(SetDialogueVolume));
+			Setting->SetDefaultValue(GetDefault<UBEGameDeviceSettings>()->GetDialogueVolume());
 			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::ZeroToOnePercent);
 
 			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
@@ -127,9 +124,9 @@ UGameSettingCollection* UBEGameSettingRegistry::InitializeAudioSettings(UBELocal
 			Setting->SetDisplayName(LOCTEXT("VoiceChatVolume_Name", "Voice Chat"));
 			Setting->SetDescriptionRichText(LOCTEXT("VoiceChatVolume_Description", "Adjusts the volume of voice chat."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetVoiceChatVolume));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetVoiceChatVolume));
-			Setting->SetDefaultValue(GetDefault<UBESettingsLocal>()->GetVoiceChatVolume());
+			Setting->SetDynamicGetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(GetVoiceChatVolume));
+			Setting->SetDynamicSetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(SetVoiceChatVolume));
+			Setting->SetDefaultValue(GetDefault<UBEGameDeviceSettings>()->GetVoiceChatVolume());
 			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::ZeroToOnePercent);
 
 			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
@@ -156,8 +153,8 @@ UGameSettingCollection* UBEGameSettingRegistry::InitializeAudioSettings(UBELocal
 			Setting->SetDisplayName(LOCTEXT("AudioOutputDevice_Name", "Audio Output Device"));
 			Setting->SetDescriptionRichText(LOCTEXT("AudioOutputDevice_Description", "Changes the audio output device for game audio (not voice chat)."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetAudioOutputDeviceId));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetAudioOutputDeviceId));
+			Setting->SetDynamicGetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(GetAudioOutputDeviceId));
+			Setting->SetDynamicSetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(SetAudioOutputDeviceId));
 
 			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
 			Setting->AddEditCondition(FWhenPlatformHasTrait::KillIfMissing(
@@ -177,9 +174,9 @@ UGameSettingCollection* UBEGameSettingRegistry::InitializeAudioSettings(UBELocal
 			Setting->SetDisplayName(LOCTEXT("BackgroundAudio_Name", "Background Audio"));
 			Setting->SetDescriptionRichText(LOCTEXT("BackgroundAudio_Description", "Turns game audio on/off when the game is in the background. When on, the game audio will continue to play when the game is minimized, or another window is focused."));
 
-			Setting->SetDynamicGetter(GET_SHARED_SETTINGS_FUNCTION_PATH(GetAllowAudioInBackgroundSetting));
-			Setting->SetDynamicSetter(GET_SHARED_SETTINGS_FUNCTION_PATH(SetAllowAudioInBackgroundSetting));
-			Setting->SetDefaultValue(GetDefault<UBESettingsShared>()->GetAllowAudioInBackgroundSetting());
+			Setting->SetDynamicGetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(GetAllowAudioInBackgroundSetting));
+			Setting->SetDynamicSetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(SetAllowAudioInBackgroundSetting));
+			Setting->SetDefaultValue(GetDefault<UBEGameDeviceSettings>()->GetAllowAudioInBackgroundSetting());
 
 			Setting->AddEnumOption(EBEAllowBackgroundAudioSetting::Off, LOCTEXT("EBEAllowBackgroundAudioSetting_Off", "Off"));
 			Setting->AddEnumOption(EBEAllowBackgroundAudioSetting::AllSounds, LOCTEXT("EBEAllowBackgroundAudioSetting_AllSounds", "All Sounds"));
@@ -202,14 +199,14 @@ UGameSettingCollection* UBEGameSettingRegistry::InitializeAudioSettings(UBELocal
 			Setting->SetDisplayName(LOCTEXT("HeadphoneMode_Name", "3D Surround"));
 			Setting->SetDescriptionRichText(LOCTEXT("HeadphoneMode_Description", "Enable binaural audio.  Provides 3D audio spatialization, so you can hear the location of sounds more precisely, including above, below, and behind you. Recommended for use with stereo headphones only."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(bDesiredHeadphoneMode));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(bDesiredHeadphoneMode));
-			Setting->SetDefaultValue(GetDefault<UBESettingsLocal>()->IsHeadphoneModeEnabled());
+			Setting->SetDynamicGetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(bDesiredHeadphoneMode));
+			Setting->SetDynamicSetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(bDesiredHeadphoneMode));
+			Setting->SetDefaultValue(GetDefault<UBEGameDeviceSettings>()->IsHeadphoneModeEnabled());
 
 			Setting->AddEditCondition(MakeShared<FWhenCondition>(
 				[](const ULocalPlayer*, FGameSettingEditableState& InOutEditState)
 				{
-					if (!GetDefault<UBESettingsLocal>()->CanModifyHeadphoneModeEnabled())
+					if (!GetDefault<UBEGameDeviceSettings>()->CanModifyHeadphoneModeEnabled())
 					{
 						InOutEditState.Kill(TEXT("Binaural Spatialization option cannot be modified on this platform"));
 					}
@@ -229,9 +226,9 @@ UGameSettingCollection* UBEGameSettingRegistry::InitializeAudioSettings(UBELocal
 			Setting->SetDisplayName(LOCTEXT("HDRAudioMode_Name", "High Dynamic Range Audio"));
 			Setting->SetDescriptionRichText(LOCTEXT("HDRAudioMode_Description", "Enable high dynamic range audio. Changes the runtime processing chain to increase the dynamic range of the audio mixdown, appropriate for theater or more cinematic experiences."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(IsHDRAudioModeEnabled));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetHDRAudioModeEnabled));
-			Setting->SetDefaultValue(GetDefault<UBESettingsLocal>()->IsHDRAudioModeEnabled());
+			Setting->SetDynamicGetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(IsHDRAudioModeEnabled));
+			Setting->SetDynamicSetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(SetHDRAudioModeEnabled));
+			Setting->SetDefaultValue(GetDefault<UBEGameDeviceSettings>()->IsHDRAudioModeEnabled());
 
 			Setting->AddEditCondition(FWhenPlayingAsPrimaryPlayer::Get());
 

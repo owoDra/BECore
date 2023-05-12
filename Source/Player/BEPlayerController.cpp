@@ -11,7 +11,7 @@
 #include "Character/BEPawnData.h"
 #include "Ability/BEAbilitySystemComponent.h"
 #include "BELocalPlayer.h"
-#include "GameSetting/BESettingsShared.h"
+#include "GameSetting/BEGameSharedSettings.h"
 #include "Development/BEDeveloperCheatSettings.h"
 #include "BEGameplayTags.h"
 
@@ -116,7 +116,7 @@ void ABEPlayerController::SetPlayer(UPlayer* InPlayer)
 
 	if (const UBELocalPlayer* BELocalPlayer = Cast<UBELocalPlayer>(InPlayer))
 	{
-		UBESettingsShared* UserSettings = BELocalPlayer->GetSharedSettings();
+		UBEGameSharedSettings* UserSettings = BELocalPlayer->GetSharedSettings();
 		UserSettings->OnSettingChanged.AddUObject(this, &ThisClass::OnSettingsChanged);
 
 		OnSettingsChanged(UserSettings);
@@ -219,6 +219,12 @@ void ABEPlayerController::PostProcessInput(const float DeltaTime, const bool bGa
 	}
 
 	Super::PostProcessInput(DeltaTime, bGamePaused);
+}
+
+
+void ABEPlayerController::OnSettingsChanged(UBEGameSharedSettings* Settings)
+{
+	bForceFeedbackEnabled = Settings->GetForceFeedbackEnabled();
 }
 
 

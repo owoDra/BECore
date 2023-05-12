@@ -1,7 +1,16 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 // Copyright Eigi Chin
 
-#include "BESettingsLocal.h"
+#include "BEGameDeviceSettings.h"
+
+#include "Player/BELocalPlayer.h"
+#include "Audio/BEAudioSettings.h"
+#include "Audio/BEAudioMixEffectsSubsystem.h"
+#include "Performance/BEPerformanceSettings.h"
+#include "Development/BEDeveloperPlatformSettings.h"
+#include "Development/BEDevelopmentTags.h"
+#include "BELogChannels.h"
+
 #include "Sound/SoundClass.h"
 #include "AudioDeviceManager.h"
 #include "AudioDevice.h"
@@ -13,23 +22,17 @@
 #include "CommonInputBaseTypes.h"
 #include "SoundControlBus.h"
 #include "AudioModulationStatics.h"
-#include "Audio/BEAudioSettings.h"
-#include "Audio/BEAudioMixEffectsSubsystem.h"
-#include "BELogChannels.h"
-#include "Player/BELocalPlayer.h"
-#include "BEGameplayTags.h"
-#include "Development/BEDevelopmentTags.h"
 #include "ICommonUIModule.h"
 #include "CommonUISettings.h"
 #include "Widgets/Layout/SSafeZone.h"
 #include "ProfilingDebugging/CsvProfiler.h"
-#include "Performance/BEPerformanceSettings.h"
 #include "DeviceProfiles/DeviceProfileManager.h"
 #include "DeviceProfiles/DeviceProfile.h"
 #include "HAL/PlatformFramePacer.h"
-#include "Development/BEDeveloperPlatformSettings.h"
+#include "Framework/Application/SlateApplication.h"
 
-#include UE_INLINE_GENERATED_CPP_BY_NAME(BESettingsLocal)
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(BEGameDeviceSettings)
 
 ////////////////////////////////////////
 //	コンソール変数定義
@@ -156,9 +159,9 @@ namespace BESettingsHelpers
 
 
 ////////////////////////////////////////
-//	BESettingsLocal : 初期化
+//	BEGameDeviceSettings : 初期化
 
-UBESettingsLocal::UBESettingsLocal()
+UBEGameDeviceSettings::UBEGameDeviceSettings()
 {
 	if (!HasAnyFlags(RF_ClassDefaultObject) && FSlateApplication::IsInitialized())
 	{
@@ -168,7 +171,7 @@ UBESettingsLocal::UBESettingsLocal()
 	SetToDefaults();
 }
 
-void UBESettingsLocal::SetToDefaults()
+void UBEGameDeviceSettings::SetToDefaults()
 {
 	Super::SetToDefaults();
 
@@ -185,7 +188,7 @@ void UBESettingsLocal::SetToDefaults()
 	FrameRateLimit_OnBattery = 60.0f;
 }
 
-void UBESettingsLocal::LoadSettings(bool bForceReload)
+void UBEGameDeviceSettings::LoadSettings(bool bForceReload)
 {
 	Super::LoadSettings(bForceReload);
 
@@ -208,7 +211,7 @@ void UBESettingsLocal::LoadSettings(bool bForceReload)
 	OnPerfStatSettingsChangedEvent.Broadcast();
 }
 
-void UBESettingsLocal::BeginDestroy()
+void UBEGameDeviceSettings::BeginDestroy()
 {
 	if (FSlateApplication::IsInitialized())
 	{
@@ -218,17 +221,17 @@ void UBESettingsLocal::BeginDestroy()
 	Super::BeginDestroy();
 }
 
-void UBESettingsLocal::OnExperienceLoaded()
+void UBEGameDeviceSettings::OnExperienceLoaded()
 {
 	ReapplyThingsDueToPossibleDeviceProfileChange();
 }
 
-void UBESettingsLocal::OnHotfixDeviceProfileApplied()
+void UBEGameDeviceSettings::OnHotfixDeviceProfileApplied()
 {
 	ReapplyThingsDueToPossibleDeviceProfileChange();
 }
 
-void UBESettingsLocal::LoadUserControlBusMix()
+void UBEGameDeviceSettings::LoadUserControlBusMix()
 {
 	if (GEngine)
 	{
@@ -344,9 +347,9 @@ void UBESettingsLocal::LoadUserControlBusMix()
 
 
 ////////////////////////////////////////
-//	BESettingsLocal : データ
+//	BEGameDeviceSettings : データ
 
-EBEStatDisplayMode UBESettingsLocal::GetPerfStatDisplayState(EBEDisplayablePerformanceStat Stat) const
+EBEStatDisplayMode UBEGameDeviceSettings::GetPerfStatDisplayState(EBEDisplayablePerformanceStat Stat) const
 {
 	if (const EBEStatDisplayMode* pMode = DisplayStatList.Find(Stat))
 	{
@@ -358,7 +361,7 @@ EBEStatDisplayMode UBESettingsLocal::GetPerfStatDisplayState(EBEDisplayablePerfo
 	}
 }
 
-void UBESettingsLocal::SetPerfStatDisplayState(EBEDisplayablePerformanceStat Stat, EBEStatDisplayMode DisplayMode)
+void UBEGameDeviceSettings::SetPerfStatDisplayState(EBEDisplayablePerformanceStat Stat, EBEStatDisplayMode DisplayMode)
 {
 	if (DisplayMode == EBEStatDisplayMode::Hidden)
 	{
@@ -371,7 +374,7 @@ void UBESettingsLocal::SetPerfStatDisplayState(EBEDisplayablePerformanceStat Sta
 	OnPerfStatSettingsChangedEvent.Broadcast();
 }
 
-void UBESettingsLocal::SetControllerPlatform(const FName InControllerPlatform)
+void UBEGameDeviceSettings::SetControllerPlatform(const FName InControllerPlatform)
 {
 	if (ControllerPlatform != InControllerPlatform)
 	{
@@ -385,24 +388,24 @@ void UBESettingsLocal::SetControllerPlatform(const FName InControllerPlatform)
 	}
 }
 
-void UBESettingsLocal::ApplySafeZoneScale()
+void UBEGameDeviceSettings::ApplySafeZoneScale()
 {
 	SSafeZone::SetGlobalSafeZoneScale(GetSafeZone());
 }
 
-void UBESettingsLocal::SetSafeZone(float Value)
+void UBEGameDeviceSettings::SetSafeZone(float Value)
 {
 	SafeZoneScale = Value; 
 	ApplySafeZoneScale();
 }
 
-void UBESettingsLocal::SetDisplayGamma(float InGamma)
+void UBEGameDeviceSettings::SetDisplayGamma(float InGamma)
 {
 	DisplayGamma = InGamma;
 	ApplyDisplayGamma();
 }
 
-void UBESettingsLocal::ApplyDisplayGamma()
+void UBEGameDeviceSettings::ApplyDisplayGamma()
 {
 	if (GEngine)
 	{
@@ -410,12 +413,12 @@ void UBESettingsLocal::ApplyDisplayGamma()
 	}
 }
 
-int32 UBESettingsLocal::GetOverallScalabilityLevel() const
+int32 UBEGameDeviceSettings::GetOverallScalabilityLevel() const
 {
 	return Super::GetOverallScalabilityLevel();
 }
 
-void UBESettingsLocal::SetOverallScalabilityLevel(int32 Value)
+void UBEGameDeviceSettings::SetOverallScalabilityLevel(int32 Value)
 {
 	TGuardValue Guard(bSettingOverallQualityGuard, true);
 
@@ -424,47 +427,47 @@ void UBESettingsLocal::SetOverallScalabilityLevel(int32 Value)
 	Super::SetOverallScalabilityLevel(Value);
 }
 
-void UBESettingsLocal::ApplyScalabilitySettings()
+void UBEGameDeviceSettings::ApplyScalabilitySettings()
 {
 	Scalability::SetQualityLevels(ScalabilityQuality);
 }
 
-void UBESettingsLocal::SetFrameRateLimit_OnBattery(float NewLimitFPS)
+void UBEGameDeviceSettings::SetFrameRateLimit_OnBattery(float NewLimitFPS)
 {
 	FrameRateLimit_OnBattery = NewLimitFPS;
 	UpdateEffectiveFrameRateLimit();
 }
 
-void UBESettingsLocal::SetFrameRateLimit_InMenu(float NewLimitFPS)
+void UBEGameDeviceSettings::SetFrameRateLimit_InMenu(float NewLimitFPS)
 {
 	FrameRateLimit_InMenu = NewLimitFPS;
 	UpdateEffectiveFrameRateLimit();
 }
 
-void UBESettingsLocal::SetFrameRateLimit_WhenBackgrounded(float NewLimitFPS)
+void UBEGameDeviceSettings::SetFrameRateLimit_WhenBackgrounded(float NewLimitFPS)
 {
 	FrameRateLimit_WhenBackgrounded = NewLimitFPS;
 	UpdateEffectiveFrameRateLimit();
 }
 
-float UBESettingsLocal::GetFrameRateLimit_Always() const
+float UBEGameDeviceSettings::GetFrameRateLimit_Always() const
 {
 	return GetFrameRateLimit();
 }
 
-void UBESettingsLocal::SetFrameRateLimit_Always(float NewLimitFPS)
+void UBEGameDeviceSettings::SetFrameRateLimit_Always(float NewLimitFPS)
 {
 	SetFrameRateLimit(NewLimitFPS);
 	UpdateEffectiveFrameRateLimit();
 }
 
-void UBESettingsLocal::SetAudioOutputDeviceId(const FString& InAudioOutputDeviceId)
+void UBEGameDeviceSettings::SetAudioOutputDeviceId(const FString& InAudioOutputDeviceId)
 {
 	AudioOutputDeviceId = InAudioOutputDeviceId;
 	OnAudioOutputDeviceChanged.Broadcast(InAudioOutputDeviceId);
 }
 
-void UBESettingsLocal::SetOverallVolume(float InVolume)
+void UBEGameDeviceSettings::SetOverallVolume(float InVolume)
 {
 	// Cache the incoming volume value
 	OverallVolume = InVolume;
@@ -489,7 +492,7 @@ void UBESettingsLocal::SetOverallVolume(float InVolume)
 	}
 }
 
-void UBESettingsLocal::SetMusicVolume(float InVolume)
+void UBEGameDeviceSettings::SetMusicVolume(float InVolume)
 {
 	// Cache the incoming volume value
 	MusicVolume = InVolume;
@@ -514,7 +517,7 @@ void UBESettingsLocal::SetMusicVolume(float InVolume)
 	}
 }
 
-void UBESettingsLocal::SetSoundFXVolume(float InVolume)
+void UBEGameDeviceSettings::SetSoundFXVolume(float InVolume)
 {
 	// Cache the incoming volume value
 	SoundFXVolume = InVolume;
@@ -539,7 +542,7 @@ void UBESettingsLocal::SetSoundFXVolume(float InVolume)
 	}
 }
 
-void UBESettingsLocal::SetDialogueVolume(float InVolume)
+void UBEGameDeviceSettings::SetDialogueVolume(float InVolume)
 {
 	// Cache the incoming volume value
 	DialogueVolume = InVolume;
@@ -564,7 +567,7 @@ void UBESettingsLocal::SetDialogueVolume(float InVolume)
 	}
 }
 
-void UBESettingsLocal::SetVoiceChatVolume(float InVolume)
+void UBEGameDeviceSettings::SetVoiceChatVolume(float InVolume)
 {
 	// Cache the incoming volume value
 	VoiceChatVolume = InVolume;
@@ -589,7 +592,7 @@ void UBESettingsLocal::SetVoiceChatVolume(float InVolume)
 	}
 }
 
-void UBESettingsLocal::SetHeadphoneModeEnabled(bool bEnabled)
+void UBEGameDeviceSettings::SetHeadphoneModeEnabled(bool bEnabled)
 {
 	if (CanModifyHeadphoneModeEnabled())
 	{
@@ -608,7 +611,7 @@ void UBESettingsLocal::SetHeadphoneModeEnabled(bool bEnabled)
 	}
 }
 
-bool UBESettingsLocal::CanModifyHeadphoneModeEnabled() const
+bool UBEGameDeviceSettings::CanModifyHeadphoneModeEnabled() const
 {
 	static IConsoleVariable* BinauralSpatializationDisabledCVar = IConsoleManager::Get().FindConsoleVariable(TEXT("au.DisableBinauralSpatialization"));
 	const bool bHRTFOptionAvailable = BinauralSpatializationDisabledCVar && ((BinauralSpatializationDisabledCVar->GetFlags() & EConsoleVariableFlags::ECVF_SetByMask) <= EConsoleVariableFlags::ECVF_SetByGameSetting);
@@ -618,7 +621,7 @@ bool UBESettingsLocal::CanModifyHeadphoneModeEnabled() const
 	return bHRTFOptionAvailable && !bBinauralSettingControlledByOS;
 }
 
-void UBESettingsLocal::SetHDRAudioModeEnabled(bool bEnabled)
+void UBEGameDeviceSettings::SetHDRAudioModeEnabled(bool bEnabled)
 {
 	bUseHDRAudioMode = bEnabled;
 
@@ -635,10 +638,26 @@ void UBESettingsLocal::SetHDRAudioModeEnabled(bool bEnabled)
 }
 
 
-////////////////////////////////////////
-//	BESettingsLocal : 操作
+void UBEGameDeviceSettings::SetAllowAudioInBackgroundSetting(EBEAllowBackgroundAudioSetting NewValue)
+{
+	AllowAudioInBackground = NewValue;
+	ApplyAudioSettings();
+}
 
-void UBESettingsLocal::ResetToCurrentSettings()
+void UBEGameDeviceSettings::ApplyAudioSettings()
+{
+	ULocalPlayer* LP = GetTypedOuter<ULocalPlayer>();
+	if (LP && LP->IsPrimaryPlayer())
+	{
+		FApp::SetUnfocusedVolumeMultiplier((AllowAudioInBackground != EBEAllowBackgroundAudioSetting::Off) ? 1.0f : 0.0f);
+	}
+}
+
+
+////////////////////////////////////////
+//	BEGameDeviceSettings : 操作
+
+void UBEGameDeviceSettings::ResetToCurrentSettings()
 {
 	Super::ResetToCurrentSettings();
 
@@ -647,7 +666,7 @@ void UBESettingsLocal::ResetToCurrentSettings()
 	UserChosenDeviceProfileSuffix = DesiredUserChosenDeviceProfileSuffix;
 }
 
-void UBESettingsLocal::ApplyNonResolutionSettings()
+void UBEGameDeviceSettings::ApplyNonResolutionSettings()
 {
 	Super::ApplyNonResolutionSettings();
 
@@ -726,7 +745,7 @@ void UBESettingsLocal::ApplyNonResolutionSettings()
 	OnPerfStatSettingsChangedEvent.Broadcast();
 }
 
-void UBESettingsLocal::UpdateEffectiveFrameRateLimit()
+void UBEGameDeviceSettings::UpdateEffectiveFrameRateLimit()
 {
 	if (!IsRunningDedicatedServer())
 	{
@@ -734,7 +753,7 @@ void UBESettingsLocal::UpdateEffectiveFrameRateLimit()
 	}
 }
 
-void UBESettingsLocal::UpdateGameModeDeviceProfileAndFps()
+void UBEGameDeviceSettings::UpdateGameModeDeviceProfileAndFps()
 {
 #if WITH_EDITOR
 	if (GIsEditor && !CVarApplyDeviceProfilesInPIE.GetValueOnGameThread())
@@ -885,7 +904,7 @@ void UBESettingsLocal::UpdateGameModeDeviceProfileAndFps()
 	}
 }
 
-void UBESettingsLocal::UpdateConsoleFramePacing()
+void UBEGameDeviceSettings::UpdateConsoleFramePacing()
 {
 	// Apply device-profile-driven frame sync and frame pace
 	const int32 FrameSyncType = CVarDeviceProfileDrivenFrameSyncType.GetValueOnGameThread();
@@ -909,7 +928,7 @@ void UBESettingsLocal::UpdateConsoleFramePacing()
 	}
 }
 
-void UBESettingsLocal::UpdateDesktopFramePacing()
+void UBEGameDeviceSettings::UpdateDesktopFramePacing()
 {
 	// For desktop the frame rate limit is handled by the parent class based on the value already
 	// applied via UpdateEffectiveFrameRateLimit()
@@ -920,7 +939,7 @@ void UBESettingsLocal::UpdateDesktopFramePacing()
 	UpdateDynamicResFrameTime(ClampedFPS);
 }
 
-void UBESettingsLocal::UpdateDynamicResFrameTime(float TargetFPS)
+void UBEGameDeviceSettings::UpdateDynamicResFrameTime(float TargetFPS)
 {
 	static IConsoleVariable* CVarDyResFrameTimeBudget = IConsoleManager::Get().FindConsoleVariable(TEXT("r.DynamicRes.FrameTimeBudget"));
 	if (CVarDyResFrameTimeBudget)
@@ -933,13 +952,13 @@ void UBESettingsLocal::UpdateDynamicResFrameTime(float TargetFPS)
 	}
 }
 
-bool UBESettingsLocal::CanRunAutoBenchmark() const
+bool UBEGameDeviceSettings::CanRunAutoBenchmark() const
 {
 	const UBEPlatformSpecificRenderingSettings* PlatformSettings = UBEPlatformSpecificRenderingSettings::Get();
 	return PlatformSettings->bSupportsAutomaticVideoQualityBenchmark;
 }
 
-bool UBESettingsLocal::ShouldRunAutoBenchmarkAtStartup() const
+bool UBEGameDeviceSettings::ShouldRunAutoBenchmarkAtStartup() const
 {
 	if (!CanRunAutoBenchmark())
 	{
@@ -955,7 +974,7 @@ bool UBESettingsLocal::ShouldRunAutoBenchmarkAtStartup() const
 	return true;
 }
 
-void UBESettingsLocal::RunAutoBenchmark(bool bSaveImmediately)
+void UBEGameDeviceSettings::RunAutoBenchmark(bool bSaveImmediately)
 {
 	RunHardwareBenchmark();
 
@@ -968,7 +987,7 @@ void UBESettingsLocal::RunAutoBenchmark(bool bSaveImmediately)
 	}
 }
 
-void UBESettingsLocal::RegisterInputConfig(ECommonInputType Type, const UPlayerMappableInputConfig* NewConfig, const bool bIsActive)
+void UBEGameDeviceSettings::RegisterInputConfig(ECommonInputType Type, const UPlayerMappableInputConfig* NewConfig, const bool bIsActive)
 {
 	if (NewConfig)
 	{
@@ -984,7 +1003,7 @@ void UBESettingsLocal::RegisterInputConfig(ECommonInputType Type, const UPlayerM
 	}
 }
 
-int32 UBESettingsLocal::UnregisterInputConfig(const UPlayerMappableInputConfig* ConfigToRemove)
+int32 UBEGameDeviceSettings::UnregisterInputConfig(const UPlayerMappableInputConfig* ConfigToRemove)
 {
 	if (ConfigToRemove)
 	{
@@ -999,7 +1018,7 @@ int32 UBESettingsLocal::UnregisterInputConfig(const UPlayerMappableInputConfig* 
 	return INDEX_NONE;
 }
 
-void UBESettingsLocal::GetRegisteredInputConfigsOfType(ECommonInputType Type, TArray<FLoadedMappableConfigPair>& OutArray) const
+void UBEGameDeviceSettings::GetRegisteredInputConfigsOfType(ECommonInputType Type, TArray<FLoadedMappableConfigPair>& OutArray) const
 {
 	OutArray.Empty();
 
@@ -1019,7 +1038,7 @@ void UBESettingsLocal::GetRegisteredInputConfigsOfType(ECommonInputType Type, TA
 	}
 }
 
-void UBESettingsLocal::GetAllMappingNamesFromKey(const FKey InKey, TArray<FName>& OutActionNames)
+void UBEGameDeviceSettings::GetAllMappingNamesFromKey(const FKey InKey, TArray<FName>& OutActionNames)
 {
 	if (InKey == EKeys::Invalid)
 	{
@@ -1055,7 +1074,7 @@ void UBESettingsLocal::GetAllMappingNamesFromKey(const FKey InKey, TArray<FName>
 	}
 }
 
-void UBESettingsLocal::AddOrUpdateCustomKeyboardBindings(const FName MappingName, const FKey NewKey, UBELocalPlayer* LocalPlayer)
+void UBEGameDeviceSettings::AddOrUpdateCustomKeyboardBindings(const FName MappingName, const FKey NewKey, UBELocalPlayer* LocalPlayer)
 {
 	if (MappingName == NAME_None)
 	{
@@ -1098,7 +1117,7 @@ void UBESettingsLocal::AddOrUpdateCustomKeyboardBindings(const FName MappingName
 	}
 }
 
-void UBESettingsLocal::ResetKeybindingToDefault(const FName MappingName, UBELocalPlayer* LocalPlayer)
+void UBEGameDeviceSettings::ResetKeybindingToDefault(const FName MappingName, UBELocalPlayer* LocalPlayer)
 {
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer))
 	{
@@ -1106,7 +1125,7 @@ void UBESettingsLocal::ResetKeybindingToDefault(const FName MappingName, UBELoca
 	}
 }
 
-void UBESettingsLocal::ResetKeybindingsToDefault(UBELocalPlayer* LocalPlayer)
+void UBEGameDeviceSettings::ResetKeybindingsToDefault(UBELocalPlayer* LocalPlayer)
 {
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer))
 	{
@@ -1116,20 +1135,20 @@ void UBESettingsLocal::ResetKeybindingsToDefault(UBELocalPlayer* LocalPlayer)
 
 
 ////////////////////////////////////////
-//	BESettingsLocal : ユーティリティ
+//	BEGameDeviceSettings : ユーティリティ
 
-UBESettingsLocal* UBESettingsLocal::Get()
+UBEGameDeviceSettings* UBEGameDeviceSettings::Get()
 {
-	return GEngine ? CastChecked<UBESettingsLocal>(GEngine->GetGameUserSettings()) : nullptr;
+	return GEngine ? CastChecked<UBEGameDeviceSettings>(GEngine->GetGameUserSettings()) : nullptr;
 }
 
-void UBESettingsLocal::SetShouldUseFrontendPerformanceSettings(bool bInFrontEnd)
+void UBEGameDeviceSettings::SetShouldUseFrontendPerformanceSettings(bool bInFrontEnd)
 {
 	bInFrontEndForPerformancePurposes = bInFrontEnd;
 	UpdateEffectiveFrameRateLimit();
 }
 
-bool UBESettingsLocal::ShouldUseFrontendPerformanceSettings() const
+bool UBEGameDeviceSettings::ShouldUseFrontendPerformanceSettings() const
 {
 #if WITH_EDITOR
 	if (GIsEditor && !CVarApplyFrontEndPerformanceOptionsInPIE.GetValueOnGameThread())
@@ -1141,7 +1160,7 @@ bool UBESettingsLocal::ShouldUseFrontendPerformanceSettings() const
 	return bInFrontEndForPerformancePurposes;
 }
 
-int32 UBESettingsLocal::GetMaxSupportedOverallQualityLevel() const
+int32 UBEGameDeviceSettings::GetMaxSupportedOverallQualityLevel() const
 {
 	if (DeviceDefaultScalabilitySettings.bHasOverrides)
 	{
@@ -1153,7 +1172,7 @@ int32 UBESettingsLocal::GetMaxSupportedOverallQualityLevel() const
 	}
 }
 
-void UBESettingsLocal::SetVolumeForControlBus(USoundControlBus* InSoundControlBus, float InVolume)
+void UBEGameDeviceSettings::SetVolumeForControlBus(USoundControlBus* InSoundControlBus, float InVolume)
 {
 	// Check to see if references to the control buses and control bus mixes have been loaded yet
 	// Will likely need to be loaded if this function is the first time a setter has been called
@@ -1190,7 +1209,7 @@ void UBESettingsLocal::SetVolumeForControlBus(USoundControlBus* InSoundControlBu
 	}
 }
 
-const UPlayerMappableInputConfig* UBESettingsLocal::GetInputConfigByName(FName ConfigName) const
+const UPlayerMappableInputConfig* UBEGameDeviceSettings::GetInputConfigByName(FName ConfigName) const
 {
 	for (const FLoadedMappableConfigPair& Pair : RegisteredInputConfigs)
 	{
@@ -1202,7 +1221,7 @@ const UPlayerMappableInputConfig* UBESettingsLocal::GetInputConfigByName(FName C
 	return nullptr;
 }
 
-float UBESettingsLocal::GetEffectiveFrameRateLimit()
+float UBEGameDeviceSettings::GetEffectiveFrameRateLimit()
 {
 	const UBEPlatformSpecificRenderingSettings* PlatformSettings = UBEPlatformSpecificRenderingSettings::Get();
 
@@ -1243,15 +1262,15 @@ float UBESettingsLocal::GetEffectiveFrameRateLimit()
 
 
 ////////////////////////////////////////
-//	BESettingsLocal : イベント
+//	BEGameDeviceSettings : イベント
 
-void UBESettingsLocal::OnAppActivationStateChanged(bool bIsActive)
+void UBEGameDeviceSettings::OnAppActivationStateChanged(bool bIsActive)
 {
 	// We might want to adjust the frame rate when the app loses/gains focus on multi-window platforms
 	UpdateEffectiveFrameRateLimit();
 }
 
-void UBESettingsLocal::ReapplyThingsDueToPossibleDeviceProfileChange()
+void UBEGameDeviceSettings::ReapplyThingsDueToPossibleDeviceProfileChange()
 {
 	ApplyNonResolutionSettings();
 }

@@ -219,14 +219,6 @@ UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Camera_Type_Death);
 
 
 // =================================
-//  ゲーム設定
-// =================================
-
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_GameSettings_Action_EditSafeZone);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_GameSettings_Action_EditBrightness);
-
-
-// =================================
 //  SetByCaller
 // =================================
 

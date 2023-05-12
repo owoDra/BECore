@@ -3,7 +3,7 @@
 
 #include "BESettingValueDiscrete_PerfStat.h"
 
-#include "GameSetting/BESettingsLocal.h"
+#include "GameSetting/BEGameDeviceSettings.h"
 #include "Performance/BEPerformanceSettings.h"
 
 #include "CommonUIVisibilitySubsystem.h"
@@ -98,20 +98,20 @@ void UBESettingValueDiscrete_PerfStat::OnInitialized()
 
 void UBESettingValueDiscrete_PerfStat::StoreInitial()
 {
-	const UBESettingsLocal* Settings = UBESettingsLocal::Get();
+	const UBEGameDeviceSettings* Settings = UBEGameDeviceSettings::Get();
 	InitialMode = Settings->GetPerfStatDisplayState(StatToDisplay);
 }
 
 void UBESettingValueDiscrete_PerfStat::ResetToDefault()
 {
-	UBESettingsLocal* Settings = UBESettingsLocal::Get();
+	UBEGameDeviceSettings* Settings = UBEGameDeviceSettings::Get();
 	Settings->SetPerfStatDisplayState(StatToDisplay, EBEStatDisplayMode::Hidden);
 	NotifySettingChanged(EGameSettingChangeReason::ResetToDefault);
 }
 
 void UBESettingValueDiscrete_PerfStat::RestoreToInitial()
 {
-	UBESettingsLocal* Settings = UBESettingsLocal::Get();
+	UBEGameDeviceSettings* Settings = UBEGameDeviceSettings::Get();
 	Settings->SetPerfStatDisplayState(StatToDisplay, InitialMode);
 	NotifySettingChanged(EGameSettingChangeReason::RestoreToInitial);
 }
@@ -122,7 +122,7 @@ void UBESettingValueDiscrete_PerfStat::SetDiscreteOptionByIndex(int32 Index)
 	{
 		const EBEStatDisplayMode DisplayMode = DisplayModes[Index];
 
-		UBESettingsLocal* Settings = UBESettingsLocal::Get();
+		UBEGameDeviceSettings* Settings = UBEGameDeviceSettings::Get();
 		Settings->SetPerfStatDisplayState(StatToDisplay, DisplayMode);
 	}
 	NotifySettingChanged(EGameSettingChangeReason::Change);
@@ -130,7 +130,7 @@ void UBESettingValueDiscrete_PerfStat::SetDiscreteOptionByIndex(int32 Index)
 
 int32 UBESettingValueDiscrete_PerfStat::GetDiscreteOptionIndex() const
 {
-	const UBESettingsLocal* Settings = UBESettingsLocal::Get();
+	const UBEGameDeviceSettings* Settings = UBEGameDeviceSettings::Get();
 	return DisplayModes.Find(Settings->GetPerfStatDisplayState(StatToDisplay));
 }
 

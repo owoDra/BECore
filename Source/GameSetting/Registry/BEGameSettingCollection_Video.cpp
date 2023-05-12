@@ -3,13 +3,13 @@
 #include "BEGameSettingRegistry.h"
 
 #include "Player/BELocalPlayer.h"
-#include "GameSetting/BESettingsLocal.h"
-#include "GameSetting/BESettingsShared.h"
+#include "GameSetting/BEGameDeviceSettings.h"
 #include "Performance/BEPerformanceSettings.h"
-#include "GameSetting/CustomSetting/BESettingValueScalar_SafeZone.h"
-#include "GameSetting/CustomSetting/BESettingValueDiscrete_Resolution.h"
-#include "GameSetting/CustomSetting/BESettingValueDiscrete_OverallQuality.h"
-#include "BEGameplayTags.h"
+#include "GameSetting/SettingValue/BESettingValueScalar_SafeZone.h"
+#include "GameSetting/SettingValue/BESettingValueDiscrete_Resolution.h"
+#include "GameSetting/SettingValue/BESettingValueDiscrete_OverallQuality.h"
+#include "GameSetting/BEGameSettingTags.h"
+#include "Development/BEDevelopmentTags.h"
 
 #include "GameSetting.h"
 #include "GameSettingValueDiscreteDynamic.h"
@@ -85,7 +85,7 @@ public:
 	{
 		// TODO for now this applies the setting immediately
 		const UBELocalPlayer* BELocalPlayer = CastChecked<UBELocalPlayer>(LocalPlayer);
-		BELocalPlayer->GetLocalSettings()->ApplyScalabilitySettings();
+		BELocalPlayer->GetDeviceSettings()->ApplyScalabilitySettings();
 	}
 
 private:
@@ -136,8 +136,8 @@ UGameSettingCollection* UBEGameSettingRegistry::InitializeVideoSettings(UBELocal
 			Setting->SetDisplayName(LOCTEXT("WindowMode_Name", "Window Mode"));
 			Setting->SetDescriptionRichText(LOCTEXT("WindowMode_Description", "In Windowed mode you can interact with other windows more easily, and drag the edges of the window to set the size. In Windowed Fullscreen mode you can easily switch between applications. In Fullscreen mode you cannot interact with other windows as easily, but the game will run slightly faster."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetFullscreenMode));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetFullscreenMode));
+			Setting->SetDynamicGetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(GetFullscreenMode));
+			Setting->SetDynamicSetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(SetFullscreenMode));
 			Setting->AddEnumOption(EWindowMode::Fullscreen, LOCTEXT("WindowModeFullscreen", "Fullscreen"));
 			Setting->AddEnumOption(EWindowMode::WindowedFullscreen, LOCTEXT("WindowModeWindowedFullscreen", "Windowed Fullscreen"));
 			Setting->AddEnumOption(EWindowMode::Windowed, LOCTEXT("WindowModeWindowed", "Windowed"));
@@ -217,8 +217,8 @@ UGameSettingCollection* UBEGameSettingRegistry::InitializeVideoSettings(UBELocal
 			Setting->SetDisplayName(LOCTEXT("Brightness_Name", "Brightness"));
 			Setting->SetDescriptionRichText(LOCTEXT("Brightness_Description", "Adjusts the brightness."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetDisplayGamma));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetDisplayGamma));
+			Setting->SetDynamicGetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(GetDisplayGamma));
+			Setting->SetDynamicSetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(SetDisplayGamma));
 			Setting->SetDefaultValue(2.2);
 			Setting->SetDisplayFormat([](double SourceValue, double NormalizedValue) {
 				return FText::Format(LOCTEXT("BrightnessFormat", "{0}%"), (int32)FMath::GetMappedRangeValueClamped(FVector2D(0, 1), FVector2D(50, 150), NormalizedValue));
@@ -247,13 +247,13 @@ UGameSettingCollection* UBEGameSettingRegistry::InitializeVideoSettings(UBELocal
 				const UBELocalPlayer* BELocalPlayer = CastChecked<UBELocalPlayer>(LocalPlayer);
 				// We don't save state until users apply the settings.
 				constexpr bool bImmediatelySaveState = false;
-				BELocalPlayer->GetLocalSettings()->RunAutoBenchmark(bImmediatelySaveState);
+				BELocalPlayer->GetDeviceSettings()->RunAutoBenchmark(bImmediatelySaveState);
 			});
 
 			Setting->AddEditCondition(MakeShared<FWhenCondition>([](const ULocalPlayer* LocalPlayer, FGameSettingEditableState& InOutEditState)
 			{
 				const UBELocalPlayer* BELocalPlayer = CastChecked<UBELocalPlayer>(LocalPlayer);
-				const bool bCanBenchmark = BELocalPlayer->GetLocalSettings()->CanRunAutoBenchmark();
+				const bool bCanBenchmark = BELocalPlayer->GetDeviceSettings()->CanRunAutoBenchmark();
 
 				if (!bCanBenchmark)
 				{
@@ -275,8 +275,8 @@ UGameSettingCollection* UBEGameSettingRegistry::InitializeVideoSettings(UBELocal
 			Setting->SetDevName(TEXT("DeviceProfileSuffix"));
 			Setting->SetDisplayName(LOCTEXT("DeviceProfileSuffix_Name", "Quality Presets"));
 			Setting->SetDescriptionRichText(LOCTEXT("DeviceProfileSuffix_Description", "Choose between different quality presets to make a trade off between quality and speed."));
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetDesiredDeviceProfileQualitySuffix));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetDesiredDeviceProfileQualitySuffix));
+			Setting->SetDynamicGetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(GetDesiredDeviceProfileQualitySuffix));
+			Setting->SetDynamicSetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(SetDesiredDeviceProfileQualitySuffix));
 
 			const UBEPlatformSpecificRenderingSettings* PlatformSettings = UBEPlatformSpecificRenderingSettings::Get();
 
@@ -322,8 +322,8 @@ UGameSettingCollection* UBEGameSettingRegistry::InitializeVideoSettings(UBELocal
 			Setting->SetDisplayName(LOCTEXT("ResolutionScale_Name", "3D Resolution"));
 			Setting->SetDescriptionRichText(LOCTEXT("ResolutionScale_Description", "3D resolution determines the resolution that objects are rendered in game, but does not affect the main menu.  Lower resolutions can significantly increase frame rate."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetResolutionScaleNormalized));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetResolutionScaleNormalized));
+			Setting->SetDynamicGetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(GetResolutionScaleNormalized));
+			Setting->SetDynamicSetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(SetResolutionScaleNormalized));
 			Setting->SetDisplayFormat(UGameSettingValueScalarDynamic::ZeroToOnePercent);
 
 			Setting->AddEditDependency(AutoSetQuality);
@@ -345,8 +345,8 @@ UGameSettingCollection* UBEGameSettingRegistry::InitializeVideoSettings(UBELocal
 			Setting->SetDisplayName(LOCTEXT("GlobalIlluminationQuality_Name", "Global Illumination"));
 			Setting->SetDescriptionRichText(LOCTEXT("GlobalIlluminationQuality_Description", "Global Illumination controls the quality of dynamically calculated indirect lighting bounces, sky shadowing and Ambient Occlusion. Settings of 'High' and above use more accurate ray tracing methods to solve lighting, but can reduce performance."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetGlobalIlluminationQuality));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetGlobalIlluminationQuality));
+			Setting->SetDynamicGetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(GetGlobalIlluminationQuality));
+			Setting->SetDynamicSetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(SetGlobalIlluminationQuality));
 			Setting->AddOption(0, LOCTEXT("VisualEffectQualityLow", "Low"));
 			Setting->AddOption(1, LOCTEXT("VisualEffectQualityMedium", "Medium"));
 			Setting->AddOption(2, LOCTEXT("VisualEffectQualityHigh", "High"));
@@ -371,8 +371,8 @@ UGameSettingCollection* UBEGameSettingRegistry::InitializeVideoSettings(UBELocal
 			Setting->SetDisplayName(LOCTEXT("Shadows_Name", "Shadows"));
 			Setting->SetDescriptionRichText(LOCTEXT("Shadows_Description", "Shadow quality determines the resolution and view distance of dynamic shadows. Shadows improve visual quality and give better depth perception, but can reduce performance."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetShadowQuality));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetShadowQuality));
+			Setting->SetDynamicGetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(GetShadowQuality));
+			Setting->SetDynamicSetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(SetShadowQuality));
 			Setting->AddOption(0, LOCTEXT("ShadowLow", "Off"));
 			Setting->AddOption(1, LOCTEXT("ShadowMedium", "Medium"));
 			Setting->AddOption(2, LOCTEXT("ShadowHigh", "High"));
@@ -397,8 +397,8 @@ UGameSettingCollection* UBEGameSettingRegistry::InitializeVideoSettings(UBELocal
 			Setting->SetDisplayName(LOCTEXT("AntiAliasing_Name", "Anti-Aliasing"));
 			Setting->SetDescriptionRichText(LOCTEXT("AntiAliasing_Description", "Anti-Aliasing reduces jaggy artifacts along geometry edges. Increasing this setting will make edges look smoother, but can reduce performance. Higher settings mean more anti-aliasing."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetAntiAliasingQuality));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetAntiAliasingQuality));
+			Setting->SetDynamicGetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(GetAntiAliasingQuality));
+			Setting->SetDynamicSetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(SetAntiAliasingQuality));
 			Setting->AddOption(0, LOCTEXT("AntiAliasingLow", "Off"));
 			Setting->AddOption(1, LOCTEXT("AntiAliasingMedium", "Medium"));
 			Setting->AddOption(2, LOCTEXT("AntiAliasingHigh", "High"));
@@ -423,8 +423,8 @@ UGameSettingCollection* UBEGameSettingRegistry::InitializeVideoSettings(UBELocal
 			Setting->SetDisplayName(LOCTEXT("ViewDistance_Name", "View Distance"));
 			Setting->SetDescriptionRichText(LOCTEXT("ViewDistance_Description", "View distance determines how far away objects are culled for performance."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetViewDistanceQuality));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetViewDistanceQuality));
+			Setting->SetDynamicGetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(GetViewDistanceQuality));
+			Setting->SetDynamicSetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(SetViewDistanceQuality));
 			Setting->AddOption(0, LOCTEXT("ViewDistanceNear", "Near"));
 			Setting->AddOption(1, LOCTEXT("ViewDistanceMedium", "Medium"));
 			Setting->AddOption(2, LOCTEXT("ViewDistanceFar", "Far"));
@@ -450,8 +450,8 @@ UGameSettingCollection* UBEGameSettingRegistry::InitializeVideoSettings(UBELocal
 
 			Setting->SetDescriptionRichText(LOCTEXT("TextureQuality_Description", "Texture quality determines the resolution of textures in game. Increasing this setting will make objects more detailed, but can reduce performance."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetTextureQuality));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetTextureQuality));
+			Setting->SetDynamicGetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(GetTextureQuality));
+			Setting->SetDynamicSetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(SetTextureQuality));
 			Setting->AddOption(0, LOCTEXT("TextureQualityLow", "Low"));
 			Setting->AddOption(1, LOCTEXT("TextureQualityMedium", "Medium"));
 			Setting->AddOption(2, LOCTEXT("TextureQualityHigh", "High"));
@@ -476,8 +476,8 @@ UGameSettingCollection* UBEGameSettingRegistry::InitializeVideoSettings(UBELocal
 			Setting->SetDisplayName(LOCTEXT("VisualEffectQuality_Name", "Effects"));
 			Setting->SetDescriptionRichText(LOCTEXT("VisualEffectQuality_Description", "Effects determines the quality of visual effects and lighting in game. Increasing this setting will increase the quality of visual effects, but can reduce performance."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetVisualEffectQuality));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetVisualEffectQuality));
+			Setting->SetDynamicGetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(GetVisualEffectQuality));
+			Setting->SetDynamicSetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(SetVisualEffectQuality));
 			Setting->AddOption(0, LOCTEXT("VisualEffectQualityLow", "Low"));
 			Setting->AddOption(1, LOCTEXT("VisualEffectQualityMedium", "Medium"));
 			Setting->AddOption(2, LOCTEXT("VisualEffectQualityHigh", "High"));
@@ -502,8 +502,8 @@ UGameSettingCollection* UBEGameSettingRegistry::InitializeVideoSettings(UBELocal
 			Setting->SetDisplayName(LOCTEXT("ReflectionQuality_Name", "Reflections"));
 			Setting->SetDescriptionRichText(LOCTEXT("ReflectionQuality_Description", "Reflection quality determines the resolution and accuracy of reflections.  Settings of 'High' and above use more accurate ray tracing methods to solve reflections, but can reduce performance."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetReflectionQuality));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetReflectionQuality));
+			Setting->SetDynamicGetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(GetReflectionQuality));
+			Setting->SetDynamicSetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(SetReflectionQuality));
 			Setting->AddOption(0, LOCTEXT("VisualEffectQualityLow", "Low"));
 			Setting->AddOption(1, LOCTEXT("VisualEffectQualityMedium", "Medium"));
 			Setting->AddOption(2, LOCTEXT("VisualEffectQualityHigh", "High"));
@@ -528,8 +528,8 @@ UGameSettingCollection* UBEGameSettingRegistry::InitializeVideoSettings(UBELocal
 			Setting->SetDisplayName(LOCTEXT("PostProcessingQuality_Name", "Post Processing"));
 			Setting->SetDescriptionRichText(LOCTEXT("PostProcessingQuality_Description", "Post Processing effects include Motion Blur, Depth of Field and Bloom. Increasing this setting improves the quality of post process effects, but can reduce performance."));  
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetPostProcessingQuality));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetPostProcessingQuality));
+			Setting->SetDynamicGetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(GetPostProcessingQuality));
+			Setting->SetDynamicSetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(SetPostProcessingQuality));
 			Setting->AddOption(0, LOCTEXT("PostProcessingQualityLow", "Low"));
 			Setting->AddOption(1, LOCTEXT("PostProcessingQualityMedium", "Medium"));
 			Setting->AddOption(2, LOCTEXT("PostProcessingQualityHigh", "High"));
@@ -565,8 +565,8 @@ UGameSettingCollection* UBEGameSettingRegistry::InitializeVideoSettings(UBELocal
 			Setting->SetDisplayName(LOCTEXT("VerticalSync_Name", "Vertical Sync"));
 			Setting->SetDescriptionRichText(LOCTEXT("VerticalSync_Description", "Enabling Vertical Sync eliminates screen tearing by always rendering and presenting a full frame. Disabling Vertical Sync can give higher frame rate and better input response, but can result in horizontal screen tearing."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(IsVSyncEnabled));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetVSyncEnabled));
+			Setting->SetDynamicGetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(IsVSyncEnabled));
+			Setting->SetDynamicSetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(SetVSyncEnabled));
 			Setting->SetDefaultValue(false);
 
 			Setting->AddEditCondition(MakeShared<FGameSettingEditCondition_FramePacingMode>(EBEFramePacingMode::DesktopStyle));
@@ -591,9 +591,9 @@ UGameSettingCollection* UBEGameSettingRegistry::InitializeVideoSettings(UBELocal
 			Setting->SetDisplayName(LOCTEXT("FrameRateLimit_OnBattery_Name", "Frame Rate Limit (On Battery)"));
 			Setting->SetDescriptionRichText(LOCTEXT("FrameRateLimit_OnBattery_Description", "Frame rate limit when running on battery. Set this lower for a more consistent frame rate or higher for the best experience on faster machines. You may need to disable Vsync to reach high frame rates."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetFrameRateLimit_OnBattery));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetFrameRateLimit_OnBattery));
-			Setting->SetDefaultValue(GetDefault<UBESettingsLocal>()->GetFrameRateLimit_OnBattery());
+			Setting->SetDynamicGetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(GetFrameRateLimit_OnBattery));
+			Setting->SetDynamicSetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(SetFrameRateLimit_OnBattery));
+			Setting->SetDefaultValue(GetDefault<UBEGameDeviceSettings>()->GetFrameRateLimit_OnBattery());
 
 			Setting->AddEditCondition(MakeShared<FGameSettingEditCondition_FramePacingMode>(EBEFramePacingMode::DesktopStyle));
 			//@TODO: Hide if this device doesn't have a battery (no API for this right now)
@@ -612,9 +612,9 @@ UGameSettingCollection* UBEGameSettingRegistry::InitializeVideoSettings(UBELocal
 			Setting->SetDisplayName(LOCTEXT("FrameRateLimit_InMenu_Name", "Frame Rate Limit (Menu)"));
 			Setting->SetDescriptionRichText(LOCTEXT("FrameRateLimit_InMenu_Description", "Frame rate limit when in the menu. Set this lower for a more consistent frame rate or higher for the best experience on faster machines. You may need to disable Vsync to reach high frame rates."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetFrameRateLimit_InMenu));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetFrameRateLimit_InMenu));
-			Setting->SetDefaultValue(GetDefault<UBESettingsLocal>()->GetFrameRateLimit_InMenu());
+			Setting->SetDynamicGetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(GetFrameRateLimit_InMenu));
+			Setting->SetDynamicSetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(SetFrameRateLimit_InMenu));
+			Setting->SetDefaultValue(GetDefault<UBEGameDeviceSettings>()->GetFrameRateLimit_InMenu());
 			Setting->AddEditCondition(MakeShared<FGameSettingEditCondition_FramePacingMode>(EBEFramePacingMode::DesktopStyle));
 
 			AddFrameRateOptions(Setting);
@@ -631,9 +631,9 @@ UGameSettingCollection* UBEGameSettingRegistry::InitializeVideoSettings(UBELocal
 			Setting->SetDisplayName(LOCTEXT("FrameRateLimit_WhenBackgrounded_Name", "Frame Rate Limit (Background)"));
 			Setting->SetDescriptionRichText(LOCTEXT("FrameRateLimit_WhenBackgrounded_Description", "Frame rate limit when in the background. Set this lower for a more consistent frame rate or higher for the best experience on faster machines. You may need to disable Vsync to reach high frame rates."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetFrameRateLimit_WhenBackgrounded));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetFrameRateLimit_WhenBackgrounded));
-			Setting->SetDefaultValue(GetDefault<UBESettingsLocal>()->GetFrameRateLimit_WhenBackgrounded());
+			Setting->SetDynamicGetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(GetFrameRateLimit_WhenBackgrounded));
+			Setting->SetDynamicSetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(SetFrameRateLimit_WhenBackgrounded));
+			Setting->SetDefaultValue(GetDefault<UBEGameDeviceSettings>()->GetFrameRateLimit_WhenBackgrounded());
 			Setting->AddEditCondition(MakeShared<FGameSettingEditCondition_FramePacingMode>(EBEFramePacingMode::DesktopStyle));
 
 			AddFrameRateOptions(Setting);
@@ -650,9 +650,9 @@ UGameSettingCollection* UBEGameSettingRegistry::InitializeVideoSettings(UBELocal
 			Setting->SetDisplayName(LOCTEXT("FrameRateLimit_Always_Name", "Frame Rate Limit"));
 			Setting->SetDescriptionRichText(LOCTEXT("FrameRateLimit_Always_Description", "Frame rate limit sets the highest frame rate that is allowed. Set this lower for a more consistent frame rate or higher for the best experience on faster machines. You may need to disable Vsync to reach high frame rates."));
 
-			Setting->SetDynamicGetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(GetFrameRateLimit_Always));
-			Setting->SetDynamicSetter(GET_LOCAL_SETTINGS_FUNCTION_PATH(SetFrameRateLimit_Always));
-			Setting->SetDefaultValue(GetDefault<UBESettingsLocal>()->GetFrameRateLimit_Always());
+			Setting->SetDynamicGetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(GetFrameRateLimit_Always));
+			Setting->SetDynamicSetter(GET_DEVICE_SETTINGS_FUNCTION_PATH(SetFrameRateLimit_Always));
+			Setting->SetDefaultValue(GetDefault<UBEGameDeviceSettings>()->GetFrameRateLimit_Always());
 			Setting->AddEditCondition(MakeShared<FGameSettingEditCondition_FramePacingMode>(EBEFramePacingMode::DesktopStyle));
 
 			AddFrameRateOptions(Setting);

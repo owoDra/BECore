@@ -1,7 +1,7 @@
 // Copyright Eigi Chin
 
 #include "ApplyFrontendPerfSettingsAction.h"
-#include "GameSetting/BESettingsLocal.h"
+#include "GameSetting/BEGameDeviceSettings.h"
 
 //////////////////////////////////////////////////////////////////////
 // UApplyFrontendPerfSettingsAction
@@ -19,7 +19,7 @@ void UApplyFrontendPerfSettingsAction::OnGameFeatureActivating(FGameFeatureActiv
 	ApplicationCounter++;
 	if (ApplicationCounter == 1)
 	{
-		UBESettingsLocal::Get()->SetShouldUseFrontendPerformanceSettings(true);
+		UBEGameDeviceSettings::Get()->SetShouldUseFrontendPerformanceSettings(true);
 	}
 }
 
@@ -30,6 +30,6 @@ void UApplyFrontendPerfSettingsAction::OnGameFeatureDeactivating(FGameFeatureDea
 
 	if (ApplicationCounter == 0)
 	{
-		UBESettingsLocal::Get()->SetShouldUseFrontendPerformanceSettings(false);
+		UBEGameDeviceSettings::Get()->SetShouldUseFrontendPerformanceSettings(false);
 	}
 }

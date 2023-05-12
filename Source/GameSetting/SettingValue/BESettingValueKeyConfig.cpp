@@ -3,7 +3,7 @@
 
 #include "BESettingValueKeyConfig.h"
 
-#include "GameSetting/BESettingsLocal.h"
+#include "GameSetting/BEGameDeviceSettings.h"
 #include "Player/BELocalPlayer.h"
 
 #include "Containers/UnrealString.h"
@@ -113,7 +113,7 @@ bool UBESettingValueKeyConfig::ChangeBinding(int32 InKeyBindSlot, FKey NewKey)
 	}
 
 	UBELocalPlayer* BELocalPlayer = CastChecked<UBELocalPlayer>(LocalPlayer);
-	UBESettingsLocal* LocalSettings = BELocalPlayer->GetLocalSettings();
+	UBEGameDeviceSettings* LocalSettings = BELocalPlayer->GetDeviceSettings();
 
 	LocalSettings->AddOrUpdateCustomKeyboardBindings(MappableOptions[InKeyBindSlot].InputMapping.PlayerMappableOptions.Name, NewKey, BELocalPlayer);
 	MappableOptions[InKeyBindSlot].InputMapping.Key = NewKey;
@@ -135,7 +135,7 @@ void UBESettingValueKeyConfig::GetAllMappedActionsFromKey(int32 InKeyBindSlot, F
 	
 	if (const UBELocalPlayer* BELocalPlayer = CastChecked<UBELocalPlayer>(LocalPlayer))
 	{
-		UBESettingsLocal* LocalSettings = BELocalPlayer->GetLocalSettings();
+		UBEGameDeviceSettings* LocalSettings = BELocalPlayer->GetDeviceSettings();
 		LocalSettings->GetAllMappingNamesFromKey(Key, OutActionNames);
 	}
 }

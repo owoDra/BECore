@@ -4,7 +4,7 @@
 #include "Audio/BEAudioMixEffectsSubsystem.h"
 
 #include "BEAudioSettings.h"
-#include "GameSetting/BESettingsLocal.h"
+#include "GameSetting/BEGameDeviceSettings.h"
 
 #include "AudioMixerBlueprintLibrary.h"
 #include "AudioModulationStatics.h"
@@ -238,7 +238,7 @@ void UBEAudioMixEffectsSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 		}
 
 		// Retrieve the user settings
-		if (const UBESettingsLocal* BESettingsLocal = GetDefault<UBESettingsLocal>())
+		if (const UBEGameDeviceSettings* BEGameDeviceSettings = GetDefault<UBEGameDeviceSettings>())
 		{
 			// Activate the User Mix
 			if (UserMix)
@@ -247,11 +247,11 @@ void UBEAudioMixEffectsSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 
 				if (OverallControlBus && MusicControlBus && SoundFXControlBus && DialogueControlBus && VoiceChatControlBus)
 				{
-					const FSoundControlBusMixStage OverallControlBusMixStage = UAudioModulationStatics::CreateBusMixStage(World, OverallControlBus, BESettingsLocal->GetOverallVolume());
-					const FSoundControlBusMixStage MusicControlBusMixStage = UAudioModulationStatics::CreateBusMixStage(World, MusicControlBus, BESettingsLocal->GetMusicVolume());
-					const FSoundControlBusMixStage SoundFXControlBusMixStage = UAudioModulationStatics::CreateBusMixStage(World, SoundFXControlBus, BESettingsLocal->GetSoundFXVolume());
-					const FSoundControlBusMixStage DialogueControlBusMixStage = UAudioModulationStatics::CreateBusMixStage(World, DialogueControlBus, BESettingsLocal->GetDialogueVolume());
-					const FSoundControlBusMixStage VoiceChatControlBusMixStage = UAudioModulationStatics::CreateBusMixStage(World, VoiceChatControlBus, BESettingsLocal->GetVoiceChatVolume());
+					const FSoundControlBusMixStage OverallControlBusMixStage = UAudioModulationStatics::CreateBusMixStage(World, OverallControlBus, BEGameDeviceSettings->GetOverallVolume());
+					const FSoundControlBusMixStage MusicControlBusMixStage = UAudioModulationStatics::CreateBusMixStage(World, MusicControlBus, BEGameDeviceSettings->GetMusicVolume());
+					const FSoundControlBusMixStage SoundFXControlBusMixStage = UAudioModulationStatics::CreateBusMixStage(World, SoundFXControlBus, BEGameDeviceSettings->GetSoundFXVolume());
+					const FSoundControlBusMixStage DialogueControlBusMixStage = UAudioModulationStatics::CreateBusMixStage(World, DialogueControlBus, BEGameDeviceSettings->GetDialogueVolume());
+					const FSoundControlBusMixStage VoiceChatControlBusMixStage = UAudioModulationStatics::CreateBusMixStage(World, VoiceChatControlBus, BEGameDeviceSettings->GetVoiceChatVolume());
 
 					TArray<FSoundControlBusMixStage> ControlBusMixStageArray;
 					ControlBusMixStageArray.Add(OverallControlBusMixStage);
@@ -264,7 +264,7 @@ void UBEAudioMixEffectsSubsystem::OnWorldBeginPlay(UWorld& InWorld)
 				}
 			}
 
-			ApplyDynamicRangeEffectsChains(BESettingsLocal->IsHDRAudioModeEnabled());
+			ApplyDynamicRangeEffectsChains(BEGameDeviceSettings->IsHDRAudioModeEnabled());
 		}
 	}
 }

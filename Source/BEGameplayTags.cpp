@@ -251,13 +251,6 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_Camera_Type_ThirdPerson, "Camera.Type.ThirdPerson");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Camera_Type_Death, "Camera.Type.Death");
 
 
-// =================================
-//  ゲーム設定
-// =================================
-
-UE_DEFINE_GAMEPLAY_TAG(TAG_GameSettings_Action_EditSafeZone, "GameSettings.Action.EditSafeZone");
-UE_DEFINE_GAMEPLAY_TAG(TAG_GameSettings_Action_EditBrightness, "GameSettings.Action.EditBrightness");
-
 
 // =================================
 //  SetByCaller

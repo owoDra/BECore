@@ -1,7 +1,7 @@
 // Copyright Eigi Chin
 
 #include "BEPerfStatContainerBase.h"
-#include "GameSetting/BESettingsLocal.h"
+#include "GameSetting/BEGameDeviceSettings.h"
 #include "BEPerfStatWidgetBase.h"
 #include "Blueprint/WidgetTree.h"
 
@@ -18,19 +18,19 @@ void UBEPerfStatContainerBase::NativeConstruct()
 	Super::NativeConstruct();
 	UpdateVisibilityOfChildren();
 
-	UBESettingsLocal::Get()->OnPerfStatSettingsChangedEvent.AddUObject(this, &ThisClass::UpdateVisibilityOfChildren);
+	UBEGameDeviceSettings::Get()->OnPerfStatSettingsChangedEvent.AddUObject(this, &ThisClass::UpdateVisibilityOfChildren);
 }
 
 void UBEPerfStatContainerBase::NativeDestruct()
 {
-	UBESettingsLocal::Get()->OnPerfStatSettingsChangedEvent.RemoveAll(this);
+	UBEGameDeviceSettings::Get()->OnPerfStatSettingsChangedEvent.RemoveAll(this);
 
 	Super::NativeDestruct();
 }
 
 void UBEPerfStatContainerBase::UpdateVisibilityOfChildren()
 {
-	UBESettingsLocal* UserSettings = UBESettingsLocal::Get();
+	UBEGameDeviceSettings* UserSettings = UBEGameDeviceSettings::Get();
 
 	const bool bShowTextWidgets = (StatDisplayModeFilter == EBEStatDisplayMode::TextOnly) || (StatDisplayModeFilter == EBEStatDisplayMode::TextAndGraph);
 	const bool bShowGraphWidgets = (StatDisplayModeFilter == EBEStatDisplayMode::GraphOnly) || (StatDisplayModeFilter == EBEStatDisplayMode::TextAndGraph);

@@ -23,7 +23,7 @@ class APlayerState;
 class FPrimitiveComponentId;
 class IInputInterface;
 class UBEAbilitySystemComponent;
-class UBESettingsShared;
+class UBEGameSharedSettings;
 class UObject;
 class UPlayer;
 struct FFrame;
@@ -59,11 +59,6 @@ public:
 	virtual void OnUnPossess() override;
 	//~End of AController interface
 
-	//~APlayerController interface
-	virtual void ReceivedPlayer() override;
-	virtual void PlayerTick(float DeltaTime) override;
-	//~End of APlayerController interface
-
 protected:
 	//~AController interface
 	virtual void InitPlayerState() override;
@@ -81,6 +76,8 @@ protected:
 	virtual void PreProcessInput(const float DeltaTime, const bool bGamePaused) override;
 	virtual void PostProcessInput(const float DeltaTime, const bool bGamePaused) override;
 	//~End of APlayerController interface
+
+	void OnSettingsChanged(UBEGameSharedSettings* Settings);
 
 	// Called when the player state is set or cleared
 	virtual void OnPlayerStateChanged();

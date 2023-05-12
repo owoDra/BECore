@@ -63,10 +63,20 @@ public:
 
 	// 常にゲームコントローラーの振動などを行うかどうか
 	// 通常、コントローラー以外のデバイスを使用している場合、コントローラーが接続されていても振動を行わない
-	UPROPERTY(config, EditAnywhere, Category = "BE", meta = (ConsoleVariable = "BEPC.ShouldAlwaysPlayForceFeedback"))
+	UPROPERTY(config, EditAnywhere, Category = "BE|Game", meta = (ConsoleVariable = "BEPC.ShouldAlwaysPlayForceFeedback"))
 	bool bShouldAlwaysPlayForceFeedback = false;
 
 	// Log に GameplayMessageSubsystem を用いた通知を表示するか
-	UPROPERTY(config, EditAnywhere, Category = GameplayMessages, meta = (ConsoleVariable = "GameplayMessageSubsystem.LogMessages"))
+	UPROPERTY(config, EditAnywhere, Category = "BE|Game", meta = (ConsoleVariable = "GameplayMessageSubsystem.LogMessages"))
 	bool LogGameplayMessages = false;
+
+
+public:
+	// ゲームの共有設定のクラス
+	UPROPERTY(config, EditDefaultsOnly, BlueprintReadOnly, Category = "BE|GameSettings", meta = (AllowedClasses = "/Script/BECore.BEGameSharedSettings"))
+	FSoftClassPath SharedSettingClass;
+
+	// ゲームの共有設定のクラス
+	UPROPERTY(config, EditDefaultsOnly, BlueprintReadOnly, Category = "BE|GameSettings", meta = (AllowedClasses = "/Script/BECore.BEGameSettingRegistry"))
+	FSoftClassPath SettingRegistryClass;
 };

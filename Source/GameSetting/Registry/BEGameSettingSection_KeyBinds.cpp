@@ -3,30 +3,21 @@
 
 #include "BEGameSettingRegistry.h"
 
+#include "GameSetting/BEGameDeviceSettings.h"
+#include "GameSetting/SettingValue/BESettingValueKeyConfig.h"
 #include "Player/BELocalPlayer.h"
 
 #include "GameSetting.h"
-#include "GameSettingValueDiscreteDynamic.h"
-#include "GameSettingValueScalar.h"
-#include "GameSettingValueScalarDynamic.h"
 #include "GameSettingCollection.h"
-#include "GameSettingAction.h"
-#include "GameSetting/BESettingsLocal.h"
-#include "GameSetting/BESettingsShared.h"
-#include "EditCondition/WhenCondition.h"
-#include "EditCondition/WhenPlayingAsPrimaryPlayer.h"
-#include "EditCondition/WhenPlatformHasTrait.h"
-#include "GameSetting/CustomSetting/BESettingValueKeyConfig.h"
-#include "System/BEGameData.h"
 #include "PlayerMappableInputConfig.h"
 
-#define LOCTEXT_NAMESPACE "BE"
 
+#define LOCTEXT_NAMESPACE "BE"
 
 ///////////////////////////////////////////////////////
 //	キーバインド設定
 
-void UBEGameSettingRegistry::AddKeyBindSettingsPage(UGameSettingCollection* Screen, UBELocalPlayer* InLocalPlayer)
+void UBEGameSettingRegistry::AddKeyBindSettingsSection(UGameSettingCollection* Screen, UBELocalPlayer* InLocalPlayer)
 {
 	UGameSettingCollection* Keybind = NewObject<UGameSettingCollection>();
 	Keybind->SetDevName(TEXT("KeybindSection"));
@@ -53,8 +44,8 @@ void UBEGameSettingRegistry::AddKeyBindSettingsPage(UGameSettingCollection* Scre
 		//	キーバインド設定自動登録
 		//======================================
 		{
-			const TArray<FLoadedMappableConfigPair>& RegisteredConfigs = InLocalPlayer->GetLocalSettings()->GetAllRegisteredInputConfigs();
-			const TMap<FName, FKey>& CustomKeyMap = InLocalPlayer->GetLocalSettings()->GetCustomPlayerInputConfig();
+			const TArray<FLoadedMappableConfigPair>& RegisteredConfigs = InLocalPlayer->GetDeviceSettings()->GetAllRegisteredInputConfigs();
+			const TMap<FName, FKey>& CustomKeyMap = InLocalPlayer->GetDeviceSettings()->GetCustomPlayerInputConfig();
 
 			for (const FLoadedMappableConfigPair& InputConfigPair : RegisteredConfigs)
 			{

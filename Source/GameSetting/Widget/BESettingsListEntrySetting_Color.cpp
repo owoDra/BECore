@@ -2,7 +2,7 @@
 
 #include "BESettingsListEntrySetting_Color.h"
 
-#include "GameSetting/CustomSetting/BESettingValueColor.h"
+#include "GameSetting/SettingValue/BESettingValueColor.h"
 
 #include "Input/Events.h"
 #include "Misc/AssertionMacros.h"
