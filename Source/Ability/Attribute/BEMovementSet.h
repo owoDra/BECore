@@ -42,7 +42,7 @@ public:
 	ATTRIBUTE_ACCESSORS(UBEMovementSet, OverallSpeedMultiplier);
 	ATTRIBUTE_ACCESSORS(UBEMovementSet, WalkSpeed);
 	ATTRIBUTE_ACCESSORS(UBEMovementSet, WalkSpeedCrouched);
-	ATTRIBUTE_ACCESSORS(UBEMovementSet, WalkSpeedRunning);
+	ATTRIBUTE_ACCESSORS(UBEMovementSet, WalkSpeedSprinting);
 	ATTRIBUTE_ACCESSORS(UBEMovementSet, WalkSpeedTargeting);
 	ATTRIBUTE_ACCESSORS(UBEMovementSet, SwimSpeed);
 	ATTRIBUTE_ACCESSORS(UBEMovementSet, FlySpeed);
@@ -73,7 +73,7 @@ protected:
 		void OnRep_WalkSpeedCrouched(const FGameplayAttributeData& OldValue);
 
 	UFUNCTION()
-		void OnRep_WalkSpeedRunning(const FGameplayAttributeData& OldValue);
+		void OnRep_WalkSpeedSprinting(const FGameplayAttributeData& OldValue);
 
 	UFUNCTION()
 		void OnRep_WalkSpeedTargeting(const FGameplayAttributeData& OldValue);
@@ -118,8 +118,8 @@ private:
 	FGameplayAttributeData WalkSpeedCrouched;
 
 	// 走りの速度
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_WalkSpeedRunning, Category = "BE|Movement", Meta = (AllowPrivateAccess = true))
-	FGameplayAttributeData WalkSpeedRunning;
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_WalkSpeedSprinting, Category = "BE|Movement", Meta = (AllowPrivateAccess = true))
+	FGameplayAttributeData WalkSpeedSprinting;
 
 	// エイム時の移動速度
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_WalkSpeedTargeting, Category = "BE|Movement", Meta = (AllowPrivateAccess = true))

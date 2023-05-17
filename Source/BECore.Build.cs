@@ -42,7 +42,8 @@ public class BECore : ModuleRules
                 "CommonLoadingScreen",
                 "Niagara",
                 "AsyncMixin",
-                "ControlFlows"
+                "ControlFlows",
+                "PropertyPath"
             }
 			);
 			
@@ -72,7 +73,9 @@ public class BECore : ModuleRules
                 "NetworkReplayStreaming",
                 "UIExtension",
                 "ClientPilot",
-                "AudioModulation"
+                "AudioModulation",
+                "EngineSettings",
+                "DTLSHandlerComponent",
             }
 			);
 		
@@ -83,5 +86,8 @@ public class BECore : ModuleRules
 				// ... add any modules that your module loads dynamically here ...
 			}
 			);
-	}
+
+        SetupGameplayDebuggerSupport(Target);
+        SetupIrisSupport(Target);
+    }
 }

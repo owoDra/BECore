@@ -6,6 +6,7 @@
 #include "Character/Component/BEPawnBasicComponent.h"
 #include "Character/Movement/BECharacterMovementFragment.h"
 #include "Character/BECharacter.h"
+#include "Character/BEPawnInitializeTags.h"
 #include "Ability/BEAbilitySystemComponent.h"
 #include "Ability/Attribute/BEMovementSet.h"
 #include "BELogChannels.h"
@@ -58,7 +59,7 @@ void UBECharacterMovementComponent::FSavedMove_BECharacter::Clear()
 {
 	Super::Clear();
 
-	Saved_bWantsToRun		= false;
+	Saved_bWantsToSprint		= false;
 	Saved_bWantsToTarget	= false;
 }
 
@@ -66,9 +67,9 @@ uint8 UBECharacterMovementComponent::FSavedMove_BECharacter::GetCompressedFlags(
 {
 	uint8 Result = Super::GetCompressedFlags();
 
-	if (Saved_bWantsToRun)
+	if (Saved_bWantsToSprint)
 	{
-		Result |= FLAG_Run;
+		Result |= FLAG_Sprint;
 	}
 
 	if (Saved_bWantsToTarget)
@@ -83,7 +84,7 @@ bool UBECharacterMovementComponent::FSavedMove_BECharacter::CanCombineWith(const
 {
 	const FSavedMove_BECharacter* NewSavedMove = static_cast<FSavedMove_BECharacter*>(NewMove.Get());
 
-	if (Saved_bWantsToRun != NewSavedMove->Saved_bWantsToRun)
+	if (Saved_bWantsToSprint != NewSavedMove->Saved_bWantsToSprint)
 	{
 		return false;
 	}
@@ -103,7 +104,7 @@ void UBECharacterMovementComponent::FSavedMove_BECharacter::SetMoveFor(ACharacte
 	UBECharacterMovementComponent* CharacterMovement = Cast<UBECharacterMovementComponent>(Character->GetCharacterMovement());
 	if (CharacterMovement)
 	{
-		Saved_bWantsToRun		= CharacterMovement->bWantsToRun;
+		Saved_bWantsToSprint		= CharacterMovement->bWantsToSprint;
 		Saved_bWantsToTarget	= CharacterMovement->bWantsToTarget;
 	}
 }
@@ -115,7 +116,7 @@ void UBECharacterMovementComponent::FSavedMove_BECharacter::PrepMoveFor(ACharact
 	UBECharacterMovementComponent* CharacterMovement = Cast<UBECharacterMovementComponent>(Character->GetCharacterMovement());
 	if (CharacterMovement)
 	{
-		CharacterMovement->bWantsToRun		= Saved_bWantsToRun;
+		CharacterMovement->bWantsToSprint		= Saved_bWantsToSprint;
 		CharacterMovement->bWantsToTarget	= Saved_bWantsToTarget;
 	}
 }
@@ -241,7 +242,7 @@ void UBECharacterMovementComponent::InitializeWithAbilitySystem(UBEAbilitySystem
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UBEMovementSet::GetOverallSpeedMultiplierAttribute()).AddUObject(this, &ThisClass::HandleOverallSpeedMultiplierChanged);
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UBEMovementSet::GetWalkSpeedAttribute()).AddUObject(this, &ThisClass::HandleWalkSpeedChanged);
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UBEMovementSet::GetWalkSpeedCrouchedAttribute()).AddUObject(this, &ThisClass::HandleWalkSpeedCrouchedChanged);
-	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UBEMovementSet::GetWalkSpeedRunningAttribute()).AddUObject(this, &ThisClass::HandleWalkSpeedRunningChanged);
+	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UBEMovementSet::GetWalkSpeedSprintingAttribute()).AddUObject(this, &ThisClass::HandleWalkSpeedSprintingChanged);
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UBEMovementSet::GetWalkSpeedTargetingAttribute()).AddUObject(this, &ThisClass::HandleWalkSpeedTargetingChanged);
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UBEMovementSet::GetSwimSpeedAttribute()).AddUObject(this, &ThisClass::HandleSwimSpeedChanged);
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UBEMovementSet::GetFlySpeedAttribute()).AddUObject(this, &ThisClass::HandleFlySpeedChanged);
@@ -256,7 +257,7 @@ void UBECharacterMovementComponent::InitializeWithAbilitySystem(UBEAbilitySystem
 	AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetOverallSpeedMultiplierAttribute(), OverallMaxSpeedMultiplier);
 	AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetWalkSpeedAttribute(), MaxWalkSpeed);
 	AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetWalkSpeedCrouchedAttribute(), MaxWalkSpeedCrouched);
-	AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetWalkSpeedRunningAttribute(), MaxWalkSpeedRunning);
+	AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetWalkSpeedSprintingAttribute(), MaxWalkSpeedSprinting);
 	AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetWalkSpeedTargetingAttribute(), MaxWalkSpeedTargeting);
 	AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetSwimSpeedAttribute(), MaxSwimSpeed);
 	AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetFlySpeedAttribute(), MaxFlySpeed);
@@ -441,9 +442,9 @@ void UBECharacterMovementComponent::HandleWalkSpeedCrouchedChanged(const FOnAttr
 	MaxWalkSpeedCrouched = ChangeData.NewValue;
 }
 
-void UBECharacterMovementComponent::HandleWalkSpeedRunningChanged(const FOnAttributeChangeData& ChangeData)
+void UBECharacterMovementComponent::HandleWalkSpeedSprintingChanged(const FOnAttributeChangeData& ChangeData)
 {
-	MaxWalkSpeedRunning = ChangeData.NewValue;
+	MaxWalkSpeedSprinting = ChangeData.NewValue;
 }
 
 void UBECharacterMovementComponent::HandleWalkSpeedTargetingChanged(const FOnAttributeChangeData& ChangeData)
@@ -498,7 +499,7 @@ void UBECharacterMovementComponent::UpdateFromCompressedFlags(uint8 Flags)
 {
 	Super::UpdateFromCompressedFlags(Flags);
 
-	bWantsToRun = (Flags & FSavedMove_BECharacter::FLAG_Run) != 0;
+	bWantsToSprint = (Flags & FSavedMove_BECharacter::FLAG_Sprint) != 0;
 
 	bWantsToTarget = (Flags & FSavedMove_BECharacter::FLAG_Target) != 0;
 }
@@ -532,14 +533,14 @@ void UBECharacterMovementComponent::UpdateCharacterStateBeforeMovement(float Del
 			Crouch(false);
 		}
 
-		const bool bIsRunning = IsRunning();
-		if (bIsRunning && (!bWantsToRun || !CanRunInCurrentState()))
+		const bool bIsSprinting = IsSprinting();
+		if (bIsSprinting && (!bWantsToSprint || !CanSprintInCurrentState()))
 		{
-			UnRun(false);
+			UnSprint(false);
 		}
-		else if (!bIsRunning && bWantsToRun && CanRunInCurrentState())
+		else if (!bIsSprinting && bWantsToSprint && CanSprintInCurrentState())
 		{
-			Run(false);
+			Sprint(false);
 		}
 
 		const bool bIsTargeting = IsTargeting();
@@ -562,6 +563,16 @@ void UBECharacterMovementComponent::UpdateCharacterStateBeforeMovement(float Del
 	}
 }
 
+
+bool UBECharacterMovementComponent::CanCrouchInCurrentState() const
+{
+	if (!CanEverCrouch())
+	{
+		return false;
+	}
+
+	return ((IsFalling() && bCanCrouchInAir) || IsMovingOnGround()) && UpdatedComponent && !UpdatedComponent->IsSimulatingPhysics();
+}
 
 bool UBECharacterMovementComponent::CanAttemptJump() const
 {
@@ -660,9 +671,9 @@ float UBECharacterMovementComponent::GetMaxSpeed() const
 			}
 			else
 			{
-				if (IsRunning())
+				if (IsSprinting())
 				{
-					SuggestMaxSpeed = MaxWalkSpeedRunning;
+					SuggestMaxSpeed = MaxWalkSpeedSprinting;
 				}
 				else
 				{
@@ -673,9 +684,9 @@ float UBECharacterMovementComponent::GetMaxSpeed() const
 	}
 	else if (LocMoveMode == MOVE_Falling)
 	{
-		if (IsRunning())
+		if (IsSprinting())
 		{
-			SuggestMaxSpeed = MaxWalkSpeedRunning;
+			SuggestMaxSpeed = MaxWalkSpeedSprinting;
 		}
 		else
 		{
@@ -824,21 +835,21 @@ void UBECharacterMovementComponent::PhysCustom(float deltaTime, int32 Iterations
 }
 
 
-bool UBECharacterMovementComponent::IsRunning() const
+bool UBECharacterMovementComponent::IsSprinting() const
 {
 	if (ABECharacter* BEChara = GetBECharacterOwner())
 	{
-		return BEChara->bIsRunning;
+		return BEChara->bIsSprinting;
 	}
 
 	return false;
 }
 
-bool UBECharacterMovementComponent::CanRunInCurrentState() const
+bool UBECharacterMovementComponent::CanSprintInCurrentState() const
 {
 	if (AbilitySystemComponent)
 	{
-		if (AbilitySystemComponent->HasMatchingGameplayTag(TAG_Status_RunBlocked))
+		if (AbilitySystemComponent->HasMatchingGameplayTag(TAG_Status_SprintBlocked))
 		{
 			return false;
 		}
@@ -847,7 +858,7 @@ bool UBECharacterMovementComponent::CanRunInCurrentState() const
 	return !IsTargeting() && (IsFalling() || IsMovingOnGround());
 }
 
-void UBECharacterMovementComponent::Run(bool bClientSimulation)
+void UBECharacterMovementComponent::Sprint(bool bClientSimulation)
 {
 	if (!HasValidData())
 	{
@@ -858,14 +869,14 @@ void UBECharacterMovementComponent::Run(bool bClientSimulation)
 	{
 		if (!bClientSimulation)
 		{
-			BEChara->bIsRunning = true;
+			BEChara->bIsSprinting = true;
 		}
 
-		BEChara->OnStartRun();
+		BEChara->OnStartSprint();
 	}
 }
 
-void UBECharacterMovementComponent::UnRun(bool bClientSimulation)
+void UBECharacterMovementComponent::UnSprint(bool bClientSimulation)
 {
 	if (!HasValidData())
 	{
@@ -876,10 +887,10 @@ void UBECharacterMovementComponent::UnRun(bool bClientSimulation)
 	{
 		if (!bClientSimulation)
 		{
-			BEChara->bIsRunning = false;
+			BEChara->bIsSprinting = false;
 		}
 
-		BEChara->OnEndRun();
+		BEChara->OnEndSprint();
 	}
 }
 

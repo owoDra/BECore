@@ -45,7 +45,7 @@
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BECharacter)
 
 UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Crouching, "Status.Crouching");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Running, "Status.Running");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Sprinting, "Status.Sprinting");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Targeting, "Status.Targeting");
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -94,7 +94,7 @@ void ABECharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLi
 
 	DOREPLIFETIME_CONDITION(ThisClass, ReplicatedAcceleration, COND_SimulatedOnly);
 
-	DOREPLIFETIME_CONDITION(ThisClass, bIsRunning, COND_SimulatedOnly);
+	DOREPLIFETIME_CONDITION(ThisClass, bIsSprinting, COND_SimulatedOnly);
 	DOREPLIFETIME_CONDITION(ThisClass, bIsTargeting, COND_SimulatedOnly);
 
 	DOREPLIFETIME(ThisClass, MyTeamID);
@@ -331,70 +331,70 @@ bool ABECharacter::CanJumpInternal_Implementation() const
 }
 
 
-void ABECharacter::OnRep_IsRunning()
+void ABECharacter::OnRep_IsSprinting()
 {
 	if (UCharacterMovementComponent* CMC = GetCharacterMovement())
 	{
 		if (UBECharacterMovementComponent* BECMC = Cast<UBECharacterMovementComponent>(CMC))
 		{
-			if (bIsRunning)
+			if (bIsSprinting)
 			{
-				BECMC->bWantsToRun = true;
-				BECMC->Run(true);
+				BECMC->bWantsToSprint = true;
+				BECMC->Sprint(true);
 			}
 			else
 			{
-				BECMC->bWantsToRun = false;
-				BECMC->UnRun(true);
+				BECMC->bWantsToSprint = false;
+				BECMC->UnSprint(true);
 			}
 		}
 	}
 }
 
-void ABECharacter::Run()
+void ABECharacter::Sprint()
 {
 	if (UCharacterMovementComponent* CMC = GetCharacterMovement())
 	{
 		if (UBECharacterMovementComponent* BECMC = Cast<UBECharacterMovementComponent>(CMC))
 		{
-			BECMC->bWantsToRun = true;
+			BECMC->bWantsToSprint = true;
 		}
 	}
 }
 
-void ABECharacter::UnRun()
+void ABECharacter::UnSprint()
 {
 	if (UCharacterMovementComponent* CMC = GetCharacterMovement())
 	{
 		if (UBECharacterMovementComponent* BECMC = Cast<UBECharacterMovementComponent>(CMC))
 		{
-			BECMC->bWantsToRun = false;
+			BECMC->bWantsToSprint = false;
 		}
 	}
 }
 
-void ABECharacter::OnStartRun()
+void ABECharacter::OnStartSprint()
 {
 	if (UBEAbilitySystemComponent* BEASC = GetBEAbilitySystemComponent())
 	{
-		BEASC->SetLooseGameplayTagCount(TAG_Status_Running, 1);
+		BEASC->SetLooseGameplayTagCount(TAG_Status_Sprinting, 1);
 	}
 
-	OnRunChanged.Broadcast(true);
+	OnSprintChanged.Broadcast(true);
 
-	K2_OnStartRun();
+	K2_OnStartSprint();
 }
 
-void ABECharacter::OnEndRun()
+void ABECharacter::OnEndSprint()
 {
 	if (UBEAbilitySystemComponent* BEASC = GetBEAbilitySystemComponent())
 	{
-		BEASC->SetLooseGameplayTagCount(TAG_Status_Running, 0);
+		BEASC->SetLooseGameplayTagCount(TAG_Status_Sprinting, 0);
 	}
 
-	OnRunChanged.Broadcast(false);
+	OnSprintChanged.Broadcast(false);
 
-	K2_OnEndRun();
+	K2_OnEndSprint();
 }
 
 

@@ -20,11 +20,11 @@
 class UBEPawnBasicComponent;
 
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Crouching);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Running);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Sprinting);
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Targeting);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTargetingChangedSignature, bool, isTargeting);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FRunningChangedSignature, bool, isRunning);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FSprintingChangedSignature, bool, isSprinting);
 
 
 /**
@@ -113,29 +113,29 @@ protected:
 
 
 public:
-	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_IsRunning, Category = "Character|Run")
-	uint32 bIsRunning : 1;
+	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_IsSprinting, Category = "Character|Sprint")
+	uint32 bIsSprinting : 1;
 
 	UFUNCTION()
-	virtual void OnRep_IsRunning();
+	virtual void OnRep_IsSprinting();
 
-	UFUNCTION(BlueprintCallable, Category = "Character|Run")
-	void Run();
+	UFUNCTION(BlueprintCallable, Category = "Character|Sprint")
+	void Sprint();
 
-	UFUNCTION(BlueprintCallable, Category = "Character|Run")
-	void UnRun();
+	UFUNCTION(BlueprintCallable, Category = "Character|Sprint")
+	void UnSprint();
 
-	virtual void OnStartRun();
-	virtual void OnEndRun();
+	virtual void OnStartSprint();
+	virtual void OnEndSprint();
 
-	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "OnStartRun", ScriptName = "OnStartRun"))
-	void K2_OnStartRun();
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "OnStartSprint", ScriptName = "OnStartSprint"))
+	void K2_OnStartSprint();
 
-	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "OnEndRun", ScriptName = "OnEndRun"))
-	void K2_OnEndRun();
+	UFUNCTION(BlueprintImplementableEvent, meta = (DisplayName = "OnEndSprint", ScriptName = "OnEndSprint"))
+	void K2_OnEndSprint();
 
-	UPROPERTY(BlueprintAssignable, Category = "Character|Run")
-	FRunningChangedSignature OnRunChanged;
+	UPROPERTY(BlueprintAssignable, Category = "Character|Sprint")
+	FSprintingChangedSignature OnSprintChanged;
 
 public:
 	UPROPERTY(BlueprintReadOnly, ReplicatedUsing = OnRep_IsTargeting, Category = "Character|Target")

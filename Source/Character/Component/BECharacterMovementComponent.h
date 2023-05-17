@@ -78,7 +78,7 @@ class BECORE_API UBECharacterMovementComponent : public UCharacterMovementCompon
 
 		enum CompressedFlags
 		{
-			FLAG_Run		= 0x10,
+			FLAG_Sprint		= 0x10,
 			FLAG_Target		= 0x20,
 			FLAG_Custom_2	= 0x40,
 			FLAG_Custom_3	= 0x80,
@@ -91,7 +91,7 @@ class BECORE_API UBECharacterMovementComponent : public UCharacterMovementCompon
 		virtual void PrepMoveFor(ACharacter* Character) override;
 
 		// Flags
-		uint8 Saved_bWantsToRun		: 1;
+		uint8 Saved_bWantsToSprint		: 1;
 		uint8 Saved_bWantsToTarget	: 1;
 	};
 
@@ -155,7 +155,7 @@ protected:
 	virtual void HandleOverallSpeedMultiplierChanged(const FOnAttributeChangeData& ChangeData);
 	virtual void HandleWalkSpeedChanged(const FOnAttributeChangeData& ChangeData);
 	virtual void HandleWalkSpeedCrouchedChanged(const FOnAttributeChangeData& ChangeData);
-	virtual void HandleWalkSpeedRunningChanged(const FOnAttributeChangeData& ChangeData);
+	virtual void HandleWalkSpeedSprintingChanged(const FOnAttributeChangeData& ChangeData);
 	virtual void HandleWalkSpeedTargetingChanged(const FOnAttributeChangeData& ChangeData);
 	virtual void HandleSwimSpeedChanged(const FOnAttributeChangeData& ChangeData);
 	virtual void HandleFlySpeedChanged(const FOnAttributeChangeData& ChangeData);
@@ -170,6 +170,8 @@ public:
 	virtual void UpdateFromCompressedFlags(uint8 Flags) override;
 	virtual void SimulateMovement(float DeltaTime) override;
 	virtual void UpdateCharacterStateBeforeMovement(float DeltaSeconds) override;
+
+	virtual bool CanCrouchInCurrentState() const override;
 
 	virtual bool CanAttemptJump() const override;
 	virtual bool IsMovingOnGround() const override;
@@ -193,15 +195,15 @@ protected:
 
 
 public:
-	uint8 bWantsToRun : 1;
+	uint8 bWantsToSprint : 1;
 
 	UFUNCTION(BlueprintCallable, Category = "Character Movement")
-	virtual bool IsRunning() const;
+	virtual bool IsSprinting() const;
 
-	virtual bool CanRunInCurrentState() const;
+	virtual bool CanSprintInCurrentState() const;
 
-	virtual void Run(bool bClientSimulation);
-	virtual void UnRun(bool bClientSimulation);
+	virtual void Sprint(bool bClientSimulation);
+	virtual void UnSprint(bool bClientSimulation);
 
 public:
 	uint8 bWantsToTarget : 1;
@@ -243,11 +245,15 @@ public:
 
 	// Movement Mode が Walking かつ走り状態の最大移動速度
 	UPROPERTY(Category = "Character Movement: Walking", EditAnywhere, BlueprintReadWrite, meta = (DisplayAfter = "MaxWalkSpeedCrouched", ClampMin = "0", UIMin = "0", ForceUnits = "cm/s"))
-	float MaxWalkSpeedRunning = 550;
+	float MaxWalkSpeedSprinting = 550;
 
 	// Movement Mode が Walking かつターゲット状態の最大移動速度
 	UPROPERTY(Category = "Character Movement: Walking", EditAnywhere, BlueprintReadWrite, meta = (DisplayAfter = "MaxWalkSpeedCrouched", ClampMin = "0", UIMin = "0", ForceUnits = "cm/s"))
 	float MaxWalkSpeedTargeting = 250;
+
+	// 空中でしゃがむことができるかどうか
+	UPROPERTY(Category = "Character Movement: Jumping / Falling", EditAnywhere, BlueprintReadWrite)
+	uint8 bCanCrouchInAir : 1;
 
 	// CustomMovementMode の Movement 処理
 	// 配列の順番が CustomMovement の番号と一致する
