@@ -71,6 +71,13 @@ public:
 	bool LogGameplayMessages = false;
 
 
+#if WITH_EDITORONLY_DATA
+	// 素早く Map を開けるように登録できるリスト
+	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = Maps, meta = (AllowedClasses = "/Script/Engine.World"))
+		TArray<FSoftObjectPath> QuickAccessEditorMaps;
+#endif
+
+
 public:
 	// ゲームの共有設定のクラス
 	UPROPERTY(config, EditDefaultsOnly, BlueprintReadOnly, Category = "BE|GameSettings", meta = (AllowedClasses = "/Script/BECore.BEGameSharedSettings"))
