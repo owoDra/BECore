@@ -51,8 +51,6 @@ UBEGameSharedSettings* UBEGameSharedSettings::LoadOrCreateSettings(const ULocalP
 	const UBEDeveloperGameSettings* DevSettings = GetDefault<UBEDeveloperGameSettings>();
 	check(DevSettings);
 
-	UBEGameSharedSettings* SharedSettings = nullptr;
-
 	FSoftClassPath SettingClassPath = DevSettings->SharedSettingClass;
 	if (SettingClassPath.IsValid())
 	{
@@ -64,8 +62,10 @@ UBEGameSharedSettings* UBEGameSharedSettings::LoadOrCreateSettings(const ULocalP
 
 		return Cast<UBEGameSharedSettings>(UGameplayStatics::CreateSaveGameObject(SettingClass));
 	}
-
-	return nullptr;
+	else
+	{
+		return Cast<UBEGameSharedSettings>(UGameplayStatics::CreateSaveGameObject(UBEGameSharedSettings::StaticClass()));
+	}
 }
 
 
