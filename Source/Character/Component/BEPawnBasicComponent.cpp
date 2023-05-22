@@ -127,12 +127,6 @@ bool UBEPawnBasicComponent::CanChangeInitState(UGameFrameworkComponentManager* M
 			return false;
 		}
 
-		// 有効な AbilitySystemComponent が存在するか
-		if (AbilitySystemComponent == nullptr)
-		{
-			return false;
-		}
-
 		// 承認されたローカルコントローラーがあるか
 		const bool bHasAuthority = Pawn->HasAuthority();
 		const bool bIsLocallyControlled = Pawn->IsLocallyControlled();
@@ -187,15 +181,19 @@ void UBEPawnBasicComponent::HandleChangeInitState(UGameFrameworkComponentManager
 			return;
 		}
 
-		if (!Pawn->HasAuthority())
+		ABEPlayerState* BEPS = GetPlayerState<ABEPlayerState>();
+		if (ensure(BEPS))
 		{
-			return;
+			InitializeAbilitySystem(BEPS->GetBEAbilitySystemComponent(), BEPS);
 		}
 
 		check(AbilitySystemComponent);
 		check(PawnData);
 
-		AbilitySystemComponent->SetTagRelationshipMapping(PawnData->TagRelationshipMapping);
+		if (Pawn->HasAuthority())
+		{
+			AbilitySystemComponent->SetTagRelationshipMapping(PawnData->TagRelationshipMapping);
+		}
 
 		OnPawnInitialized.Broadcast();
 	}

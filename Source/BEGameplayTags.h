@@ -23,9 +23,9 @@ class UGameplayTagsManager;
 ////////////////////////////////////
 // タイプ
 
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_Action_Crouch);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_Action_Run);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_Action_Jump);
+
+
+
 
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_Action_Interact);
 
@@ -86,9 +86,9 @@ UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Message_Reset);
 
 
 
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Ability_Crouch);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Ability_Run);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Ability_Jump);
+
+
+
 
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Ability_Interact);
 
@@ -210,15 +210,6 @@ UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_HUD_Slot_PerfStats_Text);
 
 
 // =================================
-//  カメラ
-// =================================
-
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Camera_Type_FirstPerson);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Camera_Type_ThirdPerson);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Camera_Type_Death);
-
-
-// =================================
 //  SetByCaller
 // =================================
 
@@ -255,10 +246,8 @@ UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Spawning);
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_AbilityInputBlocked);
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_WeaponFireBlocked);
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_WeaponAimBlocked);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_JumpBlocked);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_RunBlocked);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_SprintBlocked);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_MovementStopped);
+
+
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_DamageImmunity);
 
 

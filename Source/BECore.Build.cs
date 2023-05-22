@@ -45,7 +45,7 @@ public class BECore : ModuleRules
                 "ControlFlows",
                 "PropertyPath"
             }
-			);
+		);
 			
 		
 		PrivateDependencyModuleNames.AddRange(

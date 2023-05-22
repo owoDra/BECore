@@ -10,7 +10,6 @@
 #include "Ability/BEAbilitySystemComponent.h"
 #include "Ability/Attribute/BEMovementSet.h"
 #include "BELogChannels.h"
-#include "BEGameplayTags.h"
 
 #include "AbilitySystemGlobals.h"
 #include "CharacterMovementComponentAsync.h"
@@ -40,6 +39,11 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_Movement_Mode_Falling, "Movement.Mode.Falling");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Movement_Mode_Swimming, "Movement.Mode.Swimming");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Movement_Mode_Flying, "Movement.Mode.Flying");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Movement_Mode_Custom, "Movement.Mode.Custom");
+
+UE_DEFINE_GAMEPLAY_TAG(TAG_Status_MovementStopped, "Status.MovementStopped");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Status_JumpBlocked, "Status.JumpBlocked");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Status_SprintBlocked, "Status.SprintBlocked");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Status_TargetBlocked, "Status.TargetBlocked");
 
 
 //////////////////////////////////////////////
@@ -276,30 +280,29 @@ void UBECharacterMovementComponent::UninitializeFromAbilitySystem()
 
 void UBECharacterMovementComponent::InitializeGameplayTags()
 {
-	// AbilitySystem から MovementMode に関する Tag を削除する
-	if (AbilitySystemComponent != nullptr)
-	{
-		AbilitySystemComponent->SetLooseGameplayTagCount(TAG_Movement_Mode_Walking, 0);
-		AbilitySystemComponent->SetLooseGameplayTagCount(TAG_Movement_Mode_NavWalking, 0);
-		AbilitySystemComponent->SetLooseGameplayTagCount(TAG_Movement_Mode_Falling, 0);
-		AbilitySystemComponent->SetLooseGameplayTagCount(TAG_Movement_Mode_Swimming, 0);
-		AbilitySystemComponent->SetLooseGameplayTagCount(TAG_Movement_Mode_Flying, 0);
-		AbilitySystemComponent->SetLooseGameplayTagCount(TAG_Movement_Mode_Custom, 0);
+	check(AbilitySystemComponent);
 
-		for (const UBECharacterMovementFragment* Fragment : Fragments)
+	// AbilitySystem から MovementMode に関する Tag を削除する
+	AbilitySystemComponent->SetLooseGameplayTagCount(TAG_Movement_Mode_Walking, 0);
+	AbilitySystemComponent->SetLooseGameplayTagCount(TAG_Movement_Mode_NavWalking, 0);
+	AbilitySystemComponent->SetLooseGameplayTagCount(TAG_Movement_Mode_Falling, 0);
+	AbilitySystemComponent->SetLooseGameplayTagCount(TAG_Movement_Mode_Swimming, 0);
+	AbilitySystemComponent->SetLooseGameplayTagCount(TAG_Movement_Mode_Flying, 0);
+	AbilitySystemComponent->SetLooseGameplayTagCount(TAG_Movement_Mode_Custom, 0);
+
+	for (const UBECharacterMovementFragment* Fragment : Fragments)
+	{
+		if (Fragment != nullptr)
 		{
-			if (Fragment != nullptr)
+			FGameplayTag ModeTag = Fragment->GetMovementModeTag();
+			if (ModeTag.IsValid())
 			{
-				FGameplayTag ModeTag = Fragment->GetMovementModeTag();
-				if (ModeTag.IsValid())
-				{
-					AbilitySystemComponent->SetLooseGameplayTagCount(ModeTag, 0);
-				}
+				AbilitySystemComponent->SetLooseGameplayTagCount(ModeTag, 0);
 			}
 		}
-
-		SetMovementModeTag(MovementMode, CustomMovementMode, true);
 	}
+
+	SetMovementModeTag(MovementMode, CustomMovementMode, true);
 }
 
 
@@ -740,46 +743,38 @@ void UBECharacterMovementComponent::SetMovementModeTag(EMovementMode InMovementM
 {
 	if (AbilitySystemComponent)
 	{
-		FGameplayTag MovementModeTag = FGameplayTag::EmptyTag;
-		FGameplayTag CustomMovementModeTag = FGameplayTag::EmptyTag;
+		const int32 NewCount = (bTagEnabled ? 1 : 0);
 
-		if (MovementMode == MOVE_Walking)
+		if (InMovementMode == MOVE_Walking)
 		{
-			MovementModeTag = TAG_Movement_Mode_Walking;
+			AbilitySystemComponent->SetLooseGameplayTagCount(TAG_Movement_Mode_Walking, NewCount);
 		}
-		else if (MovementMode == MOVE_NavWalking)
+		else if (InMovementMode == MOVE_NavWalking)
 		{
-			MovementModeTag = TAG_Movement_Mode_NavWalking;
+			AbilitySystemComponent->SetLooseGameplayTagCount(TAG_Movement_Mode_NavWalking, NewCount);
 		}
-		else if (MovementMode == MOVE_Falling)
+		else if (InMovementMode == MOVE_Falling)
 		{
-			MovementModeTag = TAG_Movement_Mode_Falling;
+			AbilitySystemComponent->SetLooseGameplayTagCount(TAG_Movement_Mode_Falling, NewCount);
 		}
-		else if (MovementMode == MOVE_Swimming)
+		else if (InMovementMode == MOVE_Swimming)
 		{
-			MovementModeTag = TAG_Movement_Mode_Swimming;
+			AbilitySystemComponent->SetLooseGameplayTagCount(TAG_Movement_Mode_Swimming, NewCount);
 		}
-		else if (MovementMode == MOVE_Flying)
+		else if (InMovementMode == MOVE_Flying)
 		{
-			MovementModeTag = TAG_Movement_Mode_Flying;
+			AbilitySystemComponent->SetLooseGameplayTagCount(TAG_Movement_Mode_Flying, NewCount);
 		}
-		else if (MovementMode == MOVE_Custom)
+		else if (InMovementMode == MOVE_Custom)
 		{
-			MovementModeTag = TAG_Movement_Mode_Custom;
-
 			if (const UBECharacterMovementFragment* Fragment = Fragments[CustomMovementMode])
 			{
-				CustomMovementModeTag = Fragment->GetMovementModeTag();
+				const FGameplayTag MovementModeTag = Fragment->GetMovementModeTag();
+				if (MovementModeTag.IsValid())
+				{
+					AbilitySystemComponent->SetLooseGameplayTagCount(MovementModeTag, NewCount);
+				}
 			}
-		}
-
-		if (MovementModeTag.IsValid())
-		{
-			AbilitySystemComponent->SetLooseGameplayTagCount(MovementModeTag, (bTagEnabled ? 1 : 0));
-		}
-		if (CustomMovementModeTag.IsValid())
-		{
-			AbilitySystemComponent->SetLooseGameplayTagCount(CustomMovementModeTag, (bTagEnabled ? 1 : 0));
 		}
 	}
 }
@@ -909,7 +904,7 @@ bool UBECharacterMovementComponent::CanTargetInCurrentState() const
 {
 	if (AbilitySystemComponent)
 	{
-		if (AbilitySystemComponent->HasMatchingGameplayTag(TAG_Status_WeaponAimBlocked))
+		if (AbilitySystemComponent->HasMatchingGameplayTag(TAG_Status_TargetBlocked))
 		{
 			return false;
 		}

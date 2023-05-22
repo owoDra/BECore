@@ -65,7 +65,7 @@ enum class EBEGamepadSensitivity : uint8
  *  保存したデータは SvaeGame として保存される。
  */
 UCLASS()
-class UBEGameSharedSettings : public USaveGame
+class BECORE_API UBEGameSharedSettings : public USaveGame
 {
 	GENERATED_BODY()
 public:
@@ -117,7 +117,7 @@ public:
 	 */
 	bool IsDirty() const { return bIsDirty; }
 
-private:
+protected:
 	template<typename T>
 	bool ChangeValueAndDirty(T& CurrentValue, const T& NewValue)
 	{
@@ -133,6 +133,7 @@ private:
 		return false;
 	}
 
+private:
 	// 設定が変更されたか判定する
 	bool bIsDirty = false;
 

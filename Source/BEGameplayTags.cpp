@@ -22,9 +22,8 @@ FBEGameplayTags FBEGameplayTags::GameplayTags;
 ////////////////////////////////////
 // タイプ
 
-UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_Action_Crouch, "Ability.Type.Action.Crouch");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_Action_Run, "Ability.Type.Action.Run");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_Action_Jump, "Ability.Type.Action.Jump");
+
+
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_Action_Mantle, "Ability.Type.Action.Mantle");
 
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_Action_Interact, "Ability.Type.Action.Interact");
@@ -93,9 +92,9 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_Message_Reset, "Message.Reset");
 
 
 
-UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Ability_Crouch, "Input.Ability.Crouch");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Ability_Run, "Input.Ability.Run");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Ability_Jump, "Input.Ability.Jump");
+
+
+
 
 UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Ability_Interact, "Input.Ability.Interact");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Ability_ShowOverlay, "Input.Ability.ShowOverlay");
@@ -243,16 +242,6 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_HUD_Slot_PerfStats_Text, "HUD.Slot.PerfStats.Text");
 
 
 // =================================
-//  カメラ
-// =================================
-
-UE_DEFINE_GAMEPLAY_TAG(TAG_Camera_Type_FirstPerson, "Camera.Type.FirstPerson");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Camera_Type_ThirdPerson, "Camera.Type.ThirdPerson");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Camera_Type_Death, "Camera.Type.Death");
-
-
-
-// =================================
 //  SetByCaller
 // =================================
 
@@ -292,10 +281,8 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Fireing, "Status.Fireing");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Status_AbilityInputBlocked, "Status.AbilityInputBlocked");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Status_WeaponFireBlocked, "Status.WeaponFireBlocked");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Status_WeaponAimBlocked, "Status.WeaponAimBlocked");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Status_JumpBlocked, "Status.JumpBlocked");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Status_RunBlocked, "Status.RunBlocked");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Status_SprintBlocked, "Status.SprintBlocked");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Status_MovementStopped, "Status.MovementStopped");
+
+
 UE_DEFINE_GAMEPLAY_TAG(TAG_Status_DamageImmunity, "Status.DamageImmunity");
 
 

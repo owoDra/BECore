@@ -21,7 +21,9 @@ class UBECameraComponent;
 class AActor;
 class UCanvas;
 
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Camera_Type);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Camera_Type_FirstPerson);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Camera_Type_ThirdPerson);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Camera_Type_Death);
 
 
 /**
@@ -86,7 +88,7 @@ UCLASS(Abstract, NotBlueprintable)
 class BECORE_API UBECameraMode : public UObject
 {
 	GENERATED_BODY()
-
+public:
 	UBECameraMode();
 	
 public:
@@ -204,7 +206,7 @@ UCLASS()
 class UBECameraModeStack : public UObject
 {
 	GENERATED_BODY()
-
+public:
 	UBECameraModeStack();
 
 protected:

@@ -41,7 +41,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogBEGameSettingRegistry, Log, Log);
  * UBEGameSettingRegistry
  */
 UCLASS()
-class UBEGameSettingRegistry : public UGameSettingRegistry
+class BECORE_API UBEGameSettingRegistry : public UGameSettingRegistry
 {
 	GENERATED_BODY()
 public:
