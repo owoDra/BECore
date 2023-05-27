@@ -514,6 +514,39 @@ void ABECharacter::OnRep_MyTeamID(FGenericTeamId OldTeamID)
 }
 
 
+void ABECharacter::GetMeshes(TArray<USkeletalMeshComponent*>& Meshes) const
+{
+	Meshes.Empty();
+	Meshes.Emplace(GetMesh());
+}
+
+USkeletalMeshComponent* ABECharacter::GetFPPMesh() const
+{
+	return nullptr;
+}
+
+USkeletalMeshComponent* ABECharacter::GetTPPMesh() const
+{
+	return GetMesh();
+}
+
+void ABECharacter::GetMainAnimInstances(TArray<UBEAnimInstance*>& Instances) const
+{
+	Instances.Empty();
+	Instances.Emplace(Cast<UBEAnimInstance>(GetMesh()->GetAnimInstance()));
+}
+
+UBEAnimInstance* ABECharacter::GetFPPAnimInstance() const
+{
+	return nullptr;
+}
+
+UBEAnimInstance* ABECharacter::GetTPPAnimInstance() const
+{
+	return Cast<UBEAnimInstance>(GetMesh()->GetAnimInstance());
+}
+
+
 ABEPlayerController* ABECharacter::GetBEPlayerController() const
 {
 	return CastChecked<ABEPlayerController>(Controller, ECastCheckedType::NullAllowed);

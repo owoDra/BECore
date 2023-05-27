@@ -3,11 +3,13 @@
 #pragma once
 
 #include "ModularCharacter.h"
+
 #include "Team/BETeamAgentInterface.h"
+#include "BEPawnMeshAssistInterface.h"
+
 #include "AbilitySystemInterface.h"
 #include "GameplayCueInterface.h"
 #include "GameplayTagAssetInterface.h"
-
 #include "GenericTeamAgentInterface.h"
 #include "Containers/Array.h"
 #include "Engine/EngineTypes.h"
@@ -59,11 +61,14 @@ class BECORE_API ABECharacter
 	, public IGameplayCueInterface
 	, public IGameplayTagAssetInterface
 	, public IBETeamAgentInterface
+	, public IBEPawnMeshAssistInterface
 {
 	GENERATED_BODY()
-
 public:
 	ABECharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+
+	UPROPERTY(EditDefaultsOnly)
+	bool UpdateMeshPositionWhenCrouch = true;
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Character", Meta = (AllowPrivateAccess = "true"))
@@ -72,9 +77,6 @@ protected:
 private:
 	UPROPERTY(Transient, ReplicatedUsing = OnRep_ReplicatedAcceleration)
 	FBEReplicatedAcceleration ReplicatedAcceleration;
-
-	UPROPERTY(EditDefaultsOnly)
-	bool UpdateMeshPositionWhenCrouch = true;
 
 	UFUNCTION()
 	void OnRep_ReplicatedAcceleration();
@@ -185,6 +187,18 @@ private:
 
 	UFUNCTION()
 	void OnRep_MyTeamID(FGenericTeamId OldTeamID);
+
+
+public:
+	//~IBEPawnMeshAssistInterface interface
+	void GetMeshes(TArray<USkeletalMeshComponent*>& Meshes) const;
+	USkeletalMeshComponent* GetFPPMesh() const;
+	USkeletalMeshComponent* GetTPPMesh() const;
+
+	void GetMainAnimInstances(TArray<UBEAnimInstance*>& Instances) const;
+	UBEAnimInstance* GetFPPAnimInstance() const;
+	UBEAnimInstance* GetTPPAnimInstance() const;
+	//~End of IBEPawnMeshAssistInterface interface
 
 
 public:
