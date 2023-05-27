@@ -18,18 +18,18 @@ void UBECameraMode_FirstPerson::PostActivateMode()
 	{
 		if (BEChara->IsLocallyControlled())
 		{
-			if (IBEPawnMeshAssistInterface* AssistInterface = Cast<IBEPawnMeshAssistInterface>(BEChara))
+			if (Cast<IBEPawnMeshAssistInterface>(BEChara))
 			{
 				// FPP Mesh の表示
-				if (USkeletalMeshComponent* FPPMesh = AssistInterface->GetFPPMesh())
+				if (USkeletalMeshComponent* FPPMesh = IBEPawnMeshAssistInterface::Execute_GetFPPMesh(BEChara))
 				{
-					FPPMesh->SetHiddenInGame(false);
+					FPPMesh->SetHiddenInGame(false, true);
 				}
 
 				// TPP Mesh の非表示
-				if (USkeletalMeshComponent* TPPMesh = AssistInterface->GetTPPMesh())
+				if (USkeletalMeshComponent* TPPMesh = IBEPawnMeshAssistInterface::Execute_GetTPPMesh(BEChara))
 				{
-					TPPMesh->SetHiddenInGame(true);
+					TPPMesh->SetHiddenInGame(true, true);
 				}
 			}
 
@@ -45,18 +45,18 @@ void UBECameraMode_FirstPerson::PreDeactivateMode()
 	{
 		if (BEChara->IsLocallyControlled())
 		{
-			if (IBEPawnMeshAssistInterface* AssistInterface = Cast<IBEPawnMeshAssistInterface>(BEChara))
+			if (Cast<IBEPawnMeshAssistInterface>(BEChara))
 			{
 				// FPP Mesh の非表示
-				if (USkeletalMeshComponent* FPPMesh = AssistInterface->GetFPPMesh())
+				if (USkeletalMeshComponent* FPPMesh = IBEPawnMeshAssistInterface::Execute_GetFPPMesh(BEChara))
 				{
-					FPPMesh->SetHiddenInGame(true);
+					FPPMesh->SetHiddenInGame(true, true);
 				}
 
 				// TPP Mesh の表示
-				if (USkeletalMeshComponent* TPPMesh = AssistInterface->GetTPPMesh())
+				if (USkeletalMeshComponent* TPPMesh = IBEPawnMeshAssistInterface::Execute_GetTPPMesh(BEChara))
 				{
-					TPPMesh->SetHiddenInGame(false);
+					TPPMesh->SetHiddenInGame(false, true);
 				}
 			}
 

@@ -191,13 +191,13 @@ private:
 
 public:
 	//~IBEPawnMeshAssistInterface interface
-	void GetMeshes(TArray<USkeletalMeshComponent*>& Meshes) const;
-	USkeletalMeshComponent* GetFPPMesh() const;
-	USkeletalMeshComponent* GetTPPMesh() const;
+	void GetMeshes_Implementation(TArray<USkeletalMeshComponent*>& Meshes) const override;
+	USkeletalMeshComponent* GetFPPMesh_Implementation() const override;
+	USkeletalMeshComponent* GetTPPMesh_Implementation() const override;
 
-	void GetMainAnimInstances(TArray<UBEAnimInstance*>& Instances) const;
-	UBEAnimInstance* GetFPPAnimInstance() const;
-	UBEAnimInstance* GetTPPAnimInstance() const;
+	void GetMainAnimInstances_Implementation(TArray<UBEAnimInstance*>& Instances) const override;
+	UBEAnimInstance* GetFPPAnimInstance_Implementation() const override;
+	UBEAnimInstance* GetTPPAnimInstance_Implementation() const override;
 	//~End of IBEPawnMeshAssistInterface interface
 
 
