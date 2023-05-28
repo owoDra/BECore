@@ -56,7 +56,7 @@ protected:
 	TObjectPtr<UBECameraModeStack> CameraModeStack;
 
 	FRotator PreviousControlRotation;
-
+	FRotator ControlRotationDelta;
 
 protected:
 	/**
@@ -150,10 +150,10 @@ public:
 	void PushCameraMode(TSubclassOf<UBECameraMode> CameraModeClass);
 
 	/**
-	 * GetPrevControlRotation
+	 * GetControlRotationDelta
 	 *
-	 *	キャッシュした直前のフレームでの ControlRotation を返す
+	 *	キャッシュした直前のフレームとの ControlRotation の差を返す
 	 */
 	UFUNCTION(BlueprintPure, Category = "Camera")
-		FRotator GetPrevControlRotation() const { return PreviousControlRotation; }
+	FRotator GetControlRotationDelta() const { return ControlRotationDelta; }
 };

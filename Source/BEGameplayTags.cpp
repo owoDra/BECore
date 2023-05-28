@@ -30,16 +30,8 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_Action_Interact, "Ability.Type.Action.In
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_Action_ShowOverlay, "Ability.Type.Action.ShowOverlay");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_Action_Ping, "Ability.Type.Action.Ping");
 
-UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_Action_Tactical_Main, "Ability.Type.Action.Tactical.Main");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_Action_Tactical_Sub, "Ability.Type.Action.Tactical.Sub");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_Action_Tactical_Ultimate, "Ability.Type.Action.Tactical.Ultimate");
-
-UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_Action_Weapon_Fire, "Ability.Type.Action.Weapon.Fire");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_Action_Weapon_AltFire, "Ability.Type.Action.Weapon.AltFire");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_Action_Weapon_Reload, "Ability.Type.Action.Weapon.Reload");
 
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_Passive_AutoRespawn, "Ability.Type.Passive.AutoRespawn");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_Passive_ChangeQuickBarSlot, "Ability.Type.Passive.ChangeQuickBarSlot");
 
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_StatusChange_Death, "Ability.Type.StatusChange.Death");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Ability_Type_StatusChange_Spawning, "Ability.Type.StatusChange.Spawning");
@@ -100,25 +92,12 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Ability_Interact, "Input.Ability.Interact");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Ability_ShowOverlay, "Input.Ability.ShowOverlay");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Ability_Ping, "Input.Ability.Ping");
 
-UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Ability_Tactical_Main, "Input.Ability.Tactical.Main");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Ability_Tactical_Sub, "Input.Ability.Tactical.Sub");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Ability_Tactical_Ultimate, "Input.Ability.Tactical.Ultimate");
-
-UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Ability_QuickSlot_Next, "Input.Ability.QuickSlot.Next");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Ability_QuickSlot_Back, "Input.Ability.QuickSlot.Back");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Ability_QuickSlot_Select, "Input.Ability.QuickSlot.Select");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Ability_QuickSlot_Drop, "Input.Ability.QuickSlot.Drop");
-
-UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Ability_Weapon_Fire, "Input.Ability.Weapon.Fire");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Ability_Weapon_AltFire, "Input.Ability.Weapon.AltFire");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Ability_Weapon_Reload, "Input.Ability.Weapon.Reload");
-
 
 // =================================
 //  イベント
 // =================================
 
-UE_DEFINE_GAMEPLAY_TAG(TAG_Event_Death, "Event.Death");
+
 
 UE_DEFINE_GAMEPLAY_TAG(TAG_Event_RequestReset, "Event.RequestReset");
 

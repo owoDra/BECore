@@ -29,11 +29,7 @@ class UGameplayTagsManager;
 
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_Action_Interact);
 
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_Action_Tactical);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_Action_Weapon);
-
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_Passive_AutoRespawn);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_Passive_ChangeQuickBarSlot);
 
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_StatusChange_Death);
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_StatusChange_Spawning);
@@ -92,20 +88,12 @@ UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Message_Reset);
 
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Ability_Interact);
 
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Ability_Tactical);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Ability_Weapon);
-
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Ability_QuickSlot_Next);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Ability_QuickSlot_Back);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Ability_QuickSlot_Select);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Ability_QuickSlot_Drop);
-
 
 // =================================
 //  イベント
 // =================================
 
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Event_Death);
+
 
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Event_RequestReset);
 

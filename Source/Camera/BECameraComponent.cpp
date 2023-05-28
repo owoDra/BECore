@@ -50,13 +50,15 @@ void UBECameraComponent::ComputeCameraView(float DeltaTime, FMinimalViewInfo& De
 	
 	FBECameraModeView CameraModeView;
 	CameraModeStack->EvaluateStack(DeltaTime, CameraModeView);
+
+	ControlRotationDelta = (CameraModeView.ControlRotation - PreviousControlRotation);
 	
 	ComputeRecoilAmount(DeltaTime, CameraModeView);
 	ComputeZoomAmount(DeltaTime, CameraModeView);
 	
 	SetWorldLocationAndRotation(CameraModeView.Location, CameraModeView.Rotation);
-	PlayerController->SetControlRotation(CameraModeView.ControlRotation);
 	PreviousControlRotation = CameraModeView.ControlRotation;
+	PlayerController->SetControlRotation(CameraModeView.ControlRotation);
 	FieldOfView = CameraModeView.FieldOfView;
 
 	DesiredView.Location = CameraModeView.Location;
@@ -82,7 +84,7 @@ void UBECameraComponent::ComputeRecoilAmount(float DeltaTime, FBECameraModeView&
 	if (RecoilState == EBECameraRecoilState::RecoilUp)
 	{
 		// このフレームにおける ControlRotation のデルタ
-		const FRotator ControlDelta = (CameraModeView.ControlRotation - PreviousControlRotation);
+		const FRotator ControlDelta = ControlRotationDelta;
 		const bool bNegativeDeltaY = (ControlDelta.Pitch < 0.0);
 		const bool bNegativeDeltaX = (ControlDelta.Yaw < 0.0);
 

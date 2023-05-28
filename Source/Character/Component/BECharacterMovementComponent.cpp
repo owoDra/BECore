@@ -154,7 +154,7 @@ UBECharacterMovementComponent::UBECharacterMovementComponent(const FObjectInitia
 {
 	AbilitySystemComponent = nullptr;
 	MovementSet = nullptr;
-
+	
 	// 基本設定
 	GravityScale = 1.0f;
 	MaxAcceleration = 2400.0f;
@@ -231,8 +231,7 @@ void UBECharacterMovementComponent::InitializeWithAbilitySystem(UBEAbilitySystem
 		return;
 	}
 
-	UAttributeSet* NewSet = NewObject<UAttributeSet>(GetOwner(), UBEMovementSet::StaticClass());
-	MovementSet = Cast<UBEMovementSet>(AbilitySystemComponent->AddAttributeSetSubobject(NewSet));
+	MovementSet = Cast<UBEMovementSet>(AbilitySystemComponent->InitStats(UBEMovementSet::StaticClass(), nullptr));
 	if (!MovementSet)
 	{
 		UE_LOG(LogBE, Error, TEXT("BECharacterMovementComponent: Cannot initialize Character movement component for owner [%s] with NULL movement set on the ability system."), *GetNameSafe(Owner));
@@ -254,22 +253,25 @@ void UBECharacterMovementComponent::InitializeWithAbilitySystem(UBEAbilitySystem
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UBEMovementSet::GetJumpPowerAttribute()).AddUObject(this, &ThisClass::HandleJumpPowerChanged);
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UBEMovementSet::GetAirControlAttribute()).AddUObject(this, &ThisClass::HandleAirControlChanged);
 
-	// アトリビュートの初期値を設定
-	AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetGravityScaleAttribute(), GravityScale);
-	AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetGroundFrictionAttribute(), GroundFriction);
+	if (CharacterOwner->HasAuthority())
+	{
+		// アトリビュートの初期値を設定
+		AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetGravityScaleAttribute(), GravityScale);
+		AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetGroundFrictionAttribute(), GroundFriction);
 
-	AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetOverallSpeedMultiplierAttribute(), OverallMaxSpeedMultiplier);
-	AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetWalkSpeedAttribute(), MaxWalkSpeed);
-	AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetWalkSpeedCrouchedAttribute(), MaxWalkSpeedCrouched);
-	AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetWalkSpeedSprintingAttribute(), MaxWalkSpeedSprinting);
-	AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetWalkSpeedTargetingAttribute(), MaxWalkSpeedTargeting);
-	AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetSwimSpeedAttribute(), MaxSwimSpeed);
-	AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetFlySpeedAttribute(), MaxFlySpeed);
+		AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetOverallSpeedMultiplierAttribute(), OverallMaxSpeedMultiplier);
+		AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetWalkSpeedAttribute(), MaxWalkSpeed);
+		AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetWalkSpeedCrouchedAttribute(), MaxWalkSpeedCrouched);
+		AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetWalkSpeedSprintingAttribute(), MaxWalkSpeedSprinting);
+		AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetWalkSpeedTargetingAttribute(), MaxWalkSpeedTargeting);
+		AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetSwimSpeedAttribute(), MaxSwimSpeed);
+		AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetFlySpeedAttribute(), MaxFlySpeed);
 
-	AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetJumpPowerAttribute(), JumpZVelocity);
-	AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetAirControlAttribute(), AirControl);
+		AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetJumpPowerAttribute(), JumpZVelocity);
+		AbilitySystemComponent->SetNumericAttributeBase(UBEMovementSet::GetAirControlAttribute(), AirControl);
 
-	InitializeGameplayTags();
+		InitializeGameplayTags();
+	}
 }
 
 void UBECharacterMovementComponent::UninitializeFromAbilitySystem()
@@ -378,11 +380,6 @@ void UBECharacterMovementComponent::HandleChangeInitState(UGameFrameworkComponen
 	if (CurrentState == TAG_InitState_DataAvailable && DesiredState == TAG_InitState_DataInitialized)
 	{
 		if (!ensure(CharacterOwner))
-		{
-			return;
-		}
-
-		if (!CharacterOwner->HasAuthority())
 		{
 			return;
 		}

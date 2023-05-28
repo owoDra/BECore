@@ -324,9 +324,12 @@ void UBECameraModeStack::UpdateStack(float DeltaTime)
 			RemoveIndex = (StackIndex + 1);
 			RemoveCount = (StackSize - RemoveIndex);
 
-			// Blend が完了したということは完全に Active になったということなので
+			// Index 0 の Blend が完了したということは完全に Active になったということなので
 			// ActivationState を Activated に設定
-			CameraMode->SetActivationState(EBECameraModeActivationState::Activated);
+			if (StackIndex == 0)
+			{
+				CameraMode->SetActivationState(EBECameraModeActivationState::Activated);
+			}
 			break;
 		}
 	}
@@ -397,7 +400,7 @@ void UBECameraModeStack::PushCameraMode(TSubclassOf<UBECameraMode> CameraModeCla
 	// 新しく追加する CameraMode の BlendWeight を決める
 	int32 ExistingStackIndex		= INDEX_NONE;
 	float ExistingStackContribution = 1.0f;
-	bool bCameraModeExisted = false;
+	bool bCameraModeExisted			= false;
 
 	for (int32 StackIndex = 0; StackIndex < StackSize; ++StackIndex)
 	{

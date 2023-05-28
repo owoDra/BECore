@@ -8,6 +8,7 @@
 #include "Player/BEPlayerState.h"
 #include "Ability/BEAbilitySystemComponent.h"
 #include "Ability/Attribute/BEHealthSet.h"
+#include "Ability/Attribute/BECombatSet.h"
 #include "System/BEAssetManager.h"
 #include "System/BEGameData.h"
 #include "Message/BEVerbMessage.h"
@@ -29,6 +30,8 @@
 UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Death, "Status.Death");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Death_Dying, "Status.Death.Dying");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Death_Dead, "Status.Death.Dead");
+
+UE_DEFINE_GAMEPLAY_TAG(TAG_Event_Death, "Event.Death");
 
 const FName UBEPawnHealthComponent::NAME_ActorFeatureName("CharacterHealth");
 
@@ -54,6 +57,7 @@ UBEPawnHealthComponent::UBEPawnHealthComponent(const FObjectInitializer& ObjectI
 	SetIsReplicatedByDefault(true);
 
 	HealthSet = nullptr;
+	CombatSet = nullptr;
 	DeathState = EBEDeathState::NotDead;
 
 	DefaultMaxHealth = 100;
@@ -133,12 +137,17 @@ void UBEPawnHealthComponent::InitializeWithAbilitySystem(UBEAbilitySystemCompone
 		return;
 	}
 
-
-	UAttributeSet* NewSet = NewObject<UAttributeSet>(GetOwner(), UBEHealthSet::StaticClass());
-	HealthSet = Cast<UBEHealthSet>(AbilitySystemComponent->AddAttributeSetSubobject(NewSet));
+	HealthSet = Cast<UBEHealthSet>(AbilitySystemComponent->InitStats(UBEHealthSet::StaticClass(), nullptr));
 	if (!HealthSet)
 	{
 		UE_LOG(LogBE, Error, TEXT("BEPawnHealthComponent: Cannot initialize health component for owner [%s] with NULL health set on the ability system."), *GetNameSafe(Owner));
+		return;
+	}
+
+	CombatSet = Cast<UBECombatSet>(AbilitySystemComponent->InitStats(UBECombatSet::StaticClass(), nullptr));
+	if (!CombatSet)
+	{
+		UE_LOG(LogBE, Error, TEXT("BEPawnHealthComponent: Cannot initialize health component for owner [%s] with NULL combat set on the ability system."), *GetNameSafe(Owner));
 		return;
 	}
 
@@ -150,14 +159,19 @@ void UBEPawnHealthComponent::InitializeWithAbilitySystem(UBEAbilitySystemCompone
 	AbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UBEHealthSet::GetMaxShieldAttribute()).AddUObject(this, &ThisClass::HandleMaxShieldChanged);
 	HealthSet->OnOutOfHealth.AddUObject(this, &ThisClass::HandleOutOfHealth);
 
-	///////////////////////////////////
-	// アトリビュートの値を初期化
-	AbilitySystemComponent->SetNumericAttributeBase(UBEHealthSet::GetMaxHealthAttribute(), DefaultMaxHealth);
-	AbilitySystemComponent->SetNumericAttributeBase(UBEHealthSet::GetMaxShieldAttribute(), DefaultMaxShield);
-	AbilitySystemComponent->SetNumericAttributeBase(UBEHealthSet::GetHealthAttribute(), DefaultHealth);
-	AbilitySystemComponent->SetNumericAttributeBase(UBEHealthSet::GetShieldAttribute(), DefaultShield);
+	APawn* Pawn = GetPawn<APawn>();
+	if (Pawn->HasAuthority())
+	{
+		///////////////////////////////////
+		// アトリビュートの値を初期化
 
-	ClearGameplayTags();
+		AbilitySystemComponent->SetNumericAttributeBase(UBEHealthSet::GetMaxHealthAttribute(), DefaultMaxHealth);
+		AbilitySystemComponent->SetNumericAttributeBase(UBEHealthSet::GetMaxShieldAttribute(), DefaultMaxShield);
+		AbilitySystemComponent->SetNumericAttributeBase(UBEHealthSet::GetHealthAttribute(), DefaultHealth);
+		AbilitySystemComponent->SetNumericAttributeBase(UBEHealthSet::GetShieldAttribute(), DefaultShield);
+
+		ClearGameplayTags();
+	}
 
 	///////////////////////////////////
 	// 初期値の更新を知らせる
@@ -254,11 +268,6 @@ void UBEPawnHealthComponent::HandleChangeInitState(UGameFrameworkComponentManage
 	{
 		APawn* Pawn = GetPawn<APawn>();
 		if (!ensure(Pawn))
-		{
-			return;
-		}
-
-		if (!Pawn->HasAuthority())
 		{
 			return;
 		}
