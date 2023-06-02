@@ -4,6 +4,10 @@
 
 #include "NativeGameplayTags.h"
 
+
+////////////////////////////////////
+// Platform.Trait
+
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Platform_Trait_SupportsChangingAudioOutputDevice);
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Platform_Trait_SupportsBackgroundAudio);
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Platform_Trait_SupportsWindowedMode);

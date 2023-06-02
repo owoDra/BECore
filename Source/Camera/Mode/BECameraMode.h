@@ -13,17 +13,12 @@
 #include "Templates/SubclassOf.h"
 #include "UObject/ObjectPtr.h"
 #include "UObject/UObjectGlobals.h"
-#include "NativeGameplayTags.h"
 
 #include "BECameraMode.generated.h"
 
 class UBECameraComponent;
 class AActor;
 class UCanvas;
-
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Camera_Type_FirstPerson);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Camera_Type_ThirdPerson);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Camera_Type_Death);
 
 
 /**
