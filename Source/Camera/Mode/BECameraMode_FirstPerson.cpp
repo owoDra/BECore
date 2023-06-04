@@ -23,13 +23,13 @@ void UBECameraMode_FirstPerson::PostActivateMode()
 				// FPP Mesh の表示
 				if (USkeletalMeshComponent* FPPMesh = IBEPawnMeshAssistInterface::Execute_GetFPPMesh(BEChara))
 				{
-					FPPMesh->SetHiddenInGame(false, true);
+					FPPMesh->SetHiddenInGame(false);
 				}
 
 				// TPP Mesh の非表示
 				if (USkeletalMeshComponent* TPPMesh = IBEPawnMeshAssistInterface::Execute_GetTPPMesh(BEChara))
 				{
-					TPPMesh->SetHiddenInGame(true, true);
+					TPPMesh->SetOwnerNoSee(true);
 				}
 			}
 
@@ -50,13 +50,13 @@ void UBECameraMode_FirstPerson::PreDeactivateMode()
 				// FPP Mesh の非表示
 				if (USkeletalMeshComponent* FPPMesh = IBEPawnMeshAssistInterface::Execute_GetFPPMesh(BEChara))
 				{
-					FPPMesh->SetHiddenInGame(true, true);
+					FPPMesh->SetHiddenInGame(true);
 				}
 
 				// TPP Mesh の表示
 				if (USkeletalMeshComponent* TPPMesh = IBEPawnMeshAssistInterface::Execute_GetTPPMesh(BEChara))
 				{
-					TPPMesh->SetHiddenInGame(false, true);
+					TPPMesh->SetOwnerNoSee(false);
 				}
 			}
 
