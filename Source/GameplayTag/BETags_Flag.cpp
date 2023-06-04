@@ -16,4 +16,9 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_Flag_SkillActivateBlocked	, "Flag.SkillActivateBlocke
 UE_DEFINE_GAMEPLAY_TAG(TAG_Flag_WeaponAttackBlocked		, "Flag.WeaponAttackBlocked");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Flag_WeaponTargetBlocked		, "Flag.WeaponTargetBlocked");
 
+UE_DEFINE_GAMEPLAY_TAG(TAG_Flag_MovementBlocked			, "Flag.MovementBlocked");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Flag_JumpBlocked				, "Flag.JumpBlocked");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Flag_SprintBlocked			, "Flag.SprintBlocked");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Flag_TargetBlocked			, "Flag.TargetBlocked");
+
 UE_DEFINE_GAMEPLAY_TAG(TAG_Flag_DamageImmunity			, "Flag.DamageImmunity");

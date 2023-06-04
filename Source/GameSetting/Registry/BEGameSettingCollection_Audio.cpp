@@ -5,7 +5,7 @@
 #include "Player/BELocalPlayer.h"
 #include "GameSetting/BEGameDeviceSettings.h"
 #include "GameSetting/SettingValue/BESettingValueDiscreteDynamic_AudioOutputDevice.h"
-#include "Development/BEDevelopmentTags.h"
+#include "GameplayTag/BETags_Platform.h"
 
 #include "GameSetting.h"
 #include "GameSettingValueDiscreteDynamic.h"

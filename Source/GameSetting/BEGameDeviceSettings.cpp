@@ -8,8 +8,8 @@
 #include "Audio/BEAudioMixEffectsSubsystem.h"
 #include "Performance/BEPerformanceSettings.h"
 #include "Development/BEDeveloperPlatformSettings.h"
-#include "Development/BEDevelopmentTags.h"
 #include "BELogChannels.h"
+#include "GameplayTag/BETags_Platform.h"
 
 #include "Sound/SoundClass.h"
 #include "AudioDeviceManager.h"

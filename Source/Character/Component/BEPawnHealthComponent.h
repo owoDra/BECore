@@ -8,7 +8,6 @@
 #include "Delegates/Delegate.h"
 #include "HAL/Platform.h"
 #include "UObject/UObjectGlobals.h"
-#include "NativeGameplayTags.h"
 
 #include "BEPawnHealthComponent.generated.h"
 
@@ -17,12 +16,6 @@ class UBEHealthSet;
 struct FFrame;
 struct FGameplayEffectSpec;
 struct FOnAttributeChangeData;
-
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Death);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Death_Dying);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Death_Dead);
-
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Event_Death);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FBEHealth_DeathEvent, APawn*, OwningPawn);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_FourParams(FBEHealth_AttributeChanged, UBEPawnHealthComponent*, HealthComponent, float, OldValue, float, NewValue, APawn*, Instigator);

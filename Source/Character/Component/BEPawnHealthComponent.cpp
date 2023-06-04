@@ -3,7 +3,6 @@
 #include "BEPawnHealthComponent.h"
 
 #include "Character/Component/BEPawnBasicComponent.h"
-#include "Character/BEPawnInitializeTags.h"
 #include "Player/BEPlayerController.h"
 #include "Player/BEPlayerState.h"
 #include "Ability/BEAbilitySystemComponent.h"
@@ -14,6 +13,12 @@
 #include "Message/BEVerbMessage.h"
 #include "Message/BEVerbMessageHelpers.h"
 #include "BELogChannels.h"
+#include "GameplayTag/BETags_Status.h"
+#include "GameplayTag/BETags_GameplayEvent.h"
+#include "GameplayTag/BETags_GameplayEffect.h"
+#include "GameplayTag/BETags_InitState.h"
+#include "GameplayTag/BETags_Message.h"
+#include "GameplayTag/BETags_Damage.h"
 
 #include "Net/UnrealNetwork.h"
 #include "GameplayEffect.h"
@@ -26,12 +31,6 @@
 #include "Engine/World.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BEPawnHealthComponent)
-
-UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Death, "Status.Death");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Death_Dying, "Status.Death.Dying");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Death_Dead, "Status.Death.Dead");
-
-UE_DEFINE_GAMEPLAY_TAG(TAG_Event_Death, "Event.Death");
 
 const FName UBEPawnHealthComponent::NAME_ActorFeatureName("CharacterHealth");
 
@@ -514,11 +513,11 @@ void UBEPawnHealthComponent::DamageSelfDestruct(bool bFellOutOfWorld)
 			return;
 		}
 
-		Spec->AddDynamicAssetTag(TAG_Gameplay_Damage_SelfDestruct);
+		Spec->AddDynamicAssetTag(TAG_Damage_Type_SelfDestruct);
 
 		if (bFellOutOfWorld)
 		{
-			Spec->AddDynamicAssetTag(TAG_Gameplay_Damage_FellOutOfWorld);
+			Spec->AddDynamicAssetTag(TAG_Damage_Type_FellOutOfWorld);
 		}
 
 		const float DamageAmount = GetTotalMaxHealth();

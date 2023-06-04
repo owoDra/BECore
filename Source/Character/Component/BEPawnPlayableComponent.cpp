@@ -6,7 +6,6 @@
 #include "Character/Component/BEPawnBasicComponent.h"
 #include "Character/BEPawnData.h"
 #include "Character/BECharacter.h"
-#include "Character/BEPawnInitializeTags.h"
 #include "Player/BEPlayerController.h"
 #include "Player/BEPlayerState.h"
 #include "Ability/BEAbilitySystemComponent.h"
@@ -15,6 +14,8 @@
 #include "GameSetting/BEGameDeviceSettings.h"
 #include "System/BEAssetManager.h"
 #include "BELogChannels.h"
+#include "GameplayTag/BETags_Input.h"
+#include "GameplayTag/BETags_InitState.h"
 
 #include "GameFramework/Pawn.h"
 #include "EnhancedInputComponent.h"
@@ -24,11 +25,6 @@
 #include "PlayerMappableInputConfig.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BEPawnPlayableComponent)
-
-UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Move_KM, "Input.Move.KM");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Move_Pad, "Input.Move.Pad");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Look_KM, "Input.Look.KM");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Look_Pad, "Input.Look.Pad");
 
 namespace BEPlayable
 {

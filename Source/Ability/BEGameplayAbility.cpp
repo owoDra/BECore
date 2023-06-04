@@ -13,8 +13,10 @@
 #include "Character/Component/BEPawnCameraComponent.h"
 #include "Character/Component/BEPawnHealthComponent.h"
 #include "Camera/Mode/BECameraMode.h"
-#include "BEGameplayTags.h"
 #include "BELogChannels.h"
+#include "GameplayTag/BETags_Message.h"
+#include "GameplayTag/BETags_GameplayAbility.h"
+#include "GameplayTag/BETags_Status.h"
 
 #include "AbilitySystemLog.h"
 #include "AbilitySystemBlueprintLibrary.h"

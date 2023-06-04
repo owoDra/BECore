@@ -3,7 +3,7 @@
 
 #include "BEHUDLayout.h"
 
-#include "BEGameplayTags.h"
+#include "GameplayTag/BETags_UI.h"
 
 #include "CommonUIExtensions.h"
 #include "Delegates/Delegate.h"

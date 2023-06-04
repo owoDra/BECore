@@ -6,10 +6,12 @@
 #include "Character/Component/BEPawnBasicComponent.h"
 #include "Character/Movement/BECharacterMovementFragment.h"
 #include "Character/BECharacter.h"
-#include "Character/BEPawnInitializeTags.h"
 #include "Ability/BEAbilitySystemComponent.h"
 #include "Ability/Attribute/BEMovementSet.h"
 #include "BELogChannels.h"
+#include "GameplayTag/BETags_Status.h"
+#include "GameplayTag/BETags_Flag.h"
+#include "GameplayTag/BETags_InitState.h"
 
 #include "AbilitySystemGlobals.h"
 #include "CharacterMovementComponentAsync.h"
@@ -24,7 +26,6 @@
 #include "HAL/IConsoleManager.h"
 #include "Math/Vector.h"
 #include "Misc/AssertionMacros.h"
-#include "NativeGameplayTags.h"
 #include "Stats/Stats2.h"
 #include "UObject/NameTypes.h"
 #include "UObject/ObjectPtr.h"
@@ -32,18 +33,6 @@
 #include "Components/GameFrameworkComponentManager.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BECharacterMovementComponent)
-
-UE_DEFINE_GAMEPLAY_TAG(TAG_Movement_Mode_Walking, "Movement.Mode.Walking");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Movement_Mode_NavWalking, "Movement.Mode.NavWalking");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Movement_Mode_Falling, "Movement.Mode.Falling");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Movement_Mode_Swimming, "Movement.Mode.Swimming");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Movement_Mode_Flying, "Movement.Mode.Flying");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Movement_Mode_Custom, "Movement.Mode.Custom");
-
-UE_DEFINE_GAMEPLAY_TAG(TAG_Status_MovementStopped, "Status.MovementStopped");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Status_JumpBlocked, "Status.JumpBlocked");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Status_SprintBlocked, "Status.SprintBlocked");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Status_TargetBlocked, "Status.TargetBlocked");
 
 
 //////////////////////////////////////////////
@@ -109,7 +98,7 @@ void UBECharacterMovementComponent::FSavedMove_BECharacter::SetMoveFor(ACharacte
 	if (CharacterMovement)
 	{
 		Saved_bWantsToSprint		= CharacterMovement->bWantsToSprint;
-		Saved_bWantsToTarget	= CharacterMovement->bWantsToTarget;
+		Saved_bWantsToTarget		= CharacterMovement->bWantsToTarget;
 	}
 }
 
@@ -290,7 +279,6 @@ void UBECharacterMovementComponent::InitializeGameplayTags()
 	AbilitySystemComponent->SetLooseGameplayTagCount(TAG_Movement_Mode_Falling, 0);
 	AbilitySystemComponent->SetLooseGameplayTagCount(TAG_Movement_Mode_Swimming, 0);
 	AbilitySystemComponent->SetLooseGameplayTagCount(TAG_Movement_Mode_Flying, 0);
-	AbilitySystemComponent->SetLooseGameplayTagCount(TAG_Movement_Mode_Custom, 0);
 
 	for (const UBECharacterMovementFragment* Fragment : Fragments)
 	{
@@ -578,7 +566,7 @@ bool UBECharacterMovementComponent::CanAttemptJump() const
 {
 	if (AbilitySystemComponent)
 	{
-		if (AbilitySystemComponent->HasMatchingGameplayTag(TAG_Status_JumpBlocked))
+		if (AbilitySystemComponent->HasMatchingGameplayTag(TAG_Flag_JumpBlocked))
 		{
 			return false;
 		}
@@ -628,7 +616,7 @@ FRotator UBECharacterMovementComponent::GetDeltaRotation(float DeltaTime) const
 {
 	if (AbilitySystemComponent)
 	{
-		if (AbilitySystemComponent->HasMatchingGameplayTag(TAG_Status_MovementStopped))
+		if (AbilitySystemComponent->HasMatchingGameplayTag(TAG_Flag_MovementBlocked))
 		{
 			return FRotator(0, 0, 0);
 		}
@@ -641,7 +629,7 @@ float UBECharacterMovementComponent::GetMaxSpeed() const
 {
 	if (AbilitySystemComponent)
 	{
-		if (AbilitySystemComponent->HasMatchingGameplayTag(TAG_Status_MovementStopped))
+		if (AbilitySystemComponent->HasMatchingGameplayTag(TAG_Flag_MovementBlocked))
 		{
 			return 0.0f;
 		}
@@ -841,7 +829,7 @@ bool UBECharacterMovementComponent::CanSprintInCurrentState() const
 {
 	if (AbilitySystemComponent)
 	{
-		if (AbilitySystemComponent->HasMatchingGameplayTag(TAG_Status_SprintBlocked))
+		if (AbilitySystemComponent->HasMatchingGameplayTag(TAG_Flag_SprintBlocked))
 		{
 			return false;
 		}
@@ -901,7 +889,7 @@ bool UBECharacterMovementComponent::CanTargetInCurrentState() const
 {
 	if (AbilitySystemComponent)
 	{
-		if (AbilitySystemComponent->HasMatchingGameplayTag(TAG_Status_TargetBlocked))
+		if (AbilitySystemComponent->HasMatchingGameplayTag(TAG_Flag_TargetBlocked))
 		{
 			return false;
 		}

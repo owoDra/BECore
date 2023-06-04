@@ -11,18 +11,14 @@
 #include "BEGameplayAbility.h"
 #include "Animation/BEAnimInstance.h"
 #include "Ability/BEAbilityTagRelationshipMapping.h"
-
-
-#include "BEAbilitySystemComponent.h"
-
 #include "Ability/BEGameplayAbility.h"
 #include "Ability/BEAbilityTagRelationshipMapping.h"
 #include "Ability/BEGlobalAbilitySystem.h"
 #include "Animation/BEAnimInstance.h"
 #include "System/BEAssetManager.h"
 #include "System/BEGameData.h"
-#include "BEGameplayTags.h"
 #include "BELogChannels.h"
+#include "GameplayTag/BETags_Flag.h"
 
 #include "Abilities/GameplayAbility.h"
 #include "Abilities/GameplayAbilityTargetTypes.h"
@@ -245,7 +241,7 @@ void UBEAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag& Inpu
 
 void UBEAbilitySystemComponent::ProcessAbilityInput(float DeltaTime, bool bGamePaused)
 {
-	if (HasMatchingGameplayTag(TAG_Status_AbilityInputBlocked))
+	if (HasMatchingGameplayTag(TAG_Flag_AbilityInputBlocked))
 	{
 		ClearAbilityInput();
 		return;

@@ -10,7 +10,7 @@
 #include "Player/BEPlayerController.h"
 #include "Player/BEPlayerState.h"
 #include "BELogChannels.h"
-#include "BEGameplayTags.h"
+#include "GameplayTag/BETags_Status.h"
 
 #include "AI/Navigation/NavigationTypes.h"
 #include "AbilitySystemComponent.h"
@@ -43,10 +43,6 @@
 #include "UObject/UObjectBaseUtility.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BECharacter)
-
-UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Crouching, "Status.Crouching");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Sprinting, "Status.Sprinting");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Status_Targeting, "Status.Targeting");
 
 /////////////////////////////////////////////////////////////////////////////////
 

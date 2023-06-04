@@ -5,7 +5,9 @@
 
 #include "Ability/BEAbilitySystemComponent.h"
 #include "Message/BEVerbMessage.h"
-#include "BEGameplayTags.h"
+#include "GameplayTag/BETags_Flag.h"
+#include "GameplayTag/BETags_Damage.h"
+#include "GameplayTag/BETags_Message.h"
 
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h"
@@ -77,9 +79,9 @@ bool UBEHealthSet::PreGameplayEffectExecute(FGameplayEffectModCallbackData &Data
 	{
 		if (Data.EvaluatedData.Magnitude > 0.0f)
 		{
-			const bool bIsDamageFromSelfDestruct = Data.EffectSpec.GetDynamicAssetTags().HasTagExact(TAG_Gameplay_Damage_SelfDestruct);
+			const bool bIsDamageFromSelfDestruct = Data.EffectSpec.GetDynamicAssetTags().HasTagExact(TAG_Damage_Type_SelfDestruct);
 
-			if (Data.Target.HasMatchingGameplayTag(TAG_Status_DamageImmunity) && !bIsDamageFromSelfDestruct)
+			if (Data.Target.HasMatchingGameplayTag(TAG_Flag_DamageImmunity) && !bIsDamageFromSelfDestruct)
 			{
 				// Do not take away any health.
 				Data.EvaluatedData.Magnitude = 0.0f;
@@ -88,7 +90,7 @@ bool UBEHealthSet::PreGameplayEffectExecute(FGameplayEffectModCallbackData &Data
 
 #if !UE_BUILD_SHIPPING
 			// Check GodMode cheat, unlimited health is checked below
-			if (Data.Target.HasMatchingGameplayTag(TAG_Cheat_UnlimitedHealth) && !bIsDamageFromSelfDestruct)
+			if (Data.Target.HasMatchingGameplayTag(TAG_Flag_UnlimitedHealth) && !bIsDamageFromSelfDestruct)
 			{
 				// Do not take away any health.
 				Data.EvaluatedData.Magnitude = 0.0f;

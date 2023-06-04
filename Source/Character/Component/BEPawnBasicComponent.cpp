@@ -3,11 +3,11 @@
 #include "BEPawnBasicComponent.h"
 
 #include "Ability/BEAbilitySystemComponent.h"
-#include "Ability/BEAbilityTags.h"
 #include "Character/BEPawnData.h"
-#include "Character/BEPawnInitializeTags.h"
 #include "Player/BEPlayerState.h"
 #include "BELogChannels.h"
+#include "GameplayTag/BETags_InitState.h"
+#include "GameplayTag/BETags_GameplayAbility.h"
 
 #include "Abilities/GameplayAbilityTypes.h"
 #include "Components/GameFrameworkComponentManager.h"

@@ -1,10 +1,10 @@
 // Copyright Eigi Chin
 
 #include "BEUIMessaging.h"
-#include "BEGameplayTags.h"
 #include "Player/BELocalPlayer.h"
 #include "PrimaryGameLayout.h"
 #include "Messaging/CommonGameDialog.h"
+#include "GameplayTag/BETags_UI.h"
 
 
 void UBEUIMessaging::Initialize(FSubsystemCollectionBase& Collection)

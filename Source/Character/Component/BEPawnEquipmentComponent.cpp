@@ -5,12 +5,14 @@
 #include "Ability/BEAbilitySystemComponent.h"
 #include "Ability/BEAbilitySet.h"
 #include "Character/BEPawnData.h"
-#include "Character/BEPawnInitializeTags.h"
 #include "Player/BEPlayerController.h"
 #include "Player/BEPlayerState.h"
 #include "Item/Equipment/BEEquipmentInstance.h"
 #include "Item/BEItemData.h"
 #include "Item/Fragment/BEItemDataFragment_Equippable.h"
+#include "GameplayTag/BETags_Message.h"
+#include "GameplayTag/BETags_Item.h"
+#include "GameplayTag/BETags_InitState.h"
 
 #include "AbilitySystemComponent.h"
 #include "AbilitySystemGlobals.h"
@@ -27,10 +29,6 @@
 #include "Components/GameFrameworkComponentManager.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BEPawnEquipmentComponent)
-
-UE_DEFINE_GAMEPLAY_TAG(TAG_Message_Equipment_SlotChange, "Message.Equipment.SlotChange");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Message_Equipment_ActiveSlotChange, "Message.Equipment.ActiveSlotChange");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Equipment_Slot, "Equipment.Slot");
 
 class FLifetimeProperty;
 struct FReplicationFlags;

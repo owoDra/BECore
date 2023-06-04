@@ -4,7 +4,7 @@
 #include "BEFrontendStateComponent.h"
 
 #include "GameMode/Experience/BEExperienceManagerComponent.h"
-#include "BEGameplayTags.h"
+#include "GameplayTag/BETags_UI.h"
 
 #include "CommonActivatableWidget.h"
 #include "CommonGameInstance.h"

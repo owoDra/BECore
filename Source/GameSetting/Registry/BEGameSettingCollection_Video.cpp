@@ -8,8 +8,8 @@
 #include "GameSetting/SettingValue/BESettingValueScalar_SafeZone.h"
 #include "GameSetting/SettingValue/BESettingValueDiscrete_Resolution.h"
 #include "GameSetting/SettingValue/BESettingValueDiscrete_OverallQuality.h"
-#include "GameSetting/BEGameSettingTags.h"
-#include "Development/BEDevelopmentTags.h"
+#include "GameplayTag/BETags_GameSetting.h"
+#include "GameplayTag/BETags_Platform.h"
 
 #include "GameSetting.h"
 #include "GameSettingValueDiscreteDynamic.h"

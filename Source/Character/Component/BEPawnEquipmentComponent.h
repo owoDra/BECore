@@ -21,7 +21,6 @@
 #include "Templates/UnrealTemplate.h"
 #include "UObject/Class.h"
 #include "UObject/UObjectGlobals.h"
-#include "NativeGameplayTags.h"
 
 #include "BEPawnEquipmentComponent.generated.h"
 
@@ -29,10 +28,6 @@ class UBEItemData;
 class UBEEquipmentInstance;
 class UBEEquipmentSlotData;
 class UBEPawnEquipmentComponent;
-
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Message_Equipment_SlotChange);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Message_Equipment_ActiveSlotChange);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Equipment_Slot);
 
 
 /**

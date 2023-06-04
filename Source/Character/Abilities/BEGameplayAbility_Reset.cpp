@@ -5,7 +5,9 @@
 
 #include "Ability/BEAbilitySystemComponent.h"
 #include "Character/BECharacter.h"
-#include "BEGameplayTags.h"
+#include "GameplayTag/BETags_GameplayEvent.h"
+#include "GameplayTag/BETags_GameplayAbility.h"
+#include "GameplayTag/BETags_Message.h"
 
 #include "Abilities/GameplayAbility.h"
 #include "Abilities/GameplayAbilityTypes.h"
@@ -40,7 +42,7 @@ void UBEGameplayAbility_Reset::DoneAddingNativeTags()
 	{
 		// Add the ability trigger tag as default to the CDO.
 		FAbilityTriggerData TriggerData;
-		TriggerData.TriggerTag = TAG_Event_RequestReset;
+		TriggerData.TriggerTag = TAG_Ability_Trigger_Reset;
 		TriggerData.TriggerSource = EGameplayAbilityTriggerSource::GameplayEvent;
 		AbilityTriggers.Add(TriggerData);
 	}

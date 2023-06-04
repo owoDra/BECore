@@ -11,6 +11,7 @@
 #include "BEDeveloperCheatManager.generated.h"
 
 class UBEAbilitySystemComponent;
+struct FGameplayTag;
 
 /////////////////////////////////////////////////
 
@@ -113,11 +114,7 @@ public:
 
 	// 残弾の消費がなくなる
 	UFUNCTION(Exec, BlueprintAuthorityOnly)
-	virtual void UnlimitedAmmo(int32 Enabled = -1);
-
-	// アビリティのクールタイムやストックを無視する
-	UFUNCTION(Exec, BlueprintAuthorityOnly)
-	virtual void UnlimitedAbility(int32 Enabled = -1);
+	virtual void UnlimitedCost(int32 Enabled = -1);
 
 
 	//===========================================
@@ -126,6 +123,9 @@ public:
 public:
 	// Helper function to write text to the console and to the log.
 	static void CheatOutputText(const FString& TextToOutput);
+
+protected:
+	FGameplayTag FindTagByString(FString TagString, bool bMatchPartialString = false);
 
 protected:
 	virtual void EnableDebugCamera() override;

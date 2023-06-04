@@ -15,15 +15,10 @@
 #include "Engine/EngineTypes.h"
 #include "HAL/Platform.h"
 #include "UObject/UObjectGlobals.h"
-#include "NativeGameplayTags.h"
 
 #include "BECharacter.generated.h"
 
 class UBEPawnBasicComponent;
-
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Crouching);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Sprinting);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Targeting);
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FTargetingChangedSignature, bool, isTargeting);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FSprintingChangedSignature, bool, isSprinting);

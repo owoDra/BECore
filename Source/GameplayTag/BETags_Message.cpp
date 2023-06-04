@@ -21,8 +21,8 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_Message_Elimination							, "Message.Elimination");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Message_Assist								, "Message.Assist");
 
 
-UE_DEFINE_GAMEPLAY_TAG(TAG_Message_QuickBar_SlotsChanged				, "Message.QuickBar.SlotsChanged");
-UE_DEFINE_GAMEPLAY_TAG(TAG_Message_QuickBar_ActiveIndexChanged			, "Message.QuickBar.ActiveIndexChanged");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Message_Equipment_SlotChange					, "Message.Equipment.SlotChange");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Message_Equipment_ActiveSlotChange			, "Message.Equipment.ActiveSlotChange");
 
 
 UE_DEFINE_GAMEPLAY_TAG(TAG_Message_AddNotification						, "Message.AddNotification");

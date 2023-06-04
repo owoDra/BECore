@@ -4,8 +4,8 @@
 
 #include "Character/Component/BEPawnBasicComponent.h"
 #include "Character/BEPawnData.h"
-#include "Character/BEPawnInitializeTags.h"
 #include "Camera/Mode/BECameraMode.h"
+#include "GameplayTag/BETags_InitState.h"
 
 #include "Camera/CameraTypes.h"
 #include "Engine/Engine.h"

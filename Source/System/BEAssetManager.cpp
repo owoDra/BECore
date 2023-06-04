@@ -1,7 +1,6 @@
 // Copyright Eigi Chin
 
 #include "BEAssetManager.h"
-#include "BEGameplayTags.h"
 #include "BELogChannels.h"
 #include "BEGameData.h"
 #include "AbilitySystemGlobals.h"
@@ -124,8 +123,6 @@ void UBEAssetManager::StartInitialLoading()
 void UBEAssetManager::InitializeAbilitySystem()
 {
 	SCOPED_BOOT_TIMING("UBEAssetManager::InitializeAbilitySystem");
-
-	FBEGameplayTags::InitializeNativeTags();
 
 	UAbilitySystemGlobals::Get().InitGlobalData();
 }

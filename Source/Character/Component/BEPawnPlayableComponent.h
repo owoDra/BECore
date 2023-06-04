@@ -14,7 +14,6 @@
 #include "Templates/SubclassOf.h"
 #include "UObject/NameTypes.h"
 #include "UObject/UObjectGlobals.h"
-#include "NativeGameplayTags.h"
 
 #include "BEPawnPlayableComponent.generated.h"
 
@@ -26,11 +25,6 @@ class UObject;
 struct FActorInitStateChangedParams;
 struct FGameplayTag;
 struct FInputActionValue;
-
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Move_KM);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Move_Pad);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Look_KM);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Look_Pad);
 
 
 /**

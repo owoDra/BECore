@@ -8,11 +8,15 @@
 ////////////////////////////////////
 // Input.Move
 
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Move_KM);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Move_Pad);
 
 
 ////////////////////////////////////
 // Input.Look
 
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Look_KM);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Look_Pad);
 
 
 ////////////////////////////////////
@@ -33,3 +37,7 @@ UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Ability_Weapon_AltAttack);
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Ability_Interact);
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Ability_ShowOverlay);
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Ability_Ping);
+
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Ability_Crouch);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Ability_Jump);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Input_Ability_Sprint);

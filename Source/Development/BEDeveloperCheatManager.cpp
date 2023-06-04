@@ -9,19 +9,22 @@
 #include "System/BEAssetManager.h"
 #include "Character/Component/BEPawnHealthComponent.h"
 #include "Character/Component/BEPawnBasicComponent.h"
-#include "Character/BEPawnInitializeTags.h"
 #include "System/BESystemStatics.h"
 #include "System/BEGameData.h"
 #include "Development/BEDeveloperCheatSettings.h"
-#include "BEGameplayTags.h"
+#include "GameplayTag/BETags_InitState.h"
+#include "GameplayTag/BETags_GameplayEffect.h"
+#include "GameplayTag/BETags_Flag.h"
+#include "BELogChannels.h"
 
 #include "Engine/Engine.h"
 #include "Engine/GameViewportClient.h"
 #include "Engine/World.h"
 #include "Engine/Console.h"
-#include "GameFramework/HUD.h"
 #include "AbilitySystemGlobals.h"
+#include "GameFramework/HUD.h"
 #include "GameplayEffect.h"
+#include "GameplayTagsManager.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BEDeveloperCheatManager)
 
@@ -165,7 +168,7 @@ void UBEDeveloperCheatManager::CancelActivatedAbilities()
 
 void UBEDeveloperCheatManager::AddTagToSelf(FString TagName)
 {
-	FGameplayTag Tag = FBEGameplayTags::FindTagByString(TagName, true);
+	FGameplayTag Tag = FindTagByString(TagName, true);
 	if (Tag.IsValid())
 	{
 		if (UBEAbilitySystemComponent* BEASC = GetPlayerAbilitySystemComponent())
@@ -181,7 +184,7 @@ void UBEDeveloperCheatManager::AddTagToSelf(FString TagName)
 
 void UBEDeveloperCheatManager::RemoveTagFromSelf(FString TagName)
 {
-	FGameplayTag Tag = FBEGameplayTags::FindTagByString(TagName, true);
+	FGameplayTag Tag = FindTagByString(TagName, true);
 	if (Tag.IsValid())
 	{
 		if (UBEAbilitySystemComponent* BEASC = GetPlayerAbilitySystemComponent())
@@ -298,15 +301,14 @@ void UBEDeveloperCheatManager::God()
 	}
 
 	UnlimitedHealth();
-	UnlimitedAmmo();
-	UnlimitedAbility();
+	UnlimitedCost();
 }
 
 void UBEDeveloperCheatManager::UnlimitedHealth(int32 Enabled)
 {
 	if (UBEAbilitySystemComponent* BEASC = GetPlayerAbilitySystemComponent())
 	{
-		const FGameplayTag Tag = TAG_Cheat_UnlimitedHealth;
+		const FGameplayTag Tag = TAG_Flag_UnlimitedHealth;
 		const bool bHasTag = BEASC->HasMatchingGameplayTag(Tag);
 
 		if ((Enabled == -1) || ((Enabled > 0) && !bHasTag) || ((Enabled == 0) && bHasTag))
@@ -323,32 +325,11 @@ void UBEDeveloperCheatManager::UnlimitedHealth(int32 Enabled)
 	}
 }
 
-void UBEDeveloperCheatManager::UnlimitedAmmo(int32 Enabled)
+void UBEDeveloperCheatManager::UnlimitedCost(int32 Enabled)
 {
 	if (UBEAbilitySystemComponent* BEASC = GetPlayerAbilitySystemComponent())
 	{
-		const FGameplayTag Tag = TAG_Cheat_UnlimitedAmmo;
-		const bool bHasTag = BEASC->HasMatchingGameplayTag(Tag);
-
-		if ((Enabled == -1) || ((Enabled > 0) && !bHasTag) || ((Enabled == 0) && bHasTag))
-		{
-			if (bHasTag)
-			{
-				BEASC->RemoveDynamicTagGameplayEffect(Tag);
-			}
-			else
-			{
-				BEASC->AddDynamicTagGameplayEffect(Tag);
-			}
-		}
-	}
-}
-
-void UBEDeveloperCheatManager::UnlimitedAbility(int32 Enabled)
-{
-	if (UBEAbilitySystemComponent* BEASC = GetPlayerAbilitySystemComponent())
-	{
-		const FGameplayTag Tag = TAG_Cheat_UnlimitedAbility;
+		const FGameplayTag Tag = TAG_Flag_UnlimitedCost;
 		const bool bHasTag = BEASC->HasMatchingGameplayTag(Tag);
 
 		if ((Enabled == -1) || ((Enabled > 0) && !bHasTag) || ((Enabled == 0) && bHasTag))
@@ -379,6 +360,31 @@ void UBEDeveloperCheatManager::CheatOutputText(const FString& TextToOutput)
 	UE_LOG(LogBECheat, Display, TEXT("%s"), *TextToOutput);
 #endif // USING_CHEAT_MANAGER
 }
+
+FGameplayTag UBEDeveloperCheatManager::FindTagByString(FString TagString, bool bMatchPartialString)
+{
+	const UGameplayTagsManager& Manager = UGameplayTagsManager::Get();
+	FGameplayTag Tag = Manager.RequestGameplayTag(FName(*TagString), false);
+
+	if (!Tag.IsValid() && bMatchPartialString)
+	{
+		FGameplayTagContainer AllTags;
+		Manager.RequestAllGameplayTags(AllTags, true);
+
+		for (const FGameplayTag TestTag : AllTags)
+		{
+			if (TestTag.ToString().Contains(TagString))
+			{
+				UE_LOG(LogBE, Display, TEXT("Could not find exact match for tag [%s] but found partial match on tag [%s]."), *TagString, *TestTag.ToString());
+				Tag = TestTag;
+				break;
+			}
+		}
+	}
+
+	return Tag;
+}
+
 
 void UBEDeveloperCheatManager::EnableDebugCamera()
 {
@@ -451,6 +457,7 @@ bool UBEDeveloperCheatManager::InFixedCamera() const
 
 	return false;
 }
+
 
 void UBEDeveloperCheatManager::ApplySetByCallerDamage(UBEAbilitySystemComponent* BEASC, float DamageAmount)
 {

@@ -6,11 +6,15 @@
 ////////////////////////////////////
 // Input.Move
 
+UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Move_KM	, "Input.Move.KM");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Move_Pad	, "Input.Move.Pad");
 
 
 ////////////////////////////////////
 // Input.Look
 
+UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Look_KM	, "Input.Look.KM");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Look_Pad	, "Input.Look.Pad");
 
 
 ////////////////////////////////////
@@ -31,3 +35,7 @@ UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Ability_Weapon_AltAttack	, "Input.Ability.Weapo
 UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Ability_Interact			, "Input.Ability.Interact");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Ability_ShowOverlay		, "Input.Ability.ShowOverlay");
 UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Ability_Ping				, "Input.Ability.Ping");
+
+UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Ability_Crouch				, "Input.Ability.Crouch");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Ability_Jump				, "Input.Ability.Jump");
+UE_DEFINE_GAMEPLAY_TAG(TAG_Input_Ability_Sprint				, "Input.Ability.Sprint");

@@ -18,7 +18,7 @@
 #include "UObject/NameTypes.h"
 #include "UObject/ObjectPtr.h"
 #include "UObject/ScriptInterface.h"
-#include "BEGameplayTags.h"
+#include "GameplayTag/BETags_GameplayEvent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BEGameplayAbility_Interact)
 

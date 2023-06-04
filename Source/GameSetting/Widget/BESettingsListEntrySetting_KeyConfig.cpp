@@ -5,7 +5,7 @@
 
 #include "GameSetting/SettingValue/BESettingValueKeyConfig.h"
 #include "UI/Foundation/BEButtonBase.h"
-#include "BEGameplayTags.h"
+#include "GameplayTag/BETags_UI.h"
 
 #include "CommonActivatableWidget.h"
 #include "CommonButtonBase.h"

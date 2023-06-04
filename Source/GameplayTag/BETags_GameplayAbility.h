@@ -26,13 +26,13 @@ UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Behavior_SurvivesDeath);
 ///////////////////////////////////////////////////////
 // Ability.Type
 
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_Movement);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_Action);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_Passive);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_Skill);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_Weapon);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_StatusChange);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_Misc);
+BECORE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_Movement);
+BECORE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_Action);
+BECORE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_Passive);
+BECORE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_Skill);
+BECORE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_Weapon);
+BECORE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_StatusChange);
+BECORE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Ability_Type_Misc);
 
 
 ///////////////////////////////////////////////////////

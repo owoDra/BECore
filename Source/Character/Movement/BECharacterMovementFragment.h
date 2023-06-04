@@ -5,11 +5,8 @@
 #include "Engine/DataAsset.h"
 
 #include "UObject/UObjectGlobals.h"
-#include "NativeGameplayTags.h"
 
 #include "BECharacterMovementFragment.generated.h"
-
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Movement_CustomMode);
 
 class UBECharacterMovementComponent;
 struct FGameplayTag;

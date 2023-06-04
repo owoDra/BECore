@@ -10,7 +10,6 @@
 #include "Math/Rotator.h"
 #include "Math/UnrealMathSSE.h"
 #include "UObject/UObjectGlobals.h"
-#include "NativeGameplayTags.h"
 
 #include "BECharacterMovementComponent.generated.h"
 
@@ -22,17 +21,6 @@ class UAnimMontage;
 class UObject;
 struct FOnAttributeChangeData;
 struct FFrame;
-
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Movement_Mode_Walking);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Movement_Mode_NavWalking);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Movement_Mode_Falling);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Movement_Mode_Swimming);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Movement_Mode_Flying);
-
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_MovementStopped);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_JumpBlocked);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_SprintBlocked);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_TargetBlocked);
 
 
 /**
