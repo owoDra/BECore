@@ -18,6 +18,7 @@
 #include "System/BEAssetManager.h"
 #include "System/BEGameData.h"
 #include "BELogChannels.h"
+#include "Character/BEPawnMeshAssistInterface.h"
 #include "GameplayTag/BETags_Flag.h"
 
 #include "Abilities/GameplayAbility.h"
@@ -107,9 +108,17 @@ void UBEAbilitySystemComponent::InitAbilityActorInfo(AActor* InOwnerActor, AActo
 			GlobalAbilitySystem->RegisterASC(this);
 		}
 
-		if (UBEAnimInstance* BEAnimInst = Cast<UBEAnimInstance>(ActorInfo->GetAnimInstance()))
+		if (Cast<IBEPawnMeshAssistInterface>(ActorInfo->AvatarActor))
 		{
-			BEAnimInst->InitializeWithAbilitySystem(this);
+			TArray<UBEAnimInstance*> MainAnimInstances;
+			IBEPawnMeshAssistInterface::Execute_GetMainAnimInstances(ActorInfo->AvatarActor.Get(), MainAnimInstances);
+			for (UBEAnimInstance* BEAnimInst : MainAnimInstances)
+			{
+				if (BEAnimInst)
+				{
+					BEAnimInst->InitializeWithAbilitySystem(this);
+				}
+			}
 		}
 
 		TryActivateAbilitiesOnSpawn();
