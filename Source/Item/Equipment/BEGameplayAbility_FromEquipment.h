@@ -16,8 +16,8 @@ class UBEEquipmentInstance;
 /**
  * UBEGameplayAbility_FromEquipment
  *
- * Equipment ‚Æ‚Æ‚à‚Ég—p‚·‚é‚±‚Æ‚ª‘z’è‚³‚ê‚½ GameplayAbilityB
- * Equipment ‚Æ‹¤‚Ég—p‚µ‚È‚¢‚Æ³í‚É“®ì‚µ‚È‚¢B
+ * Equipment ã¨ã¨ã‚‚ã«ä½¿ç”¨ã™ã‚‹ã“ã¨ãŒæƒ³å®šã•ã‚ŒãŸ GameplayAbilityã€‚
+ * Equipment ã¨å…±ã«ä½¿ç”¨ã—ãªã„ã¨æ­£å¸¸ã«å‹•ä½œã—ãªã„ã€‚
  */
 UCLASS()
 class BECORE_API UBEGameplayAbility_FromEquipment : public UBEGameplayAbility

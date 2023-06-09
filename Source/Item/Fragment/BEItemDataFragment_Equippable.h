@@ -21,8 +21,8 @@ struct FGameplayTagContainer;
 /**
  * UBEItemDataFragment_Equippable
  *
- * Item ‚ª‘•”õ‰Â”\‚©‚Ç‚¤‚©‚ğ¯•Ê‚·‚é‚½‚ß‚Ég—pB
- * Item ‚ğ‘•”õ‚µ‚½‚Æ‚«‚Ìî•ñ‚ªŠÜ‚Ü‚ê‚éB
+ * Item ãŒè£…å‚™å¯èƒ½ã‹ã©ã†ã‹ã‚’è­˜åˆ¥ã™ã‚‹ãŸã‚ã«ä½¿ç”¨ã€‚
+ * Item ã‚’è£…å‚™ã—ãŸã¨ãã®æƒ…å ±ãŒå«ã¾ã‚Œã‚‹ã€‚
  */
 UCLASS()
 class UBEItemDataFragment_Equippable : public UBEItemDataFragment
@@ -30,20 +30,20 @@ class UBEItemDataFragment_Equippable : public UBEItemDataFragment
 	GENERATED_BODY()
 
 public:
-	// ‘•”õ‚ğ’Ç‰Á‰Â”\‚È Slot ‚ğw’è‚·‚é
-	// ‰½‚àİ’è‚µ‚È‚¢ê‡‚Í‚·‚×‚Ä‚Ì Slot ‚É’Ç‰Á‰Â”\ 
+	// è£…å‚™ã‚’è¿½åŠ å¯èƒ½ãª Slot ã‚’æŒ‡å®šã™ã‚‹
+	// ä½•ã‚‚è¨­å®šã—ãªã„å ´åˆã¯ã™ã¹ã¦ã® Slot ã«è¿½åŠ å¯èƒ½ 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item", meta = (Categories = "Equipment.Slot"))
 	FGameplayTagContainer AllowedSlotTags;
 
-	// ‘•”õ•i‚Ì«”\‚âó‘Ô‚ğŠÇ—‚·‚é‚½‚ß‚ÌƒNƒ‰ƒX
+	// è£…å‚™å“ã®æ€§èƒ½ã‚„çŠ¶æ…‹ã‚’ç®¡ç†ã™ã‚‹ãŸã‚ã®ã‚¯ãƒ©ã‚¹
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	TSubclassOf<UBEEquipmentInstance> InstanceType;
 
-	// ‘•”õ‚É‘•”õ‚µ‚½Pawn‚É•t—^‚·‚éƒAƒrƒŠƒeƒBƒZƒbƒg
+	// è£…å‚™æ™‚ã«è£…å‚™ã—ãŸPawnã«ä»˜ä¸ã™ã‚‹ã‚¢ãƒ“ãƒªãƒ†ã‚£ã‚»ãƒƒãƒˆ
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	TArray<TObjectPtr<const UBEAbilitySet>> AbilitySetsToGrantOnEquip;
 
-	// ƒAƒNƒeƒBƒu‚É‘•”õ‚µ‚½Pawn‚É•t—^‚·‚éƒAƒrƒŠƒeƒBƒZƒbƒg
+	// ã‚¢ã‚¯ãƒ†ã‚£ãƒ–æ™‚ã«è£…å‚™ã—ãŸPawnã«ä»˜ä¸ã™ã‚‹ã‚¢ãƒ“ãƒªãƒ†ã‚£ã‚»ãƒƒãƒˆ
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Item")
 	TArray<TObjectPtr<const UBEAbilitySet>> AbilitySetsToGrantOnActive;
 };

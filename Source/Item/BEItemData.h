@@ -16,7 +16,7 @@
 /**
  * UBEItemDataFragment
  * 
- * Item ‚É•t—^‰Â”\‚È’Ç‰Áî•ñ
+ * Item ã«ä»˜ä¸å¯èƒ½ãªè¿½åŠ æƒ…å ±
  */
 UCLASS(DefaultToInstanced, EditInlineNew, Abstract)
 class BECORE_API UBEItemDataFragment : public UObject
@@ -33,8 +33,8 @@ public:
 /**
  * UBEItemData
  * 
- * Item ‚ğ’è‹`‚·‚éB
- * Item ‚Ì–¼‘O‚âÚ×‚È‚Ç‚Ì‚ ‚ç‚©‚¶‚ßŒˆ‚ß‚ç‚ê‚½î•ñ‚È‚Ç‚ğ•Û—L‚·‚éB
+ * Item ã‚’å®šç¾©ã™ã‚‹ã€‚
+ * Item ã®åå‰ã‚„è©³ç´°ãªã©ã®ã‚ã‚‰ã‹ã˜ã‚æ±ºã‚ã‚‰ã‚ŒãŸæƒ…å ±ãªã©ã‚’ä¿æœ‰ã™ã‚‹ã€‚
  */
 UCLASS(BlueprintType, Const, Abstract)
 class UBEItemData : public UPrimaryDataAsset
@@ -54,7 +54,7 @@ public:
 
 
 public:
-	// ƒAƒCƒeƒ€‚ÌƒQ[ƒ€“à‚Å‚Ì•\¦–¼
+	// ã‚¢ã‚¤ãƒ†ãƒ ã®ã‚²ãƒ¼ãƒ å†…ã§ã®è¡¨ç¤ºå
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Inventory")
 	FText DisplayName;
 

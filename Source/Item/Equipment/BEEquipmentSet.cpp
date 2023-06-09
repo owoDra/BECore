@@ -18,7 +18,7 @@ EDataValidationResult UBEEquipmentSet::IsDataValid(TArray<FText>& ValidationErro
 {
 	EDataValidationResult Result = CombineDataValidationResults(Super::IsDataValid(ValidationErrors), EDataValidationResult::Valid);
 
-	// BP �ɂ���Ďq�N���X���쐬����Ă��Ȃ�������(C++ -> BP �͋����邪�ABP -> BP �͋֎~)
+	// BP によって子クラスが作成されていないか検証(C++ -> BP は許可するが、BP -> BP は禁止)
 	if (!GetClass()->IsNative())
 	{
 		UClass* ParentClass = GetClass()->GetSuperClass();

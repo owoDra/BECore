@@ -80,22 +80,22 @@ void UBECameraComponent::ComputeCameraView(float DeltaTime, FMinimalViewInfo& De
 
 void UBECameraComponent::ComputeRecoilAmount(float DeltaTime, FBECameraModeView& CameraModeView)
 {
-	// Recoil ‚Ì“K‰
+	// Recoil ã®é©å¿œ
 	if (RecoilState == EBECameraRecoilState::RecoilUp)
 	{
-		// ‚±‚ÌƒtƒŒ[ƒ€‚É‚¨‚¯‚é ControlRotation ‚Ìƒfƒ‹ƒ^
+		// ã“ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã«ãŠã‘ã‚‹ ControlRotation ã®ãƒ‡ãƒ«ã‚¿
 		const FRotator ControlDelta = ControlRotationDelta;
 		const bool bNegativeDeltaY = (ControlDelta.Pitch < 0.0);
 		const bool bNegativeDeltaX = (ControlDelta.Yaw < 0.0);
 
-		// ‚±‚ÌƒtƒŒ[ƒ€‚É“K‰‚·‚é Recoil ‚Ì’Ç‰Á‰ñ“]—Ê
+		// ã“ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã«é©å¿œã™ã‚‹ Recoil ã®è¿½åŠ å›è»¢é‡
 		const FRotator RecoilAmount = RecoilAmountToAdd * DeltaTime * 16;
 		const bool bNegativeRecoilY = (RecoilAmount.Pitch < 0.0);
 		const bool bNegativeRecoilX = (RecoilAmount.Yaw < 0.0);
 
 		RecoilAmountToAdd -= RecoilAmount;
 
-		// ƒŠƒRƒCƒ‹—}§‰Â”\‚È‚ç“K‰
+		// ãƒªã‚³ã‚¤ãƒ«æŠ‘åˆ¶å¯èƒ½ãªã‚‰é©å¿œ
 		float SuppressedRecoilY, SuppressedRecoilX = 0.0;
 
 		if (bNegativeDeltaY != bNegativeRecoilY)
@@ -111,11 +111,11 @@ void UBECameraComponent::ComputeRecoilAmount(float DeltaTime, FBECameraModeView&
 
 		const FRotator SuppressedRecoil = FRotator(SuppressedRecoilY, SuppressedRecoilX, 0.0);
 
-		// ƒŠƒRƒCƒ‹‚ğ“K‰
+		// ãƒªã‚³ã‚¤ãƒ«ã‚’é©å¿œ
 		CameraModeView.ControlRotation += SuppressedRecoil;
 		CurrentRecoilAmount += SuppressedRecoil;
 
-		// ƒŠƒRƒCƒ‹‚Ì“K‰‚ªI‚í‚Á‚½‚©”»’è‚µAI‚í‚Á‚Ä‚¢‚½‚ç RecoilState ‚ğ None ‚É‚·‚éB
+		// ãƒªã‚³ã‚¤ãƒ«ã®é©å¿œãŒçµ‚ã‚ã£ãŸã‹åˆ¤å®šã—ã€çµ‚ã‚ã£ã¦ã„ãŸã‚‰ RecoilState ã‚’ None ã«ã™ã‚‹ã€‚
 		if (RecoilAmountToAdd.IsNearlyZero())
 		{
 			RecoilAmountToAdd = FRotator::ZeroRotator;
@@ -123,17 +123,17 @@ void UBECameraComponent::ComputeRecoilAmount(float DeltaTime, FBECameraModeView&
 		}
 	}
 
-	// Recovery ‚Ì“K‰
+	// Recovery ã®é©å¿œ
 	else if (RecoilState == EBECameraRecoilState::Recovery)
 	{
-		// ‚±‚ÌƒtƒŒ[ƒ€‚É“K‰‚·‚é Recoil ‚Ì•œŒ³‰ñ“]—Ê
+		// ã“ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã«é©å¿œã™ã‚‹ Recoil ã®å¾©å…ƒå›è»¢é‡
 		const FRotator RecoveryAmount = CurrentRecoilAmount * DeltaTime * 4;
 
-		// Recovery ‚ğ“K‰
+		// Recovery ã‚’é©å¿œ
 		CameraModeView.ControlRotation -= RecoveryAmount;
 		CurrentRecoilAmount -= RecoveryAmount;
 
-		// Recovery ‚Ì“K‰‚ªI‚í‚Á‚½‚©”»’è‚µAI‚í‚Á‚Ä‚¢‚½‚ç RecoilState ‚ğ None ‚É‚·‚éB
+		// Recovery ã®é©å¿œãŒçµ‚ã‚ã£ãŸã‹åˆ¤å®šã—ã€çµ‚ã‚ã£ã¦ã„ãŸã‚‰ RecoilState ã‚’ None ã«ã™ã‚‹ã€‚
 		if (CurrentRecoilAmount.IsNearlyZero())
 		{
 			CurrentRecoilAmount = FRotator::ZeroRotator;

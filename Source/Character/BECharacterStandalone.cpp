@@ -20,8 +20,8 @@ ABECharacterStandalone::ABECharacterStandalone(const FObjectInitializer& ObjectI
 	AbilitySystemComponent->SetIsReplicated(true);
 	AbilitySystemComponent->SetReplicationMode(EGameplayEffectReplicationMode::Mixed);
 
-	// ˆÀ’è‚µ‚Ä AbilitySystemComponent ‚ğ—˜—p‚·‚é‚½‚ß‚É
-	// ƒlƒbƒgƒ[ƒN‚ÌXV•p“x‚ğ‚‚­İ’è
+	// å®‰å®šã—ã¦ AbilitySystemComponent ã‚’åˆ©ç”¨ã™ã‚‹ãŸã‚ã«
+	// ãƒãƒƒãƒˆãƒ¯ãƒ¼ã‚¯ã®æ›´æ–°é »åº¦ã‚’é«˜ãè¨­å®š
 	NetUpdateFrequency = 100.0f;
 }
 

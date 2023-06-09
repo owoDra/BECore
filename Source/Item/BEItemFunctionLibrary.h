@@ -17,7 +17,7 @@ class UBEItemDataFragment;
 /**
  * UBEItemFunctionLibrary
  * 
- * Item ŠÖŒW‚Ì‘€ì‚ğs‚¤ŠÖ”‚Ìƒ‰ƒCƒuƒ‰ƒŠ
+ * Item é–¢ä¿‚ã®æ“ä½œã‚’è¡Œã†é–¢æ•°ã®ãƒ©ã‚¤ãƒ–ãƒ©ãƒª
  */
 UCLASS()
 class UBEItemFunctionLibrary : public UBlueprintFunctionLibrary

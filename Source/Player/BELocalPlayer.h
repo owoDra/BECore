@@ -29,7 +29,7 @@ struct FSwapAudioOutputResult;
 /**
  * UBELocalPlayer
  * 
- *  Player ���̂��̂������(�Q�[���ݒ�A�f�o�C�X�ݒ�A���͐ݒ�A�Ȃ�)��ۗL����
+ *  Player そのものが持つ情報(ゲーム設定、デバイス設定、入力設定、など)を保有する
  */
 UCLASS()
 class BECORE_API UBELocalPlayer : public UCommonLocalPlayer, public IBETeamAgentInterface

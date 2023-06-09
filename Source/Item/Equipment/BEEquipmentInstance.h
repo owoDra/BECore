@@ -20,7 +20,7 @@ struct FGameplayTag;
 /**
  * FBEEquipmentActorToSpawn
  *
- * ‘•”õ‚·‚é‚Æ‚«‚ÌƒAƒNƒ^[ƒXƒ|[ƒ“İ’è
+ * è£…å‚™ã™ã‚‹ã¨ãã®ã‚¢ã‚¯ã‚¿ãƒ¼ã‚¹ãƒãƒ¼ãƒ³è¨­å®š
  */
 USTRUCT()
 struct FBEEquipmentActorToSpawn
@@ -72,21 +72,21 @@ public:
 	/**
 	 * OnEquiped
 	 *
-	 * ‚±‚Ì Equipment ‚ª EquipmentManagerComponent ‚É‚æ‚Á‚Äì¬‚³‚ê‚½‚Æ‚«‚ÉŒÄ‚Ño‚³‚ê‚éB
-	 * ‚±‚Ì Equipment ‚Æ ItemData ‚ÌŠÖ˜A•t‚¯‚Æ StatTag ‚Ì‰Šú‰»‚ğs‚¤
+	 * ã“ã® Equipment ãŒ EquipmentManagerComponent ã«ã‚ˆã£ã¦ä½œæˆã•ã‚ŒãŸã¨ãã«å‘¼ã³å‡ºã•ã‚Œã‚‹ã€‚
+	 * ã“ã® Equipment ã¨ ItemData ã®é–¢é€£ä»˜ã‘ã¨ StatTag ã®åˆæœŸåŒ–ã‚’è¡Œã†
 	 */
 	virtual void OnEquiped(const UBEItemData* InItemData);
 
 	/**
 	 * OnUnequiped
 	 *
-	 * ‚±‚Ì Equipment ‚ª EquipmentManagerComponent ‚É‚æ‚Á‚Äæ‚èœ‚©‚ê‚é‚Æ‚«‚ÉŒÄ‚Ño‚³‚ê‚éB
-	 * ‚±‚Ì SpawnedActor ‚Ìœ‹‚ğs‚¤B
+	 * ã“ã® Equipment ãŒ EquipmentManagerComponent ã«ã‚ˆã£ã¦å–ã‚Šé™¤ã‹ã‚Œã‚‹ã¨ãã«å‘¼ã³å‡ºã•ã‚Œã‚‹ã€‚
+	 * ã“ã® SpawnedActor ã®é™¤å»ã‚’è¡Œã†ã€‚
 	 */
 	virtual void OnUnequiped();
 
 private:
-	// ‚±‚Ì Equipment ‚Ì ItemData
+	// ã“ã® Equipment ã® ItemData
 	UPROPERTY(Replicated)
 	TObjectPtr<const UBEItemData> ItemData;
 
@@ -95,7 +95,7 @@ public:
 	/**
 	 * AddStatTagStack
 	 *
-	 * Equipment ‚É“Œvî•ñ‚Æ‚µ‚Äˆµ‚¦‚é Tag ‚ğ’Ç‰Á‚·‚é (StackCount ‚ª 0 ˆÈ‰º‚Ìê‡‚Í‰½‚à‚µ‚È‚¢)
+	 * Equipment ã«çµ±è¨ˆæƒ…å ±ã¨ã—ã¦æ‰±ãˆã‚‹ Tag ã‚’è¿½åŠ ã™ã‚‹ (StackCount ãŒ 0 ä»¥ä¸‹ã®å ´åˆã¯ä½•ã‚‚ã—ãªã„)
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Equipment")
 	void AddStatTagStack(FGameplayTag Tag, int32 StackCount);
@@ -103,7 +103,7 @@ public:
 	/**
 	 * RemoveStatTagStack
 	 *
-	 * Equipment ‚É“Œvî•ñ‚Æ‚µ‚Äˆµ‚¦‚é Tag ‚ğíœ‚·‚é (StackCount ‚ª 0 ˆÈ‰º‚Ìê‡‚Í‰½‚à‚µ‚È‚¢)
+	 * Equipment ã«çµ±è¨ˆæƒ…å ±ã¨ã—ã¦æ‰±ãˆã‚‹ Tag ã‚’å‰Šé™¤ã™ã‚‹ (StackCount ãŒ 0 ä»¥ä¸‹ã®å ´åˆã¯ä½•ã‚‚ã—ãªã„)
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Equipment")
 	void RemoveStatTagStack(FGameplayTag Tag, int32 StackCount);
@@ -111,7 +111,7 @@ public:
 	/**
 	 * GetStatTagStackCount
 	 *
-	 * Equipment ‚É“Œvî•ñ‚Æ‚µ‚Äˆµ‚¦‚é Tag ‚ª‚¢‚­‚Â‚ ‚é‚©‚ğ•Ô‚· (‘¶İ‚µ‚È‚¢ê‡‚Í 0 ‚ğ•Ô‚·)
+	 * Equipment ã«çµ±è¨ˆæƒ…å ±ã¨ã—ã¦æ‰±ãˆã‚‹ Tag ãŒã„ãã¤ã‚ã‚‹ã‹ã‚’è¿”ã™ (å­˜åœ¨ã—ãªã„å ´åˆã¯ 0 ã‚’è¿”ã™)
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Equipment")
 	int32 GetStatTagStackCount(FGameplayTag Tag) const;
@@ -119,13 +119,13 @@ public:
 	/**
 	 * HasStatTag
 	 *
-	 * Equipment ‚É“Œvî•ñ‚Æ‚µ‚Äˆµ‚¦‚é Tag ‚ª‘¶İ‚·‚é‚©‚Ç‚¤‚©‚ğ•Ô‚·
+	 * Equipment ã«çµ±è¨ˆæƒ…å ±ã¨ã—ã¦æ‰±ãˆã‚‹ Tag ãŒå­˜åœ¨ã™ã‚‹ã‹ã©ã†ã‹ã‚’è¿”ã™
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Equipment")
 	bool HasStatTag(FGameplayTag Tag) const;
 
-	// ‚±‚Ì Equipment ‚Ì‰Šú StatTag
-	// Equipment ‚ªì¬‚³‚ê‚½Û‚Ì‰Šú‰»ˆ—‚Ég—p‚·‚é
+	// ã“ã® Equipment ã®åˆæœŸ StatTag
+	// Equipment ãŒä½œæˆã•ã‚ŒãŸéš›ã®åˆæœŸåŒ–å‡¦ç†ã«ä½¿ç”¨ã™ã‚‹
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
 	TMap<FGameplayTag, int32> InitialEquipmentStats;
 
@@ -138,14 +138,14 @@ public:
 	/**
 	 * OnActivated
 	 *
-	 * EquipmentManagerComponent ‚©‚ç‚±‚Ì Equipment ‚ğ Active ‚É‚µ‚½‚Æ‚«‚ÉŒÄ‚Ño‚³‚ê‚é
+	 * EquipmentManagerComponent ã‹ã‚‰ã“ã® Equipment ã‚’ Active ã«ã—ãŸã¨ãã«å‘¼ã³å‡ºã•ã‚Œã‚‹
 	 */
 	virtual void OnActivated();
 
 	/**
 	 * OnDeactivated
 	 *
-	 * EquipmentManagerComponent ‚©‚ç‚±‚Ì Equipment ‚ğ Deactive ‚É‚µ‚½‚Æ‚«‚ÉŒÄ‚Ño‚³‚ê‚é
+	 * EquipmentManagerComponent ã‹ã‚‰ã“ã® Equipment ã‚’ Deactive ã«ã—ãŸã¨ãã«å‘¼ã³å‡ºã•ã‚Œã‚‹
 	 */
 	virtual void OnDeactivated();
 

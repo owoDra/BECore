@@ -14,7 +14,7 @@
 /**
  * UBEDeveloperPlatformSettings
  * 
- *  ŠJ”­‚·‚éƒvƒ‰ƒbƒgƒtƒH[ƒ€‚É‘Î‰ž‚·‚éÝ’è‚ð’è‹`‚·‚é
+ *  é–‹ç™ºã™ã‚‹ãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ ã«å¯¾å¿œã™ã‚‹è¨­å®šã‚’å®šç¾©ã™ã‚‹
  */
 UCLASS(config = EditorPerProjectUserSettings, MinimalAPI)
 class UBEDeveloperPlatformSettings : public UDeveloperSettingsBackedByCVars
@@ -43,7 +43,7 @@ public:
 	/**
 	 * OnPlayInEditorStarted
 	 *
-	 *  PIE ‚ðŠJŽn‚µ‚½‚Æ‚«‚É Editor ‚É‚æ‚Á‚ÄŒÄ‚Ño‚³‚êA’Ê’mƒ|ƒbƒvƒAƒbƒv‚ð•\Ž¦‚·‚é
+	 *  PIE ã‚’é–‹å§‹ã—ãŸã¨ãã« Editor ã«ã‚ˆã£ã¦å‘¼ã³å‡ºã•ã‚Œã€é€šçŸ¥ãƒãƒƒãƒ—ã‚¢ãƒƒãƒ—ã‚’è¡¨ç¤ºã™ã‚‹
 	 */
 	BECORE_API void OnPlayInEditorStarted() const;
 
@@ -51,7 +51,7 @@ private:
 	void ApplySettings();
 	void ChangeActivePretendPlatform(FName NewPlatformName);
 
-	// ÅŒã‚É“K—p‚µ‚½ƒvƒ‰ƒbƒgƒtƒH[ƒ€ƒGƒ~ƒ…ƒŒ[ƒVƒ‡ƒ“
+	// æœ€å¾Œã«é©ç”¨ã—ãŸãƒ—ãƒ©ãƒƒãƒˆãƒ•ã‚©ãƒ¼ãƒ ã‚¨ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³
 	FName LastAppliedPretendPlatform;
 
 #endif 

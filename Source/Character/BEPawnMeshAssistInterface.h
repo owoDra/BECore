@@ -15,7 +15,7 @@ class UBEAnimInstance;
 /**
  * UBECameraAssistInterface / IBECameraAssistInterface
  * 
- *  Pawn ‚Ü‚½‚Í Character ‚Ì SkeltalMesh ‚ÉŠÖ‚·‚é•â•‚ğs‚¤ƒCƒ“ƒ^[ƒtƒF[ƒX
+ *  Pawn ã¾ãŸã¯ Character ã® SkeltalMesh ã«é–¢ã™ã‚‹è£œåŠ©ã‚’è¡Œã†ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ãƒ¼ã‚¹
  */
 UINTERFACE(MinimalAPI, BlueprintType)
 class UBEPawnMeshAssistInterface : public UInterface
@@ -30,8 +30,8 @@ public:
 	/**
 	 * GetMeshes
 	 * 
-	 *  Pawn ‚Ü‚½‚Í Character ‚ÌŒ©‚½–Ú‚ğ•\‚· Mesh ‚ğ‚·‚×‚Äæ“¾‚·‚é
-	 *  ˆê”Ê“I‚É‚±‚ê‚É‚Í TPP Mesh ‚Æ FPP Mesh‚ªŠÜ‚Ü‚ê‚Ü‚·B
+	 *  Pawn ã¾ãŸã¯ Character ã®è¦‹ãŸç›®ã‚’è¡¨ã™ Mesh ã‚’ã™ã¹ã¦å–å¾—ã™ã‚‹
+	 *  ä¸€èˆ¬çš„ã«ã“ã‚Œã«ã¯ TPP Mesh ã¨ FPP MeshãŒå«ã¾ã‚Œã¾ã™ã€‚
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Pawn|Mesh")
 	void GetMeshes(TArray<USkeletalMeshComponent*>& Meshes) const;
@@ -39,8 +39,8 @@ public:
 	/**
 	 * GetFPPMesh
 	 *
-	 *  Pawn ‚Ü‚½‚Í Character ‚Ì FPP‹“_‚É‚¨‚¯‚éŒ©‚½–Ú‚ğ•\‚· Mesh ‚ğ•Ô‚·B
-	 *  FPP ‹“_‚Å‚Ì Mesh ‚ğg—p‚µ‚È‚¢ê‡‚Í nullptr ‚ğ•Ô‚·B
+	 *  Pawn ã¾ãŸã¯ Character ã® FPPè¦–ç‚¹ã«ãŠã‘ã‚‹è¦‹ãŸç›®ã‚’è¡¨ã™ Mesh ã‚’è¿”ã™ã€‚
+	 *  FPP è¦–ç‚¹ã§ã® Mesh ã‚’ä½¿ç”¨ã—ãªã„å ´åˆã¯ nullptr ã‚’è¿”ã™ã€‚
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Pawn|Mesh")
 	USkeletalMeshComponent* GetFPPMesh() const;
@@ -48,7 +48,7 @@ public:
 	/**
 	 * GetTPPMesh
 	 *
-	 *  Pawn ‚Ü‚½‚Í Character ‚Ì TPP‹“_‚É‚¨‚¯‚éŒ©‚½–Ú‚ğ•\‚· Mesh ‚ğ•Ô‚·B
+	 *  Pawn ã¾ãŸã¯ Character ã® TPPè¦–ç‚¹ã«ãŠã‘ã‚‹è¦‹ãŸç›®ã‚’è¡¨ã™ Mesh ã‚’è¿”ã™ã€‚
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Pawn|Mesh")
 	USkeletalMeshComponent* GetTPPMesh() const;
@@ -57,8 +57,8 @@ public:
 	/**
 	 * GetMainAnimInstances
 	 *
-	 *  Pawn ‚Ü‚½‚Í Character ‚Ì CopyPose ‚È‚Ç‚Å‚Í‚È‚¢ƒƒCƒ“‚Ì AnimInstance ‚ğæ“¾‚·‚éB
-	 *  ˆê”Ê“I‚É FPP Mesh ‚¨‚æ‚Ñ TPP Mesh ‚Ì AnimInstance ‚ªŠÜ‚Ü‚ê‚éB
+	 *  Pawn ã¾ãŸã¯ Character ã® CopyPose ãªã©ã§ã¯ãªã„ãƒ¡ã‚¤ãƒ³ã® AnimInstance ã‚’å–å¾—ã™ã‚‹ã€‚
+	 *  ä¸€èˆ¬çš„ã« FPP Mesh ãŠã‚ˆã³ TPP Mesh ã® AnimInstance ãŒå«ã¾ã‚Œã‚‹ã€‚
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Pawn|Anim")
 	void GetMainAnimInstances(TArray<UBEAnimInstance*>& Instances) const;
@@ -66,8 +66,8 @@ public:
 	/**
 	 * GetFPPAnimInstance
 	 *
-	 *  Pawn ‚Ü‚½‚Í Character ‚Ì FPP‹“_‚É‚¨‚¯‚é Mesh ‚Ì AnimInstance ‚ğ•Ô‚·B
-	 *  FPP ‹“_‚Å‚Ì Mesh ‚ğg—p‚µ‚È‚¢ê‡‚Í nullptr ‚ğ•Ô‚·B
+	 *  Pawn ã¾ãŸã¯ Character ã® FPPè¦–ç‚¹ã«ãŠã‘ã‚‹ Mesh ã® AnimInstance ã‚’è¿”ã™ã€‚
+	 *  FPP è¦–ç‚¹ã§ã® Mesh ã‚’ä½¿ç”¨ã—ãªã„å ´åˆã¯ nullptr ã‚’è¿”ã™ã€‚
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Pawn|Anim")
 	UBEAnimInstance* GetFPPAnimInstance() const;
@@ -75,7 +75,7 @@ public:
 	/**
 	 * GetTPPAnimInstance
 	 *
-	 *  Pawn ‚Ü‚½‚Í Character ‚Ì TPP‹“_‚É‚¨‚¯‚é Mesh ‚Ì AnimInstance ‚ğ•Ô‚·B
+	 *  Pawn ã¾ãŸã¯ Character ã® TPPè¦–ç‚¹ã«ãŠã‘ã‚‹ Mesh ã® AnimInstance ã‚’è¿”ã™ã€‚
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Pawn|Anim")
 	UBEAnimInstance* GetTPPAnimInstance() const;

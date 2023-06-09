@@ -276,19 +276,19 @@ void UBEPawnEquipmentComponent::OnRegister()
 	Pawn->GetComponents(UBEPawnEquipmentComponent::StaticClass(), Components);
 	ensureAlwaysMsgf((Components.Num() == 1), TEXT("Only one UBEPawnEquipmentComponent should exist on [%s]."), *GetNameSafe(GetOwner()));
 
-	// ƒRƒ“ƒ|[ƒlƒ“ƒg‚ª GameWorld ‚É‘¶İ‚·‚éÛ‚É@InitStateSystem ‚É“o˜^‚·‚é
+	// ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆãŒ GameWorld ã«å­˜åœ¨ã™ã‚‹éš›ã«ã€€InitStateSystem ã«ç™»éŒ²ã™ã‚‹
 	RegisterInitStateFeature();
 }
 
 void UBEPawnEquipmentComponent::BeginPlay()
 {
-	// ‚·‚×‚Ä‚Ì Feature ‚Ö‚Ì•ÏX‚ğƒŠƒbƒXƒ“‚·‚é
+	// ã™ã¹ã¦ã® Feature ã¸ã®å¤‰æ›´ã‚’ãƒªãƒƒã‚¹ãƒ³ã™ã‚‹
 	BindOnActorInitStateChanged(NAME_None, FGameplayTag(), false);
 
-	// InisStateSystem ‚É‚±‚ÌƒRƒ“ƒ|[ƒlƒ“ƒg‚ªƒXƒ|[ƒ“‚µ‚½‚±‚Æ‚ğ’m‚ç‚¹‚éB
+	// InisStateSystem ã«ã“ã®ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆãŒã‚¹ãƒãƒ¼ãƒ³ã—ãŸã“ã¨ã‚’çŸ¥ã‚‰ã›ã‚‹ã€‚
 	ensure(TryToChangeInitState(TAG_InitState_Spawned));
 
-	// c‚è‚Ì‰Šú‰»‚ğs‚¤
+	// æ®‹ã‚Šã®åˆæœŸåŒ–ã‚’è¡Œã†
 	CheckDefaultInitialization();
 }
 
@@ -309,7 +309,7 @@ bool UBEPawnEquipmentComponent::CanChangeInitState(UGameFrameworkComponentManage
 	/**
 	 * [InitState None] -> [InitState Spawned]
 	 *
-	 *  Pawn ‚ª—LŒø
+	 *  Pawn ãŒæœ‰åŠ¹
 	 */
 	if (!CurrentState.IsValid() && DesiredState == TAG_InitState_Spawned)
 	{
@@ -322,7 +322,7 @@ bool UBEPawnEquipmentComponent::CanChangeInitState(UGameFrameworkComponentManage
 	/**
 	 * [InitState Spawned] -> [InitState DataAvailable]
 	 *
-	 *  –³ğŒ‚Å‹–‰Â
+	 *  ç„¡æ¡ä»¶ã§è¨±å¯
 	 */
 	else if (CurrentState == TAG_InitState_Spawned && DesiredState == TAG_InitState_DataAvailable)
 	{
@@ -332,19 +332,19 @@ bool UBEPawnEquipmentComponent::CanChangeInitState(UGameFrameworkComponentManage
 	/**
 	 * [InitState DataAvailable] -> [InitState DataInitialized]
 	 *
-	 *  ‘¼‚Ì‚·‚×‚Ä‚Ì Feature ‚ª DataAvailable ‚É“’B‚µ‚Ä‚¢‚é
+	 *  ä»–ã®ã™ã¹ã¦ã® Feature ãŒ DataAvailable ã«åˆ°é”ã—ã¦ã„ã‚‹
 	 */
 	else if (CurrentState == TAG_InitState_DataAvailable && DesiredState == TAG_InitState_DataInitialized)
 	{
-		// CharacterBasicComponent ‚ª DataInitialized ‚É“’B‚µ‚Ä‚¢‚é‚©
-		// ‚Â‚Ü‚èA‘¼‚Ì‚·‚×‚Ä‚Ì Feature ‚ª DataAvailable ‚É“’B‚µ‚Ä‚¢‚é‚©
+		// CharacterBasicComponent ãŒ DataInitialized ã«åˆ°é”ã—ã¦ã„ã‚‹ã‹
+		// ã¤ã¾ã‚Šã€ä»–ã®ã™ã¹ã¦ã® Feature ãŒ DataAvailable ã«åˆ°é”ã—ã¦ã„ã‚‹ã‹
 		return Manager->HasFeatureReachedInitState(Pawn, UBEPawnBasicComponent::NAME_ActorFeatureName, TAG_InitState_DataInitialized);
 	}
 
 	/**
 	 * [InitState DataInitialized] -> [InitState GameplayReady]
 	 *
-	 *  –³ğŒ‚Å‹–‰Â
+	 *  ç„¡æ¡ä»¶ã§è¨±å¯
 	 */
 	else if (CurrentState == TAG_InitState_DataInitialized && DesiredState == TAG_InitState_GameplayReady)
 	{
@@ -359,7 +359,7 @@ void UBEPawnEquipmentComponent::HandleChangeInitState(UGameFrameworkComponentMan
 	/**
 	 * [InitState DataAvailable] -> [InitState DataInitialized]
 	 *
-	 *  ƒfƒtƒHƒ‹ƒg‚Ì Equipments ‚ğ“K‰
+	 *  ãƒ‡ãƒ•ã‚©ãƒ«ãƒˆã® Equipments ã‚’é©å¿œ
 	 */
 	if (CurrentState == TAG_InitState_DataAvailable && DesiredState == TAG_InitState_DataInitialized)
 	{
@@ -389,8 +389,8 @@ void UBEPawnEquipmentComponent::HandleChangeInitState(UGameFrameworkComponentMan
 
 void UBEPawnEquipmentComponent::OnActorInitStateChanged(const FActorInitStateChangedParams& Params)
 {
-	// CharacterBasicComponent ‚ª DataInitialized ‚É“’B‚µ‚Ä‚¢‚é‚©
-	// ‚Â‚Ü‚èA‘¼‚Ì‚·‚×‚Ä‚Ì Feature ‚ª DataAvailable ‚É“’B‚µ‚Ä‚¢‚é‚©
+	// CharacterBasicComponent ãŒ DataInitialized ã«åˆ°é”ã—ã¦ã„ã‚‹ã‹
+	// ã¤ã¾ã‚Šã€ä»–ã®ã™ã¹ã¦ã® Feature ãŒ DataAvailable ã«åˆ°é”ã—ã¦ã„ã‚‹ã‹
 	if (Params.FeatureName == UBEPawnBasicComponent::NAME_ActorFeatureName)
 	{
 		if (Params.FeatureState == TAG_InitState_DataInitialized)

@@ -33,7 +33,7 @@ class UBEPawnEquipmentComponent;
 /**
  * FBEEquipmentSlotChangedMessage
  *
- * EquipmentManagerComponent ‚É“o˜^‚µ‚½ Equipment ‚ª•ÏX‚³‚ê‚½‚Æ‚«‚ÌƒƒbƒZ[ƒW
+ * EquipmentManagerComponent ã«ç™»éŒ²ã—ãŸ Equipment ãŒå¤‰æ›´ã•ã‚ŒãŸã¨ãã®ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸
  */
 USTRUCT(BlueprintType)
 struct FBEEquipmentSlotChangedMessage
@@ -58,7 +58,7 @@ public:
 /**
  * FBEEquipmentEntry
  *
- * EquipmentManagerComponent ‚É“o˜^‚µ‚½ Equipment ‚Ìî•ñ
+ * EquipmentManagerComponent ã«ç™»éŒ²ã—ãŸ Equipment ã®æƒ…å ±
  */
 USTRUCT(BlueprintType)
 struct FBEEquipmentEntry : public FFastArraySerializerItem
@@ -86,13 +86,13 @@ private:
 	UPROPERTY()
 	uint8 Activated : 1;
 
-	// EquipmentManagerComponent ‚É“o˜^‚µ‚½Û‚É•t—^‚³‚ê‚é AbilitySet ‚Ì GrantedHandles
-	// ƒf[ƒ^‚ğ•Û‚·‚é‚Ì‚ÍƒT[ƒo[Œ ŒÀ‚Ì‚İ
+	// EquipmentManagerComponent ã«ç™»éŒ²ã—ãŸéš›ã«ä»˜ä¸ã•ã‚Œã‚‹ AbilitySet ã® GrantedHandles
+	// ãƒ‡ãƒ¼ã‚¿ã‚’ä¿æŒã™ã‚‹ã®ã¯ã‚µãƒ¼ãƒãƒ¼æ¨©é™ã®ã¿
 	UPROPERTY(NotReplicated)
 	FBEAbilitySet_GrantedHandles GrantedHandles_Equip;
 
-	// EquipmentManagerComponent ‚Å Active ‚É‚µ‚½‚Æ‚«‚É•t—^‚³‚ê‚é AbilitySet ‚Ì GrantedHandles
-	// ƒf[ƒ^‚ğ•Û‚·‚é‚Ì‚ÍƒT[ƒo[Œ ŒÀ‚Ì‚İ
+	// EquipmentManagerComponent ã§ Active ã«ã—ãŸã¨ãã«ä»˜ä¸ã•ã‚Œã‚‹ AbilitySet ã® GrantedHandles
+	// ãƒ‡ãƒ¼ã‚¿ã‚’ä¿æŒã™ã‚‹ã®ã¯ã‚µãƒ¼ãƒãƒ¼æ¨©é™ã®ã¿
 	UPROPERTY(NotReplicated)
 	FBEAbilitySet_GrantedHandles GrantedHandles_Active;
 
@@ -106,7 +106,7 @@ public:
 /**
  * FBEEquipmentList
  *
- * EquipmentManagerComponent ‚É“o˜^‚µ‚½ Equipment ‚ÌƒŠƒXƒg
+ * EquipmentManagerComponent ã«ç™»éŒ²ã—ãŸ Equipment ã®ãƒªã‚¹ãƒˆ
  */
 USTRUCT(BlueprintType)
 struct FBEEquipmentList : public FFastArraySerializer
@@ -177,7 +177,7 @@ struct TStructOpsTypeTraits<FBEEquipmentList> : public TStructOpsTypeTraitsBase2
 /**
  * UBEPawnEquipmentComponent
  *
- * Equipment ‚ğŠÇ—‚·‚é‚½‚ß‚ÌƒRƒ“ƒ|[ƒlƒ“ƒg
+ * Equipment ã‚’ç®¡ç†ã™ã‚‹ãŸã‚ã®ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ
  */
 UCLASS(BlueprintType, Const)
 class BECORE_API UBEPawnEquipmentComponent : public UPawnComponent, public IGameFrameworkInitStateInterface
@@ -187,7 +187,7 @@ class BECORE_API UBEPawnEquipmentComponent : public UPawnComponent, public IGame
 public:
 	UBEPawnEquipmentComponent(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	// ‚±‚ÌƒRƒ“ƒ|[ƒlƒ“ƒg‚ğÀ‘•‚·‚éÛ‚Ì FeatureName
+	// ã“ã®ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆã‚’å®Ÿè£…ã™ã‚‹éš›ã® FeatureName
 	static const FName NAME_ActorFeatureName;
 
 protected:
@@ -225,9 +225,9 @@ public:
 	/**
 	 * AddEquipment
 	 *
-	 * w’è‚µ‚½ Slot ‚É ItemData ‚ğ’Ç‰Á‚·‚éB
-	 * ItemData ‚ğ‚à‚Æ‚É Equipment ‚ğì¬‚·‚éB
-	 * •¡”‚Ì ItemData ‚ğ’Ç‰Á‚·‚éê‡‚Í AddEquipments ‚ğg—p‚µ‚Ä‚­‚¾‚³‚¢B
+	 * æŒ‡å®šã—ãŸ Slot ã« ItemData ã‚’è¿½åŠ ã™ã‚‹ã€‚
+	 * ItemData ã‚’ã‚‚ã¨ã« Equipment ã‚’ä½œæˆã™ã‚‹ã€‚
+	 * è¤‡æ•°ã® ItemData ã‚’è¿½åŠ ã™ã‚‹å ´åˆã¯ AddEquipments ã‚’ä½¿ç”¨ã—ã¦ãã ã•ã„ã€‚
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Equipment", meta = (GameplayTagFilter = "Equipment.Slot"))
 	bool AddEquipment(FGameplayTag SlotTag, const UBEItemData* ItemData, bool ActivateImmediately = true);
@@ -235,9 +235,9 @@ public:
 	/**
 	 * AddEquipments
 	 *
-	 * w’è‚µ‚½ Slot ‚É ItemData ‚ğ’Ç‰Á‚·‚éB
-	 * •¡”‚Ì ItemData ‚ğ‚¢‚Á‚Ø‚ñ‚É’Ç‰Á‚·‚éB
-	 * ActivateSlotTag ‚É SlotTag ‚ğw’è‚·‚é‚±‚Æ‚Å Active ‚É‚·‚é‚±‚Æ‚ª‚Å‚«‚éB
+	 * æŒ‡å®šã—ãŸ Slot ã« ItemData ã‚’è¿½åŠ ã™ã‚‹ã€‚
+	 * è¤‡æ•°ã® ItemData ã‚’ã„ã£ãºã‚“ã«è¿½åŠ ã™ã‚‹ã€‚
+	 * ActivateSlotTag ã« SlotTag ã‚’æŒ‡å®šã™ã‚‹ã“ã¨ã§ Active ã«ã™ã‚‹ã“ã¨ãŒã§ãã‚‹ã€‚
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Equipment", meta = (GameplayTagFilter = "Equipment.Slot"))
 	void AddEquipments(const TArray<FBEEquipmentSetEntry>& Entries, FGameplayTag ActivateSlotTag = FGameplayTag());
@@ -245,7 +245,7 @@ public:
 	/**
 	 * RemoveEquipment
 	 *
-	 * w’è‚µ‚½ Slot ‚Ì Equipment ‚ğíœ‚·‚éB
+	 * æŒ‡å®šã—ãŸ Slot ã® Equipment ã‚’å‰Šé™¤ã™ã‚‹ã€‚
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Equipment", meta = (GameplayTagFilter = "Equipment.Slot"))
 	bool RemoveEquipment(FGameplayTag SlotTag);
@@ -253,7 +253,7 @@ public:
 	/**
 	 * RemoveAllEquipments
 	 *
-	 * ‚Â‚©‚³‚ê‚½‚·‚×‚Ä‚Ì Equipment ‚ğíœ‚·‚éB
+	 * ã¤ã‹ã•ã‚ŒãŸã™ã¹ã¦ã® Equipment ã‚’å‰Šé™¤ã™ã‚‹ã€‚
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Equipment")
 	void RemoveAllEquipments();
@@ -263,8 +263,8 @@ public:
 	/**
 	 * SetActiveSlot
 	 *
-	 * Active ‚È Slot ‚ğ•ÏX‚·‚é
-	 * İ’è‚·‚é Slot ‚ª‚·‚Å‚É Active ‚Èê‡‚Í‰½‚à‹N‚±‚ç‚È‚¢
+	 * Active ãª Slot ã‚’å¤‰æ›´ã™ã‚‹
+	 * è¨­å®šã™ã‚‹ Slot ãŒã™ã§ã« Active ãªå ´åˆã¯ä½•ã‚‚èµ·ã“ã‚‰ãªã„
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "Equipment", meta = (GameplayTagFilter = "Equipment.Slot"))
 	void SetActiveSlot(FGameplayTag SlotTag);
@@ -272,7 +272,7 @@ public:
 	/**
 	 * GetActiveSlotInfo
 	 *
-	 * Active ‚È Slot ‚Ì ItemData ‚¨‚æ‚Ñ EquipmentASlotTag ‚ğ•Ô‚·
+	 * Active ãª Slot ã® ItemData ãŠã‚ˆã³ Equipmentã€SlotTag ã‚’è¿”ã™
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Equipment")
 	bool GetActiveSlotInfo(FBEEquipmentSlotChangedMessage& SlotInfo);
@@ -280,7 +280,7 @@ public:
 	/**
 	 * GetSlotInfo
 	 *
-	 * w’è‚µ‚½ Slot ‚Ì ItemData ‚¨‚æ‚Ñ EquipmentASlotTag ‚ğ•Ô‚·
+	 * æŒ‡å®šã—ãŸ Slot ã® ItemData ãŠã‚ˆã³ Equipmentã€SlotTag ã‚’è¿”ã™
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Equipment", meta = (GameplayTagFilter = "Equipment.Slot"))
 	bool GetSlotInfo(FGameplayTag SlotTag, FBEEquipmentSlotChangedMessage& SlotInfo);

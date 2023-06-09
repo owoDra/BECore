@@ -19,8 +19,8 @@ struct FBEAbilitySet_GrantedHandles;
 /**
  * ABECharacterStandalone
  *
- *	Character ©‘Ì‚Å AbilitySystem ‚ğ•Û—L‚µ‚Ä‚¢‚é BECharacter
- *  ’Pƒ‚È“G NPC ‚È‚Ç‚Æ‚¢‚Á‚½ PlayerState ‚ğ•Û—L‚µ‚È‚¢”ñƒvƒŒƒCƒ„[(ƒvƒŒƒCƒ„[ƒ{ƒbƒg)‚Ég—p‚·‚é
+ *	Character è‡ªä½“ã§ AbilitySystem ã‚’ä¿æœ‰ã—ã¦ã„ã‚‹ BECharacter
+ *  å˜ç´”ãªæ•µ NPC ãªã©ã¨ã„ã£ãŸ PlayerState ã‚’ä¿æœ‰ã—ãªã„éãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼(ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ãƒœãƒƒãƒˆ)ã«ä½¿ç”¨ã™ã‚‹
  */
 UCLASS(Blueprintable)
 class BECORE_API ABECharacterStandalone : public ABECharacter

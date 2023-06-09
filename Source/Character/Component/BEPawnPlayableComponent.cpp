@@ -54,7 +54,7 @@ void UBEPawnPlayableComponent::OnRegister()
 	Pawn->GetComponents(UBEPawnPlayableComponent::StaticClass(), Components);
 	ensureAlwaysMsgf((Components.Num() == 1), TEXT("Only one BEPawnPlayableComponent should exist on [%s]."), *GetNameSafe(GetOwner()));
 
-	// ƒRƒ“ƒ|[ƒlƒ“ƒg‚ª GameWorld ‚É‘¶İ‚·‚éÛ‚É@InitStateSystem ‚É“o˜^‚·‚é
+	// ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆãŒ GameWorld ã«å­˜åœ¨ã™ã‚‹éš›ã«ã€€InitStateSystem ã«ç™»éŒ²ã™ã‚‹
 	RegisterInitStateFeature();
 }
 
@@ -62,13 +62,13 @@ void UBEPawnPlayableComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ‚·‚×‚Ä‚Ì Feature ‚Ö‚Ì•ÏX‚ğƒŠƒbƒXƒ“‚·‚é
+	// ã™ã¹ã¦ã® Feature ã¸ã®å¤‰æ›´ã‚’ãƒªãƒƒã‚¹ãƒ³ã™ã‚‹
 	BindOnActorInitStateChanged(NAME_None, FGameplayTag(), false);
 
-	// InisStateSystem ‚É‚±‚ÌƒRƒ“ƒ|[ƒlƒ“ƒg‚ªƒXƒ|[ƒ“‚µ‚½‚±‚Æ‚ğ’m‚ç‚¹‚éB
+	// InisStateSystem ã«ã“ã®ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆãŒã‚¹ãƒãƒ¼ãƒ³ã—ãŸã“ã¨ã‚’çŸ¥ã‚‰ã›ã‚‹ã€‚
 	ensure(TryToChangeInitState(TAG_InitState_Spawned));
 
-	// c‚è‚Ì‰Šú‰»‚ğs‚¤
+	// æ®‹ã‚Šã®åˆæœŸåŒ–ã‚’è¡Œã†
 	CheckDefaultInitialization();
 }
 
@@ -89,7 +89,7 @@ bool UBEPawnPlayableComponent::CanChangeInitState(UGameFrameworkComponentManager
 	/**
 	 * [InitState None] -> [InitState Spawned]
 	 *
-	 *  Pawn ‚ª—LŒø
+	 *  Pawn ãŒæœ‰åŠ¹
 	 */
 	if (!CurrentState.IsValid() && DesiredState == TAG_InitState_Spawned)
 	{
@@ -102,20 +102,20 @@ bool UBEPawnPlayableComponent::CanChangeInitState(UGameFrameworkComponentManager
 	/**
 	 * [InitState Spawned] -> [InitState DataAvailable]
 	 *
-	 *  Controller ‚ª—LŒø
-	 *  PlayerState ‚ª—LŒø
-	 *  InputComponent ‚ª—LŒø
-	 *  Bot ‚Å‚Í‚È‚¢
+	 *  Controller ãŒæœ‰åŠ¹
+	 *  PlayerState ãŒæœ‰åŠ¹
+	 *  InputComponent ãŒæœ‰åŠ¹
+	 *  Bot ã§ã¯ãªã„
 	 */
 	else if (CurrentState == TAG_InitState_Spawned && DesiredState == TAG_InitState_DataAvailable)
 	{
-		// —LŒø‚È PlayerState ‚ª‘¶İ‚·‚é‚©
+		// æœ‰åŠ¹ãª PlayerState ãŒå­˜åœ¨ã™ã‚‹ã‹
 		if (GetPlayerState<ABEPlayerState>() == nullptr)
 		{
 			return false;
 		}
 
-		// ƒVƒ~ƒ…ƒŒ[ƒVƒ‡ƒ“‚Å‚È‚­A‚©‚Â Controller ‚ª PlayerState ‚ğŠ—L‚µ‚Ä‚¢‚é‚©
+		// ã‚·ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³ã§ãªãã€ã‹ã¤ Controller ãŒ PlayerState ã‚’æ‰€æœ‰ã—ã¦ã„ã‚‹ã‹
 		if (Pawn->GetLocalRole() != ROLE_SimulatedProxy)
 		{
 			AController* Controller = GetController<AController>();
@@ -135,7 +135,7 @@ bool UBEPawnPlayableComponent::CanChangeInitState(UGameFrameworkComponentManager
 			}
 		}
 
-		// ƒ{ƒbƒg‚Å‚Í‚È‚¢ƒ[ƒJƒ‹ƒRƒ“ƒgƒ[ƒ‰[‚ğŠ—L‚·‚é‚©‚Ç‚¤‚©
+		// ãƒœãƒƒãƒˆã§ã¯ãªã„ãƒ­ãƒ¼ã‚«ãƒ«ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ©ãƒ¼ã‚’æ‰€æœ‰ã™ã‚‹ã‹ã©ã†ã‹
 		const bool bIsLocallyControlled = Pawn->IsLocallyControlled();
 		const bool bIsBot = Pawn->IsBotControlled();
 		if (bIsLocallyControlled && !bIsBot)
@@ -154,19 +154,19 @@ bool UBEPawnPlayableComponent::CanChangeInitState(UGameFrameworkComponentManager
 	/**
 	 * [InitState DataAvailable] -> [InitState DataInitialized]
 	 *
-	 *  ‘¼‚Ì‚·‚×‚Ä‚Ì Feature ‚ª DataAvailable ‚É“’B‚µ‚Ä‚¢‚é
+	 *  ä»–ã®ã™ã¹ã¦ã® Feature ãŒ DataAvailable ã«åˆ°é”ã—ã¦ã„ã‚‹
 	 */
 	else if (CurrentState == TAG_InitState_DataAvailable && DesiredState == TAG_InitState_DataInitialized)
 	{
-		// CharacterBasicComponent ‚ª DataInitialized ‚É“’B‚µ‚Ä‚¢‚é‚©
-		// ‚Â‚Ü‚èA‘¼‚Ì‚·‚×‚Ä‚Ì Feature ‚ª DataAvailable ‚É“’B‚µ‚Ä‚¢‚é‚©
+		// CharacterBasicComponent ãŒ DataInitialized ã«åˆ°é”ã—ã¦ã„ã‚‹ã‹
+		// ã¤ã¾ã‚Šã€ä»–ã®ã™ã¹ã¦ã® Feature ãŒ DataAvailable ã«åˆ°é”ã—ã¦ã„ã‚‹ã‹
 		return Manager->HasFeatureReachedInitState(Pawn, UBEPawnBasicComponent::NAME_ActorFeatureName, TAG_InitState_DataInitialized);
 	}
 
 	/**
 	 * [InitState DataInitialized] -> [InitState GameplayReady]
 	 *
-	 *  –³ğŒ‚Å‹–‰Â
+	 *  ç„¡æ¡ä»¶ã§è¨±å¯
 	 */
 	else if (CurrentState == TAG_InitState_DataInitialized && DesiredState == TAG_InitState_GameplayReady)
 	{
@@ -181,7 +181,7 @@ void UBEPawnPlayableComponent::HandleChangeInitState(UGameFrameworkComponentMana
 	/**
 	 * [InitState DataAvailable] -> [InitState DataInitialized]
 	 *
-	 *  InputComponent ‚ğ‰Šú‰»
+	 *  InputComponent ã‚’åˆæœŸåŒ–
 	 */
 	if (CurrentState == TAG_InitState_DataAvailable && DesiredState == TAG_InitState_DataInitialized)
 	{
@@ -207,8 +207,8 @@ void UBEPawnPlayableComponent::HandleChangeInitState(UGameFrameworkComponentMana
 
 void UBEPawnPlayableComponent::OnActorInitStateChanged(const FActorInitStateChangedParams& Params)
 {
-	// CharacterBasicComponent ‚ª DataInitialized ‚É“’B‚µ‚Ä‚¢‚é‚©
-	// ‚Â‚Ü‚èA‘¼‚Ì‚·‚×‚Ä‚Ì Feature ‚ª DataAvailable ‚É“’B‚µ‚Ä‚¢‚é‚©
+	// CharacterBasicComponent ãŒ DataInitialized ã«åˆ°é”ã—ã¦ã„ã‚‹ã‹
+	// ã¤ã¾ã‚Šã€ä»–ã®ã™ã¹ã¦ã® Feature ãŒ DataAvailable ã«åˆ°é”ã—ã¦ã„ã‚‹ã‹
 	if (Params.FeatureName == UBEPawnBasicComponent::NAME_ActorFeatureName)
 	{
 		if (Params.FeatureState == TAG_InitState_DataInitialized)

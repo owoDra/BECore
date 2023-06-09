@@ -10,7 +10,7 @@
 /**
  * ABEPlayerReplayController
  *
- *	ƒŠƒvƒŒƒC‚ÌƒLƒƒƒvƒ`ƒƒ‚ÆÄ¶‚Ég—p‚³‚ê‚é PlayerController
+ *	ãƒªãƒ—ãƒ¬ã‚¤ã®ã‚­ãƒ£ãƒ—ãƒãƒ£ã¨å†ç”Ÿã«ä½¿ç”¨ã•ã‚Œã‚‹ PlayerController
  */
 UCLASS()
 class ABEPlayerReplayController : public ABEPlayerController

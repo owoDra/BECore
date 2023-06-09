@@ -34,21 +34,21 @@ struct FBEAbilitySet_GrantedHandles;
 /**
  * EBEPlayerConnectionType
  *
- *	Client ‚ªƒQ[ƒ€‚É‚Ç‚Ì–ğŠ„‚ÅÚ‘±(Q‰Á)‚µ‚Ä‚¢‚é‚©‚ğ¦‚·
+ *	Client ãŒã‚²ãƒ¼ãƒ ã«ã©ã®å½¹å‰²ã§æ¥ç¶š(å‚åŠ )ã—ã¦ã„ã‚‹ã‹ã‚’ç¤ºã™
  */
 UENUM()
 enum class EBEPlayerConnectionType : uint8
 {
-	// ÀÛ‚ÉƒQ[ƒ€‚ÉQ‰Á‚µ‚ÄŠˆ“®‚µ‚Ä‚¢‚éƒvƒŒƒCƒ„[
+	// å®Ÿéš›ã«ã‚²ãƒ¼ãƒ ã«å‚åŠ ã—ã¦æ´»å‹•ã—ã¦ã„ã‚‹ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼
 	Player = 0,
 
-	// ƒŠƒAƒ‹ƒ^ƒCƒ€‚ÈƒQ[ƒ€‚ÉÚ‘±‚µ‚Ä‚¢‚é‚ªQ‰Á‚Í‚µ‚Ä‚¢‚È‚¢ŠÏíÒ
+	// ãƒªã‚¢ãƒ«ã‚¿ã‚¤ãƒ ãªã‚²ãƒ¼ãƒ ã«æ¥ç¶šã—ã¦ã„ã‚‹ãŒå‚åŠ ã¯ã—ã¦ã„ãªã„è¦³æˆ¦è€…
 	LiveSpectator,
 
-	// ‹L˜^‚µ‚½ƒQ[ƒ€‚ğƒŠƒvƒŒƒC‚µ‚Ä‚¢‚éŠÏíÒ
+	// è¨˜éŒ²ã—ãŸã‚²ãƒ¼ãƒ ã‚’ãƒªãƒ—ãƒ¬ã‚¤ã—ã¦ã„ã‚‹è¦³æˆ¦è€…
 	ReplaySpectator,
 
-	// Šù‚ÉƒQ[ƒ€‚©‚çØ’f‚³‚ê‚Ä‚¢‚éƒvƒŒƒCƒ„[
+	// æ—¢ã«ã‚²ãƒ¼ãƒ ã‹ã‚‰åˆ‡æ–­ã•ã‚Œã¦ã„ã‚‹ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼
 	InactivePlayer
 };
 
@@ -56,7 +56,7 @@ enum class EBEPlayerConnectionType : uint8
 /**
  * ABEPlayerState
  *
- *	‚±‚ÌƒvƒƒWƒFƒNƒg‚Åg—p‚³‚ê‚éƒx[ƒX‚Ì PlayerState ƒNƒ‰ƒXB
+ *	ã“ã®ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ãƒˆã§ä½¿ç”¨ã•ã‚Œã‚‹ãƒ™ãƒ¼ã‚¹ã® PlayerState ã‚¯ãƒ©ã‚¹ã€‚
  */
 UCLASS(Config = Game)
 class BECORE_API ABEPlayerState 
@@ -95,8 +95,8 @@ private:
 
 
 private:
-	// Player ‚Ì Pawn ‚Ü‚½‚Í Character ‚ÌƒXƒ|[ƒ“‚É—p‚¢‚é Šî–{î•ñB
-	// GameMode ‚Í‚±‚Ì PawnData ‚Ìî•ñ‚ğ‚à‚Æ‚É Player ‚Ì Pawn ‚Ü‚½‚Í Character ‚ğƒXƒ|[ƒ“‚³‚¹‚é
+	// Player ã® Pawn ã¾ãŸã¯ Character ã®ã‚¹ãƒãƒ¼ãƒ³ã«ç”¨ã„ã‚‹ åŸºæœ¬æƒ…å ±ã€‚
+	// GameMode ã¯ã“ã® PawnData ã®æƒ…å ±ã‚’ã‚‚ã¨ã« Player ã® Pawn ã¾ãŸã¯ Character ã‚’ã‚¹ãƒãƒ¼ãƒ³ã•ã›ã‚‹
 	UPROPERTY(Replicated)
 	TObjectPtr<const UBEPawnData> PawnData;
 
@@ -104,8 +104,8 @@ public:
 	/**
 	 * SetPawnData
 	 *
-	 *	Player ‚Ì Pawn ‚Ü‚½‚Í Character ‚ÌƒXƒ|[ƒ“‚É—p‚¢‚éPawnData ‚ğİ’è‚·‚éB
-	 *  Às‚É‚ÍƒT[ƒo[Œ ŒÀ‚ª•K—vB
+	 *	Player ã® Pawn ã¾ãŸã¯ Character ã®ã‚¹ãƒãƒ¼ãƒ³ã«ç”¨ã„ã‚‹PawnData ã‚’è¨­å®šã™ã‚‹ã€‚
+	 *  å®Ÿè¡Œã«ã¯ã‚µãƒ¼ãƒãƒ¼æ¨©é™ãŒå¿…è¦ã€‚
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category = "PlayerState", meta = (DisplayName = "SetPawnData"))
 	void K2_SetPawnData(const UBEPawnData* InPawnData);
@@ -114,13 +114,13 @@ public:
 	/**
 	 * GetPawnData
 	 *
-	 *	Player ‚Ì Pawn ‚Ü‚½‚Í Character ‚ÌƒXƒ|[ƒ“‚É—p‚¢‚éPawnData ‚ğ•Ô‚·
+	 *	Player ã® Pawn ã¾ãŸã¯ Character ã®ã‚¹ãƒãƒ¼ãƒ³ã«ç”¨ã„ã‚‹PawnData ã‚’è¿”ã™
 	 */
 	const UBEPawnData* GetPawnData() const { return PawnData; }
 
 	
 private:
-	// Player ‚ÌƒQ[ƒ€‚Ö‚ÌÚ‘±(Q‰Á)ó‘Ô
+	// Player ã®ã‚²ãƒ¼ãƒ ã¸ã®æ¥ç¶š(å‚åŠ )çŠ¶æ…‹
 	UPROPERTY(Replicated)
 	EBEPlayerConnectionType MyPlayerConnectionType;
 
@@ -128,29 +128,29 @@ public:
 	/**
 	 * SetPlayerConnectionType
 	 *
-	 *	Player ‚ÌƒQ[ƒ€‚Ö‚ÌÚ‘±(Q‰Á)ó‘Ô‚ğİ’è‚·‚é
+	 *	Player ã®ã‚²ãƒ¼ãƒ ã¸ã®æ¥ç¶š(å‚åŠ )çŠ¶æ…‹ã‚’è¨­å®šã™ã‚‹
 	 */
 	void SetPlayerConnectionType(EBEPlayerConnectionType NewType);
 
 	/**
 	 * GetPlayerConnectionType
 	 *
-	 *	Player ‚ÌƒQ[ƒ€‚Ö‚ÌÚ‘±(Q‰Á)ó‘Ô‚ğ•Ô‚·
+	 *	Player ã®ã‚²ãƒ¼ãƒ ã¸ã®æ¥ç¶š(å‚åŠ )çŠ¶æ…‹ã‚’è¿”ã™
 	 */
 	EBEPlayerConnectionType GetPlayerConnectionType() const { return MyPlayerConnectionType; }
 	
 
 private:
-	// Player ‚ª‘®‚·‚é Team ‚ª•ÏX‚³‚ê‚½‚É’m‚ç‚¹‚é‚½‚ß‚ÌƒfƒŠƒQ[ƒg
+	// Player ãŒå±ã™ã‚‹ Team ãŒå¤‰æ›´ã•ã‚ŒãŸæ™‚ã«çŸ¥ã‚‰ã›ã‚‹ãŸã‚ã®ãƒ‡ãƒªã‚²ãƒ¼ãƒˆ
 	UPROPERTY()
 	FOnBETeamIndexChangedDelegate OnTeamChangedDelegate;
 
-	// PLayer ‚ª‘®‚·‚é Team ‚Ì ID
+	// PLayer ãŒå±ã™ã‚‹ Team ã® ID
 	UPROPERTY(ReplicatedUsing = OnRep_MyTeamID)
 	FGenericTeamId MyTeamID;
 
-	// Player ‚ª‘®‚·‚é Team “à‚Å‚Ì ƒOƒ‹[ƒv•ª‚¯—p‚Ì ID
-	// Šî–{“I‚É‚Í‘ål”‚Å‚Ì‘ÎíƒQ[ƒ€‚È‚Ç‚Åg—p‚·‚éB
+	// Player ãŒå±ã™ã‚‹ Team å†…ã§ã® ã‚°ãƒ«ãƒ¼ãƒ—åˆ†ã‘ç”¨ã® ID
+	// åŸºæœ¬çš„ã«ã¯å¤§äººæ•°ã§ã®å¯¾æˆ¦ã‚²ãƒ¼ãƒ ãªã©ã§ä½¿ç”¨ã™ã‚‹ã€‚
 	UPROPERTY(ReplicatedUsing = OnRep_MySquadID)
 	int32 MySquadID;
 
@@ -170,7 +170,7 @@ public:
 	/**
 	 * GetTeamId
 	 *
-	 *	Player ‚Ì‘®‚·‚é Team ‚Ì ID ‚ğ®”’l‚Æ‚µ‚Ä•Ô‚·
+	 *	Player ã®å±ã™ã‚‹ Team ã® ID ã‚’æ•´æ•°å€¤ã¨ã—ã¦è¿”ã™
 	 */
 	UFUNCTION(BlueprintCallable)
 	int32 GetTeamId() const { return GenericTeamIdToInteger(MyTeamID); }
@@ -178,21 +178,21 @@ public:
 	/**
 	 * SetSquadID
 	 *
-	 *	Player ‚ª‘®‚·‚é Team “à‚Å‚Ì ƒOƒ‹[ƒv•ª‚¯—p‚Ì ID ‚ğİ’è‚·‚é
+	 *	Player ãŒå±ã™ã‚‹ Team å†…ã§ã® ã‚°ãƒ«ãƒ¼ãƒ—åˆ†ã‘ç”¨ã® ID ã‚’è¨­å®šã™ã‚‹
 	 */
 	void SetSquadID(int32 NewSquadID);
 
 	/**
 	 * SetSquadID
 	 *
-	 *	Player ‚ª‘®‚·‚é Team “à‚Å‚Ì ƒOƒ‹[ƒv•ª‚¯—p‚Ì ID ‚ğ•Ô‚·
+	 *	Player ãŒå±ã™ã‚‹ Team å†…ã§ã® ã‚°ãƒ«ãƒ¼ãƒ—åˆ†ã‘ç”¨ã® ID ã‚’è¿”ã™
 	 */
 	UFUNCTION(BlueprintCallable)
 	int32 GetSquadId() const { return MySquadID; }
 
 
 private:
-	// Player ‚ª•Û—L‚·‚é “Œvî•ñ‚Æ‚µ‚ÄƒJƒEƒ“ƒg‰Â”\‚È Tag ‚Ìî•ñ
+	// Player ãŒä¿æœ‰ã™ã‚‹ çµ±è¨ˆæƒ…å ±ã¨ã—ã¦ã‚«ã‚¦ãƒ³ãƒˆå¯èƒ½ãª Tag ã®æƒ…å ±
 	UPROPERTY(Replicated)
 	FGameplayTagStackContainer StatTags;
 
@@ -204,7 +204,7 @@ public:
 	/**
 	 * AddStatTagStack
 	 *
-	 * Player ‚É“Œvî•ñ‚Æ‚µ‚Äˆµ‚¦‚é Tag ‚ğ’Ç‰Á‚·‚é (StackCount ‚ª 0 ˆÈ‰º‚Ìê‡‚Í‰½‚à‚µ‚È‚¢)
+	 * Player ã«çµ±è¨ˆæƒ…å ±ã¨ã—ã¦æ‰±ãˆã‚‹ Tag ã‚’è¿½åŠ ã™ã‚‹ (StackCount ãŒ 0 ä»¥ä¸‹ã®å ´åˆã¯ä½•ã‚‚ã—ãªã„)
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Teams)
 	void AddStatTagStack(FGameplayTag Tag, int32 StackCount);
@@ -212,7 +212,7 @@ public:
 	/**
 	 * RemoveStatTagStack
 	 *
-	 * Player ‚É“Œvî•ñ‚Æ‚µ‚Äˆµ‚¦‚é Tag ‚ğíœ‚·‚é (StackCount ‚ª 0 ˆÈ‰º‚Ìê‡‚Í‰½‚à‚µ‚È‚¢)
+	 * Player ã«çµ±è¨ˆæƒ…å ±ã¨ã—ã¦æ‰±ãˆã‚‹ Tag ã‚’å‰Šé™¤ã™ã‚‹ (StackCount ãŒ 0 ä»¥ä¸‹ã®å ´åˆã¯ä½•ã‚‚ã—ãªã„)
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintAuthorityOnly, Category=Teams)
 	void RemoveStatTagStack(FGameplayTag Tag, int32 StackCount);
@@ -220,7 +220,7 @@ public:
 	/**
 	 * GetStatTagStackCount
 	 *
-	 * Player ‚É“Œvî•ñ‚Æ‚µ‚Äˆµ‚¦‚é Tag ‚ª‚¢‚­‚Â‚ ‚é‚©‚ğ•Ô‚· (‘¶İ‚µ‚È‚¢ê‡‚Í 0 ‚ğ•Ô‚·)
+	 * Player ã«çµ±è¨ˆæƒ…å ±ã¨ã—ã¦æ‰±ãˆã‚‹ Tag ãŒã„ãã¤ã‚ã‚‹ã‹ã‚’è¿”ã™ (å­˜åœ¨ã—ãªã„å ´åˆã¯ 0 ã‚’è¿”ã™)
 	 */
 	UFUNCTION(BlueprintCallable, Category=Teams)
 	int32 GetStatTagStackCount(FGameplayTag Tag) const;
@@ -228,7 +228,7 @@ public:
 	/**
 	 * HasStatTag
 	 *
-	 * Player ‚É“Œvî•ñ‚Æ‚µ‚Äˆµ‚¦‚é Tag ‚ª‘¶İ‚·‚é‚©‚Ç‚¤‚©‚ğ•Ô‚·
+	 * Player ã«çµ±è¨ˆæƒ…å ±ã¨ã—ã¦æ‰±ãˆã‚‹ Tag ãŒå­˜åœ¨ã™ã‚‹ã‹ã©ã†ã‹ã‚’è¿”ã™
 	 */
 	UFUNCTION(BlueprintCallable, Category=Teams)
 	bool HasStatTag(FGameplayTag Tag) const;
@@ -238,8 +238,8 @@ public:
 	/**
 	 * ClientBroadcastMessage
 	 *
-	 * ‚±‚Ì Player ‚É‚Ì‚İƒƒbƒZ[ƒW‚ğ‘—M‚·‚éB
-	 * ‘¼‚ÌƒvƒŒƒCƒ„[‚©‚ç‚ÌÌ^‚È‚Ç‚Æ‚¢‚Á‚½A•K‚¸‚µ‚àd—v‚Å‚Í‚È‚¢ˆ—‚É‚Ì‚İg—p
+	 * ã“ã® Player ã«ã®ã¿ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’é€ä¿¡ã™ã‚‹ã€‚
+	 * ä»–ã®ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã‹ã‚‰ã®ç§°è³›ãªã©ã¨ã„ã£ãŸã€å¿…ãšã—ã‚‚é‡è¦ã§ã¯ãªã„å‡¦ç†ã«ã®ã¿ä½¿ç”¨
 	 */
 	UFUNCTION(Client, Unreliable, BlueprintCallable, Category = "PlayerState")
 	void ClientBroadcastMessage(const FBEVerbMessage Message);

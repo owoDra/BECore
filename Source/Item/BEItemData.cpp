@@ -41,7 +41,7 @@ EDataValidationResult UBEItemData::IsDataValid(TArray<FText>& ValidationErrors)
 		ValidationErrors.Add(FText::Format(LOCTEXT("FragmentInvalidDisplayName", "Invalid Display Name for [{0}]."), FText::AsCultureInvariant(GetNameSafe(this))));
 	}
 
-	// BP �ɂ���Ďq�N���X���쐬����Ă��Ȃ�������(C++ -> BP �͋����邪�ABP -> BP �͋֎~)
+	// BP によって子クラスが作成されていないか検証(C++ -> BP は許可するが、BP -> BP は禁止)
 	if (!GetClass()->IsNative())
 	{
 		UClass* ParentClass = GetClass()->GetSuperClass();

@@ -31,7 +31,7 @@ UGameSettingRegistry* UBESettingScreen::CreateRegistry()
 	UBEGameSettingRegistry* NewRegistry = nullptr;
 	UClass* RegistryClass = nullptr;
 
-	// DevSetting ‚©‚ç Regstry ‚ÌƒNƒ‰ƒX‚ğæ“¾
+	// DevSetting ã‹ã‚‰ Regstry ã®ã‚¯ãƒ©ã‚¹ã‚’å–å¾—
 	const UBEDeveloperGameSettings* DevSettings = GetDefault<UBEDeveloperGameSettings>();
 	check(DevSettings);
 
@@ -45,7 +45,7 @@ UGameSettingRegistry* UBESettingScreen::CreateRegistry()
 		}
 	}
 
-	// Regstry ‚ğì¬
+	// Regstry ã‚’ä½œæˆ
 	if (RegistryClass)
 	{
 		NewRegistry = NewObject<UBEGameSettingRegistry>(RegistryClass);
@@ -55,7 +55,7 @@ UGameSettingRegistry* UBESettingScreen::CreateRegistry()
 		NewRegistry = NewObject<UBEGameSettingRegistry>();
 	}
 
-	// Registy ‚ğ‰Šú‰»
+	// Registy ã‚’åˆæœŸåŒ–
 	if (UBELocalPlayer* LocalPlayer = CastChecked<UBELocalPlayer>(GetOwningLocalPlayer()))
 	{
 		NewRegistry->Initialize(LocalPlayer);

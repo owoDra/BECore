@@ -32,7 +32,7 @@ struct FFrame;
 /**
  * ABEPlayerController
  *
- *	‚±‚ÌƒvƒƒWƒFƒNƒg‚Åg—p‚³‚ê‚éŠî–{ PlayerController ƒNƒ‰ƒXB
+ *	ã“ã®ãƒ—ãƒ­ã‚¸ã‚§ã‚¯ãƒˆã§ä½¿ç”¨ã•ã‚Œã‚‹åŸºæœ¬ PlayerController ã‚¯ãƒ©ã‚¹ã€‚
  */
 UCLASS(Config = Game)
 class BECORE_API ABEPlayerController 

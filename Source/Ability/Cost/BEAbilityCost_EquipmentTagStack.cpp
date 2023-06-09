@@ -31,7 +31,7 @@ bool UBEAbilityCost_EquipmentTagStack::CheckCost(const UBEGameplayAbility* Abili
 			const int32 NumStacks = FMath::TruncToInt(NumStacksReal);
 			const bool bCanApplyCost = Instance->GetStatTagStackCount(Tag) >= NumStacks;
 
-			// ‚±‚ÌƒRƒXƒg‚ğ“K—p‚Å‚«‚È‚¢——R‚ğ‘¼‚Ì Ability ‚É’m‚ç‚¹‚é
+			// ã“ã®ã‚³ã‚¹ãƒˆã‚’é©ç”¨ã§ããªã„ç†ç”±ã‚’ä»–ã® Ability ã«çŸ¥ã‚‰ã›ã‚‹
 			if (!bCanApplyCost && OptionalRelevantTags && FailureTag.IsValid())
 			{
 				OptionalRelevantTags->AddTag(FailureTag);				

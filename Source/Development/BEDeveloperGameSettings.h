@@ -15,7 +15,7 @@ class UBEExperienceDefinition;
 /**
  * UBEDeveloperGameSettings
  *
- * ƒQ[ƒ€‚ÌƒeƒXƒgƒvƒŒƒC‚ğs‚¤Û‚ÌŠJ”­Ò—p‚ÌƒQ[ƒ€İ’è‚ğ’è‹`‚·‚é
+ * ã‚²ãƒ¼ãƒ ã®ãƒ†ã‚¹ãƒˆãƒ—ãƒ¬ã‚¤ã‚’è¡Œã†éš›ã®é–‹ç™ºè€…ç”¨ã®ã‚²ãƒ¼ãƒ è¨­å®šã‚’å®šç¾©ã™ã‚‹
  */
 UCLASS(config = EditorPerProjectUserSettings, MinimalAPI)
 class UBEDeveloperGameSettings : public UDeveloperSettingsBackedByCVars
@@ -40,7 +40,7 @@ public:
 	/**
 	 * OnPlayInEditorStarted
 	 *
-	 *  PIE ‚ğŠJn‚µ‚½‚Æ‚«‚É Editor ‚É‚æ‚Á‚ÄŒÄ‚Ño‚³‚êA’Ê’mƒ|ƒbƒvƒAƒbƒv‚ğ•\¦‚·‚é
+	 *  PIE ã‚’é–‹å§‹ã—ãŸã¨ãã« Editor ã«ã‚ˆã£ã¦å‘¼ã³å‡ºã•ã‚Œã€é€šçŸ¥ãƒãƒƒãƒ—ã‚¢ãƒƒãƒ—ã‚’è¡¨ç¤ºã™ã‚‹
 	 */
 	BECORE_API void OnPlayInEditorStarted() const;
 
@@ -48,42 +48,42 @@ public:
 
 
 public:
-	// PIE ‚ÅƒQ[ƒ€‚ğÀs‚µ‚½Û‚É WorldSettings ‚Åİ’è‚µ‚½ Experience ‚ğ–³‹‚µ‚Ä“K‰‚·‚é Experience
+	// PIE ã§ã‚²ãƒ¼ãƒ ã‚’å®Ÿè¡Œã—ãŸéš›ã« WorldSettings ã§è¨­å®šã—ãŸ Experience ã‚’ç„¡è¦–ã—ã¦é©å¿œã™ã‚‹ Experience
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, config, Category = "BE|Game", meta = (AllowedTypes = "BEExperienceDefinition"))
 	FPrimaryAssetId ExperienceOverride;
 
-	// PIE ‚ÅƒQ[ƒ€‚ğÀs‚µ‚½‚Æ‚«‚É‘S‚Ä‚Ì‰ß’ö‚ğƒeƒXƒg‚·‚é‚©
-	// false ‚Ìê‡Aˆê•”‚Ìƒ[ƒh‚ªÈ‚©‚ê‚éB
+	// PIE ã§ã‚²ãƒ¼ãƒ ã‚’å®Ÿè¡Œã—ãŸã¨ãã«å…¨ã¦ã®éç¨‹ã‚’ãƒ†ã‚¹ãƒˆã™ã‚‹ã‹
+	// false ã®å ´åˆã€ä¸€éƒ¨ã®ãƒ­ãƒ¼ãƒ‰ãŒçœã‹ã‚Œã‚‹ã€‚
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, config, Category = "BE|Game")
 	bool bTestFullGameFlowInPIE = false;
 
-	// PlayerBot ‚ªUŒ‚‚ğs‚¤‚©‚Ç‚¤‚©
+	// PlayerBot ãŒæ”»æ’ƒã‚’è¡Œã†ã‹ã©ã†ã‹
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, config, Category = "BE|Game|Bot")
 	bool bAllowPlayerBotsToAttack = true;
 
-	// í‚ÉƒQ[ƒ€ƒRƒ“ƒgƒ[ƒ‰[‚ÌU“®‚È‚Ç‚ğs‚¤‚©‚Ç‚¤‚©
-	// ’ÊíAƒRƒ“ƒgƒ[ƒ‰[ˆÈŠO‚ÌƒfƒoƒCƒX‚ğg—p‚µ‚Ä‚¢‚éê‡AƒRƒ“ƒgƒ[ƒ‰[‚ªÚ‘±‚³‚ê‚Ä‚¢‚Ä‚àU“®‚ğs‚í‚È‚¢
+	// å¸¸ã«ã‚²ãƒ¼ãƒ ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ©ãƒ¼ã®æŒ¯å‹•ãªã©ã‚’è¡Œã†ã‹ã©ã†ã‹
+	// é€šå¸¸ã€ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ©ãƒ¼ä»¥å¤–ã®ãƒ‡ãƒã‚¤ã‚¹ã‚’ä½¿ç”¨ã—ã¦ã„ã‚‹å ´åˆã€ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ©ãƒ¼ãŒæ¥ç¶šã•ã‚Œã¦ã„ã¦ã‚‚æŒ¯å‹•ã‚’è¡Œã‚ãªã„
 	UPROPERTY(config, EditAnywhere, Category = "BE|Game", meta = (ConsoleVariable = "BEPC.ShouldAlwaysPlayForceFeedback"))
 	bool bShouldAlwaysPlayForceFeedback = false;
 
-	// Log ‚É GameplayMessageSubsystem ‚ğ—p‚¢‚½’Ê’m‚ğ•\¦‚·‚é‚©
+	// Log ã« GameplayMessageSubsystem ã‚’ç”¨ã„ãŸé€šçŸ¥ã‚’è¡¨ç¤ºã™ã‚‹ã‹
 	UPROPERTY(config, EditAnywhere, Category = "BE|Game", meta = (ConsoleVariable = "GameplayMessageSubsystem.LogMessages"))
 	bool LogGameplayMessages = false;
 
 
 #if WITH_EDITORONLY_DATA
-	// ‘f‘‚­ Map ‚ğŠJ‚¯‚é‚æ‚¤‚É“o˜^‚Å‚«‚éƒŠƒXƒg
+	// ç´ æ—©ã Map ã‚’é–‹ã‘ã‚‹ã‚ˆã†ã«ç™»éŒ²ã§ãã‚‹ãƒªã‚¹ãƒˆ
 	UPROPERTY(config, EditAnywhere, BlueprintReadOnly, Category = Maps, meta = (AllowedClasses = "/Script/Engine.World"))
 		TArray<FSoftObjectPath> QuickAccessEditorMaps;
 #endif
 
 
 public:
-	// ƒQ[ƒ€‚Ì‹¤—Lİ’è‚ÌƒNƒ‰ƒX
+	// ã‚²ãƒ¼ãƒ ã®å…±æœ‰è¨­å®šã®ã‚¯ãƒ©ã‚¹
 	UPROPERTY(config, EditDefaultsOnly, BlueprintReadOnly, Category = "BE|GameSettings", meta = (AllowedClasses = "/Script/BECore.BEGameSharedSettings"))
 	FSoftClassPath SharedSettingClass;
 
-	// ƒQ[ƒ€‚Ì‹¤—Lİ’è‚ÌƒNƒ‰ƒX
+	// ã‚²ãƒ¼ãƒ ã®å…±æœ‰è¨­å®šã®ã‚¯ãƒ©ã‚¹
 	UPROPERTY(config, EditDefaultsOnly, BlueprintReadOnly, Category = "BE|GameSettings", meta = (AllowedClasses = "/Script/BECore.BEGameSettingRegistry"))
 	FSoftClassPath SettingRegistryClass;
 };

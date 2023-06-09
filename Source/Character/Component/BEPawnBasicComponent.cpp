@@ -66,7 +66,7 @@ void UBEPawnBasicComponent::OnRegister()
 	Pawn->GetComponents(UBEPawnBasicComponent::StaticClass(), Components);
 	ensureAlwaysMsgf((Components.Num() == 1), TEXT("Only one BEPawnBasicComponent should exist on [%s]."), *GetNameSafe(GetOwner()));
 
-	// ƒRƒ“ƒ|[ƒlƒ“ƒg‚ª GameWorld ‚É‘¶İ‚·‚éÛ‚É@InitStateSystem ‚É“o˜^‚·‚é
+	// ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆãŒ GameWorld ã«å­˜åœ¨ã™ã‚‹éš›ã«ã€€InitStateSystem ã«ç™»éŒ²ã™ã‚‹
 	RegisterInitStateFeature();
 }
 
@@ -74,13 +74,13 @@ void UBEPawnBasicComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// ‚·‚×‚Ä‚Ì Feature ‚Ö‚Ì•ÏX‚ğƒŠƒbƒXƒ“‚·‚é
+	// ã™ã¹ã¦ã® Feature ã¸ã®å¤‰æ›´ã‚’ãƒªãƒƒã‚¹ãƒ³ã™ã‚‹
 	BindOnActorInitStateChanged(NAME_None, FGameplayTag(), false);
 
-	// InisStateSystem ‚É‚±‚ÌƒRƒ“ƒ|[ƒlƒ“ƒg‚ªƒXƒ|[ƒ“‚µ‚½‚±‚Æ‚ğ’m‚ç‚¹‚éB
+	// InisStateSystem ã«ã“ã®ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆãŒã‚¹ãƒãƒ¼ãƒ³ã—ãŸã“ã¨ã‚’çŸ¥ã‚‰ã›ã‚‹ã€‚
 	ensure(TryToChangeInitState(TAG_InitState_Spawned));
 
-	// c‚è‚Ì‰Šú‰»‚ğs‚¤
+	// æ®‹ã‚Šã®åˆæœŸåŒ–ã‚’è¡Œã†
 	CheckDefaultInitialization();
 }
 
@@ -102,7 +102,7 @@ bool UBEPawnBasicComponent::CanChangeInitState(UGameFrameworkComponentManager* M
 	/**
 	 * [InitState None] -> [InitState Spawned]
 	 *
-	 *  Pawn ‚ª—LŒø
+	 *  Pawn ãŒæœ‰åŠ¹
 	 */
 	if (!CurrentState.IsValid() && DesiredState == TAG_InitState_Spawned)
 	{
@@ -115,19 +115,19 @@ bool UBEPawnBasicComponent::CanChangeInitState(UGameFrameworkComponentManager* M
 	/**
 	 * [InitState Spawned] -> [InitState DataAvailable]
 	 *
-	 *  Pawn ‚ª—LŒø
-	 *  AbilitySystemComponent ‚ª—LŒø
-	 *  ³”F‚³‚ê‚½ƒ[ƒJƒ‹ƒRƒ“ƒgƒ[ƒ‰[‚ª‘¶İ
+	 *  Pawn ãŒæœ‰åŠ¹
+	 *  AbilitySystemComponent ãŒæœ‰åŠ¹
+	 *  æ‰¿èªã•ã‚ŒãŸãƒ­ãƒ¼ã‚«ãƒ«ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ©ãƒ¼ãŒå­˜åœ¨
 	 */
 	if (CurrentState == TAG_InitState_Spawned && DesiredState == TAG_InitState_DataAvailable)
 	{
-		// —LŒø‚È PawnData ‚ª‘¶İ‚·‚é‚©
+		// æœ‰åŠ¹ãª PawnData ãŒå­˜åœ¨ã™ã‚‹ã‹
 		if (PawnData == nullptr)
 		{
 			return false;
 		}
 
-		// ³”F‚³‚ê‚½ƒ[ƒJƒ‹ƒRƒ“ƒgƒ[ƒ‰[‚ª‚ ‚é‚©
+		// æ‰¿èªã•ã‚ŒãŸãƒ­ãƒ¼ã‚«ãƒ«ã‚³ãƒ³ãƒˆãƒ­ãƒ¼ãƒ©ãƒ¼ãŒã‚ã‚‹ã‹
 		const bool bHasAuthority = Pawn->HasAuthority();
 		const bool bIsLocallyControlled = Pawn->IsLocallyControlled();
 		if (bHasAuthority || bIsLocallyControlled)
@@ -145,18 +145,18 @@ bool UBEPawnBasicComponent::CanChangeInitState(UGameFrameworkComponentManager* M
 	/**
 	 * [InitState DataAvailable] -> [InitState DataInitialized]
 	 *
-	 *  ‚·‚×‚Ä‚Ì Feature ‚ª DataAvailable ‚É“’B‚µ‚Ä‚¢‚é
+	 *  ã™ã¹ã¦ã® Feature ãŒ DataAvailable ã«åˆ°é”ã—ã¦ã„ã‚‹
 	 */
 	else if (CurrentState == TAG_InitState_DataAvailable && DesiredState == TAG_InitState_DataInitialized)
 	{
-		// ‚·‚×‚Ä‚Ì Feature ‚ª DataAvailable ‚É“’B‚µ‚Ä‚¢‚é‚©
+		// ã™ã¹ã¦ã® Feature ãŒ DataAvailable ã«åˆ°é”ã—ã¦ã„ã‚‹ã‹
 		return Manager->HaveAllFeaturesReachedInitState(Pawn, TAG_InitState_DataAvailable);
 	}
 
 	/**
 	 * [InitState DataInitialized] -> [InitState GameplayReady]
 	 *
-	 *  –³ğŒ‚Å‹–‰Â
+	 *  ç„¡æ¡ä»¶ã§è¨±å¯
 	 */
 	else if (CurrentState == TAG_InitState_DataInitialized && DesiredState == TAG_InitState_GameplayReady)
 	{
@@ -171,7 +171,7 @@ void UBEPawnBasicComponent::HandleChangeInitState(UGameFrameworkComponentManager
 	/**
 	 * [InitState DataAvailable] -> [InitState DataInitialized]
 	 *
-	 *  PawnData ‚Æ AbilitySystem ‚Ì‰Šú‰»
+	 *  PawnData ã¨ AbilitySystem ã®åˆæœŸåŒ–
 	 */
 	if (CurrentState == TAG_InitState_DataAvailable && DesiredState == TAG_InitState_DataInitialized)
 	{
@@ -201,7 +201,7 @@ void UBEPawnBasicComponent::HandleChangeInitState(UGameFrameworkComponentManager
 
 void UBEPawnBasicComponent::OnActorInitStateChanged(const FActorInitStateChangedParams& Params)
 {
-	// ‘¼‚Ì Feature ‚ª DataAvailable ‚É‚ ‚é‚Æ‚«ADataInitialized ‚É‘JˆÚ‚·‚é•K—v‚ª‚ ‚é‚©‚Ç‚¤‚©‚ğŠm”F‚·‚é
+	// ä»–ã® Feature ãŒ DataAvailable ã«ã‚ã‚‹ã¨ãã€DataInitialized ã«é·ç§»ã™ã‚‹å¿…è¦ãŒã‚ã‚‹ã‹ã©ã†ã‹ã‚’ç¢ºèªã™ã‚‹
 	if (Params.FeatureName != NAME_ActorFeatureName)
 	{
 		if (Params.FeatureState == TAG_InitState_DataAvailable)
@@ -213,7 +213,7 @@ void UBEPawnBasicComponent::OnActorInitStateChanged(const FActorInitStateChanged
 
 void UBEPawnBasicComponent::CheckDefaultInitialization()
 {
-	// ‰Šú‰»ó‹µ‚ğŠm”F‚·‚é‘O‚ÉAˆË‘¶ŠÖŒW‚É‚ ‚é‰Â”\‚ª‚ ‚é Feature ‚Ìˆ—‚ğ‚İ‚é
+	// åˆæœŸåŒ–çŠ¶æ³ã‚’ç¢ºèªã™ã‚‹å‰ã«ã€ä¾å­˜é–¢ä¿‚ã«ã‚ã‚‹å¯èƒ½ãŒã‚ã‚‹ Feature ã®å‡¦ç†ã‚’è©¦ã¿ã‚‹
 	CheckDefaultInitializationForImplementers();
 
 	static const TArray<FGameplayTag> StateChain = {
@@ -242,8 +242,8 @@ void UBEPawnBasicComponent::SetPawnData(const UBEPawnData* InPawnData)
 		return;
 	}
 
-	// Šù‚É PawnData ‚ª“o˜^Ï‚İ‚Ìê‡‚ÍƒLƒƒƒ“ƒZƒ‹B
-	// PawnData ‚ÍƒXƒ|[ƒ“‚Ü‚½‚ÍƒCƒ“ƒXƒ^ƒ“ƒX‚Å‚Ì‚İİ’è‰Â”\‚©‚Â•ÏX•s‰Â”\
+	// æ—¢ã« PawnData ãŒç™»éŒ²æ¸ˆã¿ã®å ´åˆã¯ã‚­ãƒ£ãƒ³ã‚»ãƒ«ã€‚
+	// PawnData ã¯ã‚¹ãƒãƒ¼ãƒ³æ™‚ã¾ãŸã¯ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹ã§ã®ã¿è¨­å®šå¯èƒ½ã‹ã¤å¤‰æ›´ä¸å¯èƒ½
 
 	if (PawnData)
 	{

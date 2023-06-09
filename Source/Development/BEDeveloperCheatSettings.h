@@ -12,15 +12,15 @@
 /**
  * ECheatExecutionTime
  * 
- * ŠJ”­Ò—pƒ`[ƒg‚Ì©“®Às‚ğ‚Ç‚Ìƒ^ƒCƒ~ƒ“ƒO‚Ås‚¤‚©
+ * é–‹ç™ºè€…ç”¨ãƒãƒ¼ãƒˆã®è‡ªå‹•å®Ÿè¡Œã‚’ã©ã®ã‚¿ã‚¤ãƒŸãƒ³ã‚°ã§è¡Œã†ã‹
  */
 UENUM()
 enum class ECheatExecutionTime
 {
-	// CheatManager ‚ªì¬‚³‚ê‚½‚Æ‚«‚ÉÀs
+	// CheatManager ãŒä½œæˆã•ã‚ŒãŸã¨ãã«å®Ÿè¡Œ
 	OnCheatManagerCreated,
 
-	// Player ‚ª Pawn ‚ğŠ—L‚µ‚½‚Æ‚«‚ÉÀs
+	// Player ãŒ Pawn ã‚’æ‰€æœ‰ã—ãŸã¨ãã«å®Ÿè¡Œ
 	OnPlayerPawnPossession
 };
 
@@ -28,7 +28,7 @@ enum class ECheatExecutionTime
 /**
  * FBECheatToRun
  *
- * ŠJ”­Ò—pƒ`[ƒg‚Ì©“®Às‚Ì‚½‚ß‚ÌƒGƒ“ƒgƒŠ[î•ñ
+ * é–‹ç™ºè€…ç”¨ãƒãƒ¼ãƒˆã®è‡ªå‹•å®Ÿè¡Œã®ãŸã‚ã®ã‚¨ãƒ³ãƒˆãƒªãƒ¼æƒ…å ±
  */
 USTRUCT()
 struct FBECheatToRun
@@ -46,7 +46,7 @@ struct FBECheatToRun
 /**
  * UBEDeveloperCheatSettings
  *
- * ŠJ”­Ò—pƒ`[ƒgŠÖŒW‚Ìİ’è‚ğ’è‹`‚·‚é
+ * é–‹ç™ºè€…ç”¨ãƒãƒ¼ãƒˆé–¢ä¿‚ã®è¨­å®šã‚’å®šç¾©ã™ã‚‹
  */
 UCLASS(config = EditorPerProjectUserSettings, MinimalAPI)
 class UBEDeveloperCheatSettings : public UDeveloperSettingsBackedByCVars
@@ -68,7 +68,7 @@ public:
 	
 
 public:
-	// ŠJ”­Ò—pƒ`[ƒg‚Ì©“®ÀsƒŠƒXƒg
+	// é–‹ç™ºè€…ç”¨ãƒãƒ¼ãƒˆã®è‡ªå‹•å®Ÿè¡Œãƒªã‚¹ãƒˆ
 	UPROPERTY(config, EditAnywhere, Category = "BE|Cheat")
 	TArray<FBECheatToRun> CheatsToRun;
 };

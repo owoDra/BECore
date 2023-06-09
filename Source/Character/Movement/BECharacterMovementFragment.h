@@ -15,7 +15,7 @@ struct FGameplayTag;
 /**
  * EBECustomMovementSpace
  *
- *	Movement ‚ÌˆÚ“®‹óŠÔ
+ *	Movement ã®ç§»å‹•ç©ºé–“
  */
 UENUM(BlueprintType)
 enum class EBECustomMovementSpace : uint8
@@ -30,8 +30,8 @@ enum class EBECustomMovementSpace : uint8
 /**
  * UBECharacterMovementFragment
  * 
- * CharacterMovementComponent ‚É’Ç‰Á‰Â”\‚ÈˆÚ“®ˆ—
- * CustomMovementMode ‚É‚Äg—p‚³‚ê‚é
+ * CharacterMovementComponent ã«è¿½åŠ å¯èƒ½ãªç§»å‹•å‡¦ç†
+ * CustomMovementMode ã«ã¦ä½¿ç”¨ã•ã‚Œã‚‹
  */
 UCLASS(DefaultToInstanced, EditInlineNew, Abstract)
 class BECORE_API UBECharacterMovementFragment : public UObject
@@ -43,25 +43,25 @@ class BECORE_API UBECharacterMovementFragment : public UObject
 #endif
 
 protected:
-	// ‚±‚Ì Movement ‚ÌˆÚ“®‹óŠÔ
+	// ã“ã® Movement ã®ç§»å‹•ç©ºé–“
 	EBECustomMovementSpace MovementSpace = EBECustomMovementSpace::None;
 
-	// ‚±‚Ì Movement ‚Ì¯•Ê—p Tag
+	// ã“ã® Movement ã®è­˜åˆ¥ç”¨ Tag
 	FGameplayTag MovementModeTag;
 
 public:
 	/**
 	 * GetMovementSpace
 	 *
-	 * ‚±‚Ì Movement ‚ÌˆÚ“®‹óŠÔ‚ğ•Ô‚·
-	 * CharacterMovementComponent ‚Å IsMovingOnGround ‚È‚Ç‚Å”»’è‚·‚é‚Ì‚É—p‚¢‚é
+	 * ã“ã® Movement ã®ç§»å‹•ç©ºé–“ã‚’è¿”ã™
+	 * CharacterMovementComponent ã§ IsMovingOnGround ãªã©ã§åˆ¤å®šã™ã‚‹ã®ã«ç”¨ã„ã‚‹
 	 */
 	EBECustomMovementSpace GetMovementSpace() const { return MovementSpace; }
 
 	/**
 	 * GetMovementModeTag
 	 *
-	 * ‚±‚Ì Movement ‚Ì¯•Ê—p Tag ‚ğ•Ô‚·
+	 * ã“ã® Movement ã®è­˜åˆ¥ç”¨ Tag ã‚’è¿”ã™
 	 */
 	FGameplayTag GetMovementModeTag() const { return MovementModeTag; }
 
@@ -70,56 +70,56 @@ public:
 	/**
 	 * GetMovementTypeTag
 	 *
-	 * ‚±‚Ì Movement ‚Ì¯•Ê—p Tag ‚ğ•Ô‚·
+	 * ã“ã® Movement ã®è­˜åˆ¥ç”¨ Tag ã‚’è¿”ã™
 	 */
 	virtual bool CanStartInCurrentState(const UBECharacterMovementComponent* CMC) const { return false; }
 
 	/**
 	 * PhysMovement
 	 *
-	 * ‚±‚Ì Movement ‚ÌÀÛ‚Ìˆ—‚ğs‚¤
+	 * ã“ã® Movement ã®å®Ÿéš›ã®å‡¦ç†ã‚’è¡Œã†
 	 */
 	virtual void PhysMovement(UBECharacterMovementComponent* CMC, float DeltaTime, int32 Iterations) {}
 
 	/**
 	 * TryStartMovement
 	 *
-	 * ‚±‚Ì Movement ‚ÌŠJn‚ğ‚İ‚é
+	 * ã“ã® Movement ã®é–‹å§‹ã‚’è©¦ã¿ã‚‹
 	 */
 	virtual void TryStartMovement(UBECharacterMovementComponent* CMC) {}
 
 	/**
 	 * GetMaxMoveSpeed
 	 *
-	 * ‚±‚Ì Movement ’†‚ÌÅ‚ˆÚ“®‘¬“x
+	 * ã“ã® Movement ä¸­ã®æœ€é«˜ç§»å‹•é€Ÿåº¦
 	 */
 	virtual float GetMaxMoveSpeed(const UBECharacterMovementComponent* CMC) const { return 0.0; }
 
 	/**
 	 * GetMaxBrakingDeceleration
 	 *
-	 * ‚±‚Ì Movement ’†‚ÌÅ‚Œ¸‘¬“x
+	 * ã“ã® Movement ä¸­ã®æœ€é«˜æ¸›é€Ÿåº¦
 	 */
 	virtual float GetMaxBrakingDeceleration(const UBECharacterMovementComponent* CMC) const { return 0.0; }
 
 	/**
 	 * OnMovementStart
 	 *
-	 * ‚±‚Ì Movement ‚Ìˆ—‚ªŠJn‚µ‚½‚Æ‚«‚ÉŒÄ‚Ño‚³‚ê‚é
+	 * ã“ã® Movement ã®å‡¦ç†ãŒé–‹å§‹ã—ãŸã¨ãã«å‘¼ã³å‡ºã•ã‚Œã‚‹
 	 */
 	virtual void OnMovementStart(const UBECharacterMovementComponent* CMC) {}
 
 	/**
 	 * OnMovementEnd
 	 *
-	 * ‚±‚Ì Movement ‚Ìˆ—‚ªI—¹‚·‚é‚Æ‚«‚ÉŒÄ‚Ño‚³‚ê‚é
+	 * ã“ã® Movement ã®å‡¦ç†ãŒçµ‚äº†ã™ã‚‹ã¨ãã«å‘¼ã³å‡ºã•ã‚Œã‚‹
 	 */
 	virtual void OnMovementEnd(const UBECharacterMovementComponent* CMC) {}
 
 	/**
 	 * OnLanded
 	 *
-	 * Character ‚ª’n–Ê‚É’…’n‚µ‚½‚Æ‚«‚ÉŒÄ‚Ño‚³‚ê‚é
+	 * Character ãŒåœ°é¢ã«ç€åœ°ã—ãŸã¨ãã«å‘¼ã³å‡ºã•ã‚Œã‚‹
 	 */
 	virtual void OnLanded(const UBECharacterMovementComponent* CMC) {}
 };

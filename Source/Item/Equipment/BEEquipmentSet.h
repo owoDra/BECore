@@ -18,7 +18,7 @@ struct FGameplayTag;
 /**
  * FBEEquipmentSetEntry
  *
- * EquipmentSet ���� �ǉ����� ItemData �� Slot ���`����̂ɗp����
+ * EquipmentSet 内で 追加する ItemData と Slot を定義するのに用いる
  */
 USTRUCT(BlueprintType)
 struct FBEEquipmentSetEntry
@@ -38,7 +38,7 @@ public:
 /**
  * UBEEquipmentSet
  * 
- * EquipmentComponent �� Equipment ���܂Ƃ߂Ēǉ����邽�߂Ɏg�p�����f�[�^�A�Z�b�g
+ * EquipmentComponent に Equipment をまとめて追加するために使用されるデータアセット
  */
 UCLASS(BlueprintType, Const, Abstract)
 class UBEEquipmentSet : public UPrimaryDataAsset
