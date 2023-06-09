@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+﻿// Copyright Eigi Chin
 
 #pragma once
 
@@ -42,7 +42,7 @@ class UBEItemData : public UPrimaryDataAsset
 	GENERATED_BODY()
 
 public:
-	UBEItemData();
+	UBEItemData() {}
 	
 #if WITH_EDITOR //~UObject interface
 	virtual EDataValidationResult IsDataValid(TArray<FText>& ValidationErrors) override;

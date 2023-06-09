@@ -1,6 +1,9 @@
-// Copyright Eigi Chin
+﻿// Copyright Eigi Chin
 
 #include "BEEquipmentInstance.h"
+
+#include "Character/BEPawnMeshAssistInterface.h"
+#include "Animation/BEAnimInstance.h"
 
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/EngineTypes.h"
@@ -33,6 +36,7 @@ void UBEEquipmentInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 
 	DOREPLIFETIME(ThisClass, StatTags);
 	DOREPLIFETIME(ThisClass, ItemData);
+	DOREPLIFETIME(ThisClass, SpawnedActors);
 }
 
 
@@ -97,13 +101,102 @@ bool UBEEquipmentInstance::HasStatTag(FGameplayTag Tag) const
 }
 
 
+void UBEEquipmentInstance::SpawnEquipmentActors()
+{
+	if (ActorsToSpawn.IsEmpty())
+	{
+		return;
+	}
+
+	if (APawn* OwningPawn = GetPawn())
+	{
+		USceneComponent* AttachTarget = OwningPawn->GetRootComponent();
+		if (ACharacter* Char = Cast<ACharacter>(OwningPawn))
+		{
+			AttachTarget = Char->GetMesh();
+		}
+
+		for (const FBEEquipmentActorToSpawn& SpawnInfo : ActorsToSpawn)
+		{
+			if (SpawnInfo.ActorToSpawn)
+			{
+				AActor* NewActor = GetWorld()->SpawnActorDeferred<AActor>(SpawnInfo.ActorToSpawn, FTransform::Identity, OwningPawn);
+				NewActor->FinishSpawning(FTransform::Identity, /*bIsDefaultTransform=*/ true);
+				NewActor->SetActorRelativeTransform(SpawnInfo.AttachTransform);
+				NewActor->AttachToComponent(AttachTarget, FAttachmentTransformRules::KeepRelativeTransform, SpawnInfo.AttachSocket);
+
+				SpawnedActors.Add(NewActor);
+			}
+		}
+	}
+}
+
+void UBEEquipmentInstance::DestroyEquipmentActors()
+{
+	for (AActor* Actor : SpawnedActors)
+	{
+		if (Actor)
+		{
+			Actor->Destroy();
+		}
+	}
+}
+
+
+void UBEEquipmentInstance::ApplyAnimLayer()
+{
+	if (!AnimLayerToApply)
+	{
+		return;
+	}
+
+	if (APawn* OwningPawn = GetPawn())
+	{
+		if (Cast<IBEPawnMeshAssistInterface>(OwningPawn))
+		{
+			TArray<UBEAnimInstance*> AnimInstances;
+			IBEPawnMeshAssistInterface::Execute_GetMainAnimInstances(OwningPawn, AnimInstances);
+			for (UBEAnimInstance* AnimIns : AnimInstances)
+			{
+				AnimIns->LinkAnimClassLayers(AnimLayerToApply);
+			}
+		}
+	}
+}
+
+void UBEEquipmentInstance::RemoveAnimLayer()
+{
+	if (!AnimLayerToApply)
+	{
+		return;
+	}
+
+	if (APawn* OwningPawn = GetPawn())
+	{
+		if (Cast<IBEPawnMeshAssistInterface>(OwningPawn))
+		{
+			TArray<UBEAnimInstance*> AnimInstances;
+			IBEPawnMeshAssistInterface::Execute_GetMainAnimInstances(OwningPawn, AnimInstances);
+			for (UBEAnimInstance* AnimIns : AnimInstances)
+			{
+				AnimIns->UnlinkAnimClassLayers(AnimLayerToApply);
+			}
+		}
+	}
+}
+
+
 void UBEEquipmentInstance::OnActivated()
 {
+	SpawnEquipmentActors();
+	ApplyAnimLayer();
 	K2_OnActivated();
 }
 
 void UBEEquipmentInstance::OnDeactivated()
 {
+	DestroyEquipmentActors();
+	RemoveAnimLayer();
 	K2_OnDeactivated();
 }
 

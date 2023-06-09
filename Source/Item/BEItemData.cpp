@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+﻿// Copyright Eigi Chin
 
 #include "Item/BEItemData.h"
 
@@ -8,10 +8,6 @@
 
 
 #define LOCTEXT_NAMESPACE "BEItem"
-
-UBEItemData::UBEItemData()
-{
-}
 
 #if WITH_EDITOR
 EDataValidationResult UBEItemData::IsDataValid(TArray<FText>& ValidationErrors)

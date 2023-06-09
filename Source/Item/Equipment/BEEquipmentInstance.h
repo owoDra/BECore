@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+﻿// Copyright Eigi Chin
 
 #pragma once
 
@@ -14,6 +14,7 @@
 
 class AActor;
 class UBEItemData;
+class UAnimInstance;
 struct FGameplayTag;
 
 
@@ -22,7 +23,7 @@ struct FGameplayTag;
  *
  * 装備するときのアクタースポーン設定
  */
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FBEEquipmentActorToSpawn
 {
 	GENERATED_BODY()
@@ -136,6 +137,61 @@ private:
 
 public:
 	/**
+	 * SpawnEquipmentActors
+	 *
+	 * Equipment が Active になったときに呼び出される。
+	 * Equipment の見た目となる Actor をスポーンする。
+	 * ActorToSpawn がからの場合は何もスポーンしない。
+	 */
+	virtual void SpawnEquipmentActors();
+
+	/**
+	 * DestroyEquipmentActors
+	 *
+	 * Equipment が Deactive になったときに呼び出される。
+	 * Equipment の見た目となる Actor を破棄する。
+	 */
+	virtual void DestroyEquipmentActors();
+
+	// Equipment が Active になったときにスポーンする
+	// 装備品の見た目となる Actor のクラス
+	// 設定しない場合は何もスポーンしない。
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
+	TArray<FBEEquipmentActorToSpawn> ActorsToSpawn;
+
+private:
+	UPROPERTY(Replicated) 
+	TArray<TObjectPtr<AActor>> SpawnedActors;
+
+
+public:
+	/**
+	 * ApplyAnimLayer
+	 * 
+	 * Equipment が Active になったときに呼び出される。
+	 * Pawn に AnimLayer を適応する。
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Equipment")
+	virtual void ApplyAnimLayer();
+
+	/**
+	 * RemoveAnimLayer
+	 * 
+	 * Equipment が Deactive になったときに呼び出される。
+	 * Pawn から適応した AnimLayer を削除する。
+	 */
+	UFUNCTION(BlueprintCallable, Category = "Equipment")
+	virtual void RemoveAnimLayer();
+
+	// Equipment が Active になったときに Pawn に
+	// 適応する AnimLayer のクラス
+	// 設定しない場合は何も適応されない。
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
+	TSubclassOf<UAnimInstance> AnimLayerToApply;
+
+
+public:
+	/**
 	 * OnActivated
 	 *
 	 * EquipmentManagerComponent からこの Equipment を Active にしたときに呼び出される
@@ -166,4 +222,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Equipment")
 	const UBEItemData* GetItemData() const { return ItemData; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Equipment")
+	TArray<AActor*> GetSpawnedActors() const { return SpawnedActors; }
 };
