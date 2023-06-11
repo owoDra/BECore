@@ -4,6 +4,7 @@
 
 #include "Character/BEPawnMeshAssistInterface.h"
 #include "Animation/BEAnimInstance.h"
+#include "BELogChannels.h"
 
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/EngineTypes.h"
@@ -22,7 +23,6 @@
 
 class FLifetimeProperty;
 class UClass;
-class USceneComponent;
 
 
 UBEEquipmentInstance::UBEEquipmentInstance(const FObjectInitializer& ObjectInitializer)
@@ -36,7 +36,7 @@ void UBEEquipmentInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 
 	DOREPLIFETIME(ThisClass, StatTags);
 	DOREPLIFETIME(ThisClass, ItemData);
-	DOREPLIFETIME(ThisClass, SpawnedActors);
+	DOREPLIFETIME(ThisClass, SpawnedMeshes);
 }
 
 
@@ -101,43 +101,81 @@ bool UBEEquipmentInstance::HasStatTag(FGameplayTag Tag) const
 }
 
 
-void UBEEquipmentInstance::SpawnEquipmentActors()
+void UBEEquipmentInstance::SpawnEquipmentMeshes()
 {
-	if (ActorsToSpawn.IsEmpty())
+	if (MeshesToSpawn.IsEmpty())
 	{
 		return;
 	}
 
-	if (APawn* OwningPawn = GetPawn())
+	APawn* OwningPawn = GetPawn();
+	if (!OwningPawn)
 	{
-		USceneComponent* AttachTarget = OwningPawn->GetRootComponent();
-		if (ACharacter* Char = Cast<ACharacter>(OwningPawn))
-		{
-			AttachTarget = Char->GetMesh();
-		}
+		UE_LOG(LogBEEquipmentSystem, Warning, TEXT("UBEEquipmentInstance::SpawnEquipmentActors: Has not valid OwningPawn"));
+		return;
+	}
 
-		for (const FBEEquipmentActorToSpawn& SpawnInfo : ActorsToSpawn)
+	if (!Cast<IBEPawnMeshAssistInterface>(OwningPawn))
+	{
+		UE_LOG(LogBEEquipmentSystem, Warning, TEXT("UBEEquipmentInstance::SpawnEquipmentMeshes: OwningPawn Has not imple IBEPawnMeshAssistInterface"));
+		return;
+	}
+
+	USkeletalMeshComponent* AttachTarget = nullptr;
+
+	// TPP Mesh 用の Actor をスポーン
+	AttachTarget = IBEPawnMeshAssistInterface::Execute_GetTPPMesh(OwningPawn);
+	if (AttachTarget)
+	{
+		const bool bOwnerNoSee = AttachTarget->bOwnerNoSee;
+
+		for (const FBEEquipmentMeshToSpawn& SpawnInfo : MeshesToSpawn)
 		{
-			if (SpawnInfo.ActorToSpawn)
+			if (SpawnInfo.MeshToSpawn)
 			{
-				AActor* NewActor = GetWorld()->SpawnActorDeferred<AActor>(SpawnInfo.ActorToSpawn, FTransform::Identity, OwningPawn);
-				NewActor->FinishSpawning(FTransform::Identity, /*bIsDefaultTransform=*/ true);
-				NewActor->SetActorRelativeTransform(SpawnInfo.AttachTransform);
-				NewActor->AttachToComponent(AttachTarget, FAttachmentTransformRules::KeepRelativeTransform, SpawnInfo.AttachSocket);
+				USkeletalMeshComponent* NewMesh = NewObject<USkeletalMeshComponent>(OwningPawn);
+				NewMesh->SetSkeletalMesh(SpawnInfo.MeshToSpawn);
+				NewMesh->SetAnimInstanceClass(SpawnInfo.MeshAnimInstance);
+				NewMesh->SetRelativeTransform(SpawnInfo.AttachTransform);
+				NewMesh->AttachToComponent(AttachTarget, FAttachmentTransformRules::KeepRelativeTransform, SpawnInfo.AttachSocket);
+				NewMesh->SetOwnerNoSee(bOwnerNoSee);
 
-				SpawnedActors.Add(NewActor);
+				SpawnedMeshes.Add(NewMesh);
+			}
+		}
+	}
+
+	// FPP Mesh 用の Actor をスポーン
+	AttachTarget = IBEPawnMeshAssistInterface::Execute_GetFPPMesh(OwningPawn);
+	if (AttachTarget)
+	{
+		const bool bHiddenInGame = AttachTarget->bHiddenInGame;
+
+		for (const FBEEquipmentMeshToSpawn& SpawnInfo : MeshesToSpawn)
+		{
+			if (SpawnInfo.MeshToSpawn)
+			{
+				USkeletalMeshComponent* NewMesh = NewObject<USkeletalMeshComponent>(OwningPawn);
+				NewMesh->SetSkeletalMesh(SpawnInfo.MeshToSpawn);
+				NewMesh->SetAnimInstanceClass(SpawnInfo.MeshAnimInstance);
+				NewMesh->SetRelativeTransform(SpawnInfo.AttachTransform);
+				NewMesh->AttachToComponent(AttachTarget, FAttachmentTransformRules::KeepRelativeTransform, SpawnInfo.AttachSocket);
+				NewMesh->SetOnlyOwnerSee(true);
+				NewMesh->SetHiddenInGame(bHiddenInGame);
+
+				SpawnedMeshes.Add(NewMesh);
 			}
 		}
 	}
 }
 
-void UBEEquipmentInstance::DestroyEquipmentActors()
+void UBEEquipmentInstance::DestroyEquipmentMeshes()
 {
-	for (AActor* Actor : SpawnedActors)
+	for (USkeletalMeshComponent* Mesh : SpawnedMeshes)
 	{
-		if (Actor)
+		if (Mesh)
 		{
-			Actor->Destroy();
+			Mesh->DestroyComponent();
 		}
 	}
 }
@@ -145,42 +183,76 @@ void UBEEquipmentInstance::DestroyEquipmentActors()
 
 void UBEEquipmentInstance::ApplyAnimLayer()
 {
-	if (!AnimLayerToApply)
+	APawn* OwningPawn = GetPawn();
+	if (!OwningPawn)
 	{
+		UE_LOG(LogBEEquipmentSystem, Warning, TEXT("UBEEquipmentInstance::ApplyAnimLayer: Has not valid OwningPawn"));
 		return;
 	}
 
-	if (APawn* OwningPawn = GetPawn())
+	if (!Cast<IBEPawnMeshAssistInterface>(OwningPawn))
 	{
-		if (Cast<IBEPawnMeshAssistInterface>(OwningPawn))
+		UE_LOG(LogBEEquipmentSystem, Warning, TEXT("UBEEquipmentInstance::ApplyAnimLayer: OwningPawn Has not imple IBEPawnMeshAssistInterface"));
+		return;
+	}
+
+	UBEAnimInstance* AnimInstance = nullptr;
+
+	// TPP Mesh 用の AnimLayer を適用
+	if (AnimLayerToApplyToTPP)
+	{
+		AnimInstance = IBEPawnMeshAssistInterface::Execute_GetTPPAnimInstance(OwningPawn);
+		if (AnimInstance)
 		{
-			TArray<UBEAnimInstance*> AnimInstances;
-			IBEPawnMeshAssistInterface::Execute_GetMainAnimInstances(OwningPawn, AnimInstances);
-			for (UBEAnimInstance* AnimIns : AnimInstances)
-			{
-				AnimIns->LinkAnimClassLayers(AnimLayerToApply);
-			}
+			AnimInstance->LinkAnimClassLayers(AnimLayerToApplyToTPP);
+		}
+	}
+
+	// FPP Mesh 用の AnimLayer を適用
+	if (AnimLayerToApplyToFPP)
+	{
+		AnimInstance = IBEPawnMeshAssistInterface::Execute_GetFPPAnimInstance(OwningPawn);
+		if (AnimInstance)
+		{
+			AnimInstance->LinkAnimClassLayers(AnimLayerToApplyToFPP);
 		}
 	}
 }
 
 void UBEEquipmentInstance::RemoveAnimLayer()
 {
-	if (!AnimLayerToApply)
+	APawn* OwningPawn = GetPawn();
+	if (!OwningPawn)
 	{
+		UE_LOG(LogBEEquipmentSystem, Warning, TEXT("UBEEquipmentInstance::RemoveAnimLayer: Has not valid OwningPawn"));
 		return;
 	}
 
-	if (APawn* OwningPawn = GetPawn())
+	if (!Cast<IBEPawnMeshAssistInterface>(OwningPawn))
 	{
-		if (Cast<IBEPawnMeshAssistInterface>(OwningPawn))
+		UE_LOG(LogBEEquipmentSystem, Warning, TEXT("UBEEquipmentInstance::RemoveAnimLayer: OwningPawn Has not imple IBEPawnMeshAssistInterface"));
+		return;
+	}
+
+	UBEAnimInstance* AnimInstance = nullptr;
+
+	// TPP Mesh 用の AnimLayer を適用
+	if (AnimLayerToApplyToTPP)
+	{
+		AnimInstance = IBEPawnMeshAssistInterface::Execute_GetTPPAnimInstance(OwningPawn);
+		if (AnimInstance)
 		{
-			TArray<UBEAnimInstance*> AnimInstances;
-			IBEPawnMeshAssistInterface::Execute_GetMainAnimInstances(OwningPawn, AnimInstances);
-			for (UBEAnimInstance* AnimIns : AnimInstances)
-			{
-				AnimIns->UnlinkAnimClassLayers(AnimLayerToApply);
-			}
+			AnimInstance->UnlinkAnimClassLayers(AnimLayerToApplyToTPP);
+		}
+	}
+
+	// FPP Mesh 用の AnimLayer を適用
+	if (AnimLayerToApplyToFPP)
+	{
+		AnimInstance = IBEPawnMeshAssistInterface::Execute_GetFPPAnimInstance(OwningPawn);
+		if (AnimInstance)
+		{
+			AnimInstance->UnlinkAnimClassLayers(AnimLayerToApplyToFPP);
 		}
 	}
 }
@@ -188,14 +260,14 @@ void UBEEquipmentInstance::RemoveAnimLayer()
 
 void UBEEquipmentInstance::OnActivated()
 {
-	SpawnEquipmentActors();
+	SpawnEquipmentMeshes();
 	ApplyAnimLayer();
 	K2_OnActivated();
 }
 
 void UBEEquipmentInstance::OnDeactivated()
 {
-	DestroyEquipmentActors();
+	DestroyEquipmentMeshes();
 	RemoveAnimLayer();
 	K2_OnDeactivated();
 }

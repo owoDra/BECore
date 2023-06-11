@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+﻿// Copyright Epic Games, Inc. All Rights Reserved.
 // Copyright Eigi Chin
 
 #pragma once
@@ -15,7 +15,7 @@ class UBEExperienceActionSet;
 /**
  * Definition of an experience
  */
-UCLASS(BlueprintType, Const)
+UCLASS(BlueprintType, Const, Abstract)
 class UBEExperienceDefinition : public UPrimaryDataAsset
 {
 	GENERATED_BODY()

@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+﻿// Copyright Eigi Chin
 
 #pragma once
 
@@ -26,10 +26,12 @@ struct FBEEquipmentSetEntry
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(BlueprintReadOnly, Category = "Equipment", meta = (Categories = "Equipment.Slot"))
+	FBEEquipmentSetEntry() {}
+
+	UPROPERTY(EditAnywhere, Category = "Equipment", meta = (Categories = "Equipment.Slot"))
 	FGameplayTag SlotTag;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Equipment")
+	UPROPERTY(EditAnywhere, Category = "Equipment")
 	TObjectPtr<const UBEItemData> ItemData = nullptr;
 };
 
@@ -40,7 +42,7 @@ public:
  * 
  * EquipmentComponent に Equipment をまとめて追加するために使用されるデータアセット
  */
-UCLASS(BlueprintType, Const, Abstract)
+UCLASS(BlueprintType, Const)
 class UBEEquipmentSet : public UPrimaryDataAsset
 {
 	GENERATED_BODY()

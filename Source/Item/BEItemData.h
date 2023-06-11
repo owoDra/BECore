@@ -36,7 +36,7 @@ public:
  * Item を定義する。
  * Item の名前や詳細などのあらかじめ決められた情報などを保有する。
  */
-UCLASS(BlueprintType, Const, Abstract)
+UCLASS(BlueprintType, Const)
 class UBEItemData : public UPrimaryDataAsset
 {
 	GENERATED_BODY()

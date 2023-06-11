@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+﻿// Copyright Eigi Chin
 
 #pragma once
 
@@ -179,7 +179,7 @@ struct TStructOpsTypeTraits<FBEEquipmentList> : public TStructOpsTypeTraitsBase2
  *
  * Equipment を管理するためのコンポーネント
  */
-UCLASS(BlueprintType, Const)
+UCLASS(Blueprintable, Meta = (BlueprintSpawnableComponent))
 class BECORE_API UBEPawnEquipmentComponent : public UPawnComponent, public IGameFrameworkInitStateInterface
 {
 	GENERATED_BODY()

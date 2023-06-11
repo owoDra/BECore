@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+﻿// Copyright Eigi Chin
 
 #include "BECameraMode_FirstPerson.h"
 
@@ -10,6 +10,8 @@
 #include "Templates/Casts.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BECameraMode_FirstPerson)
+
+class USceneComponent;
 
 
 void UBECameraMode_FirstPerson::PostActivateMode()
@@ -23,13 +25,23 @@ void UBECameraMode_FirstPerson::PostActivateMode()
 				// FPP Mesh の表示
 				if (USkeletalMeshComponent* FPPMesh = IBEPawnMeshAssistInterface::Execute_GetFPPMesh(BEChara))
 				{
-					FPPMesh->SetHiddenInGame(false);
+					FPPMesh->SetHiddenInGame(false, true);
 				}
 
 				// TPP Mesh の非表示
 				if (USkeletalMeshComponent* TPPMesh = IBEPawnMeshAssistInterface::Execute_GetTPPMesh(BEChara))
 				{
 					TPPMesh->SetOwnerNoSee(true);
+
+					TArray<USceneComponent*> Children;
+					TPPMesh->GetChildrenComponents(true, Children);
+					for (USceneComponent* Child : Children)
+					{
+						if (USkeletalMeshComponent* ChildMesh = Cast<USkeletalMeshComponent>(Child))
+						{
+							ChildMesh->SetOwnerNoSee(true);
+						}
+					}
 				}
 			}
 
@@ -50,13 +62,23 @@ void UBECameraMode_FirstPerson::PreDeactivateMode()
 				// FPP Mesh の非表示
 				if (USkeletalMeshComponent* FPPMesh = IBEPawnMeshAssistInterface::Execute_GetFPPMesh(BEChara))
 				{
-					FPPMesh->SetHiddenInGame(true);
+					FPPMesh->SetHiddenInGame(true, true);
 				}
 
 				// TPP Mesh の表示
 				if (USkeletalMeshComponent* TPPMesh = IBEPawnMeshAssistInterface::Execute_GetTPPMesh(BEChara))
 				{
 					TPPMesh->SetOwnerNoSee(false);
+
+					TArray<USceneComponent*> Children;
+					TPPMesh->GetChildrenComponents(true, Children);
+					for (USceneComponent* Child : Children)
+					{
+						if (USkeletalMeshComponent* ChildMesh = Cast<USkeletalMeshComponent>(Child))
+						{
+							ChildMesh->SetOwnerNoSee(false);
+						}
+					}
 				}
 			}
 

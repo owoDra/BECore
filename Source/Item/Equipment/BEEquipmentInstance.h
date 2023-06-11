@@ -12,27 +12,31 @@
 
 #include "BEEquipmentInstance.generated.h"
 
-class AActor;
 class UBEItemData;
 class UAnimInstance;
+class USkeletalMesh;
+class USkeletalMeshComponent;
 struct FGameplayTag;
 
 
 /**
- * FBEEquipmentActorToSpawn
+ * FBEEquipmentMeshToSpawn
  *
  * 装備するときのアクタースポーン設定
  */
 USTRUCT(BlueprintType)
-struct FBEEquipmentActorToSpawn
+struct FBEEquipmentMeshToSpawn
 {
 	GENERATED_BODY()
 
-	FBEEquipmentActorToSpawn()
-	{}
+public:
+	FBEEquipmentMeshToSpawn() {}
 
 	UPROPERTY(EditAnywhere, Category = "Equipment")
-	TSubclassOf<AActor> ActorToSpawn;
+	TObjectPtr<USkeletalMesh> MeshToSpawn;
+
+	UPROPERTY(EditAnywhere, Category = "Equipment")
+	TSubclassOf<UAnimInstance> MeshAnimInstance;
 
 	UPROPERTY(EditAnywhere, Category = "Equipment")
 	FName AttachSocket;
@@ -137,31 +141,31 @@ private:
 
 public:
 	/**
-	 * SpawnEquipmentActors
+	 * SpawnEquipmentMeshes
 	 *
 	 * Equipment が Active になったときに呼び出される。
-	 * Equipment の見た目となる Actor をスポーンする。
+	 * Equipment の見た目となる SkeletalMeshComponent をスポーンする。
 	 * ActorToSpawn がからの場合は何もスポーンしない。
 	 */
-	virtual void SpawnEquipmentActors();
+	virtual void SpawnEquipmentMeshes();
 
 	/**
-	 * DestroyEquipmentActors
+	 * DestroyEquipmentMeshes
 	 *
 	 * Equipment が Deactive になったときに呼び出される。
-	 * Equipment の見た目となる Actor を破棄する。
+	 * Equipment の見た目となる SkeletalMeshComponent を破棄する。
 	 */
-	virtual void DestroyEquipmentActors();
+	virtual void DestroyEquipmentMeshes();
 
 	// Equipment が Active になったときにスポーンする
-	// 装備品の見た目となる Actor のクラス
+	// 装備品の見た目となる SkeletalMesh の定義
 	// 設定しない場合は何もスポーンしない。
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
-	TArray<FBEEquipmentActorToSpawn> ActorsToSpawn;
+	TArray<FBEEquipmentMeshToSpawn> MeshesToSpawn;
 
 private:
 	UPROPERTY(Replicated) 
-	TArray<TObjectPtr<AActor>> SpawnedActors;
+	TArray<TObjectPtr<USkeletalMeshComponent>> SpawnedMeshes;
 
 
 public:
@@ -183,11 +187,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Equipment")
 	virtual void RemoveAnimLayer();
 
-	// Equipment が Active になったときに Pawn に
-	// 適応する AnimLayer のクラス
+	// Equipment が Active になったときに Pawn の FPP Mesh に
+	// 適応する AnimLayer のクラス。
 	// 設定しない場合は何も適応されない。
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
-	TSubclassOf<UAnimInstance> AnimLayerToApply;
+	TSubclassOf<UAnimInstance> AnimLayerToApplyToFPP;
+
+	// Equipment が Active になったときに Pawn の TPP Mesh に
+	// 適応する AnimLayer のクラス。
+	// 設定しない場合は何も適応されない。
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
+	TSubclassOf<UAnimInstance> AnimLayerToApplyToTPP;
 
 
 public:
@@ -224,5 +234,5 @@ public:
 	const UBEItemData* GetItemData() const { return ItemData; }
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Equipment")
-	TArray<AActor*> GetSpawnedActors() const { return SpawnedActors; }
+	TArray<USkeletalMeshComponent*> GetSpawnedMeshes() const { return SpawnedMeshes; }
 };
