@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+﻿// Copyright Eigi Chin
 
 #pragma once
 
@@ -57,4 +57,14 @@ public:
 	// デフォルトで装備している Equipments
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
 	TObjectPtr<UBEEquipmentSet> EquipmentSet;
+
+	// デフォルトで Pawn または Character のメインの TPP AnimInsntace に
+	// 適応する AnimLayer
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+	TSubclassOf<UAnimInstance> DefaultTPPAnimLayer;
+
+	// デフォルトで Pawn または Character のメインの FPP AnimInsntace に
+	// 適応する AnimLayer
+	UPROPERTY(EditDefaultsOnly, Category = "Animation")
+	TSubclassOf<UAnimInstance> DefaultFPPAnimLayer;
 };

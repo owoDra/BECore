@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+﻿// Copyright Eigi Chin
 
 #pragma once
 

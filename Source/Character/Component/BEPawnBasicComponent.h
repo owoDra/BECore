@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+﻿// Copyright Eigi Chin
 
 #pragma once
 
@@ -11,6 +11,8 @@
 
 #include "BEPawnBasicComponent.generated.h"
 
+class AActor;
+class APawn;
 class UBEPawnData;
 class UBEAbilitySystemComponent;
 
@@ -92,6 +94,13 @@ public:
 	 * このコンポーネントを所有する Pawn または Character の PlayerInputComponent のセットアップが完了したときに Character から呼び出す
 	 */
 	void HandlePlayerInputComponentSetup();
+
+	/**
+	 * InitializeAnimLayers
+	 *
+	 * このコンポーネントを所有する Pawn または Character の DefaultAnimLayer を設定する
+	 */
+	void InitializeAnimLayers(APawn* InOwningPawn);
 
 	/**
 	 * InitializeAbilitySystem

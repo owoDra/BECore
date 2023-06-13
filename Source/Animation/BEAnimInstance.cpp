@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+﻿// Copyright Epic Games, Inc. All Rights Reserved.
 // Copyright Eigi Chin
 
 #include "BEAnimInstance.h"
@@ -15,13 +15,6 @@ UBEAnimInstance::UBEAnimInstance(const FObjectInitializer& ObjectInitializer)
 {
 }
 
-void UBEAnimInstance::InitializeWithAbilitySystem(UAbilitySystemComponent* ASC)
-{
-	check(ASC);
-
-	GameplayTagPropertyMap.Initialize(this, ASC);
-}
-
 #if WITH_EDITOR
 EDataValidationResult UBEAnimInstance::IsDataValid(TArray<FText>& ValidationErrors)
 {
@@ -32,6 +25,7 @@ EDataValidationResult UBEAnimInstance::IsDataValid(TArray<FText>& ValidationErro
 	return ((ValidationErrors.Num() > 0) ? EDataValidationResult::Invalid : EDataValidationResult::Valid);
 }
 #endif // WITH_EDITOR
+
 
 void UBEAnimInstance::NativeInitializeAnimation()
 {
@@ -59,4 +53,11 @@ void UBEAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	UBECharacterMovementComponent* CharMoveComp = CastChecked<UBECharacterMovementComponent>(Character->GetCharacterMovement());
 	const FBECharacterGroundInfo& GroundInfo = CharMoveComp->GetGroundInfo();
 	GroundDistance = GroundInfo.GroundDistance;
+}
+
+void UBEAnimInstance::InitializeWithAbilitySystem(UAbilitySystemComponent* ASC)
+{
+	check(ASC);
+
+	GameplayTagPropertyMap.Initialize(this, ASC);
 }

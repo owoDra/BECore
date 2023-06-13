@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+﻿// Copyright Eigi Chin
 
 #include "BEPawnData.h"
 
@@ -8,8 +8,10 @@
 UBEPawnData::UBEPawnData(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	PawnClass = nullptr;
-	InputConfig = nullptr;
-	DefaultCameraMode = nullptr;
-	EquipmentSet = nullptr;
+	PawnClass			= nullptr;
+	InputConfig			= nullptr;
+	DefaultCameraMode	= nullptr;
+	EquipmentSet		= nullptr;
+	DefaultTPPAnimLayer = nullptr;
+	DefaultFPPAnimLayer = nullptr;
 }

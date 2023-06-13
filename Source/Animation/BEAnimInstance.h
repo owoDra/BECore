@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+﻿// Copyright Epic Games, Inc. All Rights Reserved.
 // Copyright Eigi Chin
 
 #pragma once
@@ -14,21 +14,17 @@ class UAbilitySystemComponent;
 /**
  * UBEAnimInstance
  *
- *	The base game animation instance class used by this project.
+ *	Pawn または Character の見た目となる Mesh に適応するメインの AnimInsntace。
+ *  CopyPose や AnimLayer などには使用せず Animation の主要な処理もおこなう。
  */
 UCLASS(Config = Game)
 class UBEAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
-
 public:
-
 	UBEAnimInstance(const FObjectInitializer& ObjectInitializer);
 
-	virtual void InitializeWithAbilitySystem(UAbilitySystemComponent* ASC);
-
 protected:
-
 #if WITH_EDITOR
 	virtual EDataValidationResult IsDataValid(TArray<FText>& ValidationErrors) override;
 #endif // WITH_EDITOR
@@ -36,10 +32,19 @@ protected:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
-protected:
+public:
+	/**
+	 * InitializeWithAbilitySystem
+	 * 
+	 *  AbilitySystem との初期化を行う。
+	 *  GameplayTag との紐づけなどを行う。
+	 */
+	virtual void InitializeWithAbilitySystem(UAbilitySystemComponent* ASC);
 
-	// Gameplay tags that can be mapped to blueprint variables. The variables will automatically update as the tags are added or removed.
-	// These should be used instead of manually querying for the gameplay tags.
+protected:
+	// ブループリント変数にマッピングできる GameplayTag。
+	// タグが追加または削除された時に変数を自動的に更新する。
+	// これらは GameplayTag を手動でクエリする代わりに使用する。
 	UPROPERTY(EditDefaultsOnly, Category = "GameplayTags")
 	FGameplayTagBlueprintPropertyMap GameplayTagPropertyMap;
 

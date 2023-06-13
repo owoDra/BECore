@@ -2,7 +2,9 @@
 
 #include "BEEquipmentInstance.h"
 
+#include "Character/Component/BEPawnBasicComponent.h"
 #include "Character/BEPawnMeshAssistInterface.h"
+#include "Character/BEPawnData.h"
 #include "Animation/BEAnimInstance.h"
 #include "BELogChannels.h"
 
@@ -235,25 +237,31 @@ void UBEEquipmentInstance::RemoveAnimLayer()
 	}
 
 	UBEAnimInstance* AnimInstance = nullptr;
+	TSubclassOf<UAnimInstance> DefaultTPPAnimLayerClass = nullptr;
+	TSubclassOf<UAnimInstance> DefalutFPPAnimLayerClass = nullptr;
 
-	// TPP Mesh 用の AnimLayer を適用
-	if (AnimLayerToApplyToTPP)
+	// PawnData から DefaultAnimLayer の設定を試行する
+	if (UBEPawnBasicComponent* CharacterBasic = UBEPawnBasicComponent::FindPawnBasicComponent(OwningPawn))
 	{
-		AnimInstance = IBEPawnMeshAssistInterface::Execute_GetTPPAnimInstance(OwningPawn);
-		if (AnimInstance)
+		if (const UBEPawnData* PawnData = CharacterBasic->GetPawnData())
 		{
-			AnimInstance->UnlinkAnimClassLayers(AnimLayerToApplyToTPP);
+			DefaultTPPAnimLayerClass = PawnData->DefaultTPPAnimLayer;
+			DefalutFPPAnimLayerClass = PawnData->DefaultFPPAnimLayer;
 		}
 	}
 
-	// FPP Mesh 用の AnimLayer を適用
-	if (AnimLayerToApplyToFPP)
+	// TPP Mesh 用の AnimLayer を適用
+	AnimInstance = IBEPawnMeshAssistInterface::Execute_GetTPPAnimInstance(OwningPawn);
+	if (AnimInstance)
 	{
-		AnimInstance = IBEPawnMeshAssistInterface::Execute_GetFPPAnimInstance(OwningPawn);
-		if (AnimInstance)
-		{
-			AnimInstance->UnlinkAnimClassLayers(AnimLayerToApplyToFPP);
-		}
+		AnimInstance->LinkAnimClassLayers(DefaultTPPAnimLayerClass);
+	}
+
+	// FPP Mesh 用の AnimLayer を適用
+	AnimInstance = IBEPawnMeshAssistInterface::Execute_GetFPPAnimInstance(OwningPawn);
+	if (AnimInstance)
+	{
+		AnimInstance->LinkAnimClassLayers(DefalutFPPAnimLayerClass);
 	}
 }
 
