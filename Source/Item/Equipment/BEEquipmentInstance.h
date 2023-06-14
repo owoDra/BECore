@@ -129,11 +129,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Equipment")
 	bool HasStatTag(FGameplayTag Tag) const;
 
-	// この Equipment の初期 StatTag
-	// Equipment が作成された際の初期化処理に使用する
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
-	TMap<FGameplayTag, int32> InitialEquipmentStats;
-
 private:
 	UPROPERTY(Replicated)
 	FGameplayTagStackContainer StatTags;
@@ -147,7 +142,7 @@ public:
 	 * Equipment の見た目となる SkeletalMeshComponent をスポーンする。
 	 * ActorToSpawn がからの場合は何もスポーンしない。
 	 */
-	virtual void SpawnEquipmentMeshes();
+	virtual void SpawnEquipmentMeshes(const TArray<FBEEquipmentMeshToSpawn>& InMeshesToSpawn);
 
 	/**
 	 * DestroyEquipmentMeshes
@@ -156,12 +151,6 @@ public:
 	 * Equipment の見た目となる SkeletalMeshComponent を破棄する。
 	 */
 	virtual void DestroyEquipmentMeshes();
-
-	// Equipment が Active になったときにスポーンする
-	// 装備品の見た目となる SkeletalMesh の定義
-	// 設定しない場合は何もスポーンしない。
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
-	TArray<FBEEquipmentMeshToSpawn> MeshesToSpawn;
 
 private:
 	UPROPERTY(Replicated) 
@@ -176,7 +165,7 @@ public:
 	 * Pawn に AnimLayer を適応する。
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Equipment")
-	virtual void ApplyAnimLayer();
+	virtual void ApplyAnimLayer(TSubclassOf<UAnimInstance> InTPPLayer, TSubclassOf<UAnimInstance> InFPPLayer);
 
 	/**
 	 * RemoveAnimLayer
@@ -186,18 +175,6 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "Equipment")
 	virtual void RemoveAnimLayer();
-
-	// Equipment が Active になったときに Pawn の FPP Mesh に
-	// 適応する AnimLayer のクラス。
-	// 設定しない場合は何も適応されない。
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
-	TSubclassOf<UAnimInstance> AnimLayerToApplyToFPP;
-
-	// Equipment が Active になったときに Pawn の TPP Mesh に
-	// 適応する AnimLayer のクラス。
-	// 設定しない場合は何も適応されない。
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Equipment")
-	TSubclassOf<UAnimInstance> AnimLayerToApplyToTPP;
 
 
 public:

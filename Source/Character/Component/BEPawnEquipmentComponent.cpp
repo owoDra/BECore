@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+﻿// Copyright Eigi Chin
 
 #include "BEPawnEquipmentComponent.h"
 
@@ -146,10 +146,10 @@ UBEEquipmentInstance* FBEEquipmentList::AddEntry(const UBEItemData* ItemData, FG
 		return nullptr;
 	}
 
-	const TSubclassOf<UBEEquipmentInstance> InstanceType = Fragment->InstanceType;
+	TSubclassOf<UBEEquipmentInstance> InstanceType = Fragment->InstanceType;
 	if (InstanceType == nullptr)
 	{
-		return nullptr;
+		InstanceType = UBEEquipmentInstance::StaticClass();
 	}
 
 	FBEEquipmentEntry& NewEntry = Entries.AddDefaulted_GetRef();
@@ -157,6 +157,11 @@ UBEEquipmentInstance* FBEEquipmentList::AddEntry(const UBEItemData* ItemData, FG
 	NewEntry.ItemData	= ItemData;
 	NewEntry.Instance	= NewObject<UBEEquipmentInstance>(OwnerComponent->GetOwner(), InstanceType);
 	NewEntry.Instance->OnEquiped(ItemData);
+	
+	for (auto& Stats : Fragment->InitialEquipmentStats)
+	{
+		NewEntry.Instance->AddStatTagStack(Stats.Key, Stats.Value);
+	}
 
 	for (TObjectPtr<const UBEAbilitySet> AbilitySet : Fragment->AbilitySetsToGrantOnEquip)
 	{
@@ -219,6 +224,8 @@ void FBEEquipmentList::ActivateEntry(int32 Index, UBEAbilitySystemComponent* ASC
 	if (UBEEquipmentInstance* Instance = Entry.Instance)
 	{
 		Instance->OnActivated();
+		Instance->SpawnEquipmentMeshes(Fragment->MeshesToSpawn);
+		Instance->ApplyAnimLayer(Fragment->AnimLayerToApplyToTPP, Fragment->AnimLayerToApplyToFPP);
 	}
 
 	Entry.Activated = true;

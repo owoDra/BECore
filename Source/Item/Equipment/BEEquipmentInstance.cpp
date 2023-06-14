@@ -5,6 +5,7 @@
 #include "Character/Component/BEPawnBasicComponent.h"
 #include "Character/BEPawnMeshAssistInterface.h"
 #include "Character/BEPawnData.h"
+#include "Item/BEItemData.h"
 #include "Animation/BEAnimInstance.h"
 #include "BELogChannels.h"
 
@@ -70,11 +71,6 @@ void UBEEquipmentInstance::RegisterReplicationFragments(UE::Net::FFragmentRegist
 void UBEEquipmentInstance::OnEquiped(const UBEItemData* InItemData)
 {
 	ItemData = InItemData;
-
-	for (const auto& KVP : InitialEquipmentStats)
-	{
-		AddStatTagStack(KVP.Key, KVP.Value);
-	}
 }
 
 void UBEEquipmentInstance::OnUnequiped()
@@ -103,9 +99,9 @@ bool UBEEquipmentInstance::HasStatTag(FGameplayTag Tag) const
 }
 
 
-void UBEEquipmentInstance::SpawnEquipmentMeshes()
+void UBEEquipmentInstance::SpawnEquipmentMeshes(const TArray<FBEEquipmentMeshToSpawn>& InMeshesToSpawn)
 {
-	if (MeshesToSpawn.IsEmpty())
+	if (InMeshesToSpawn.IsEmpty())
 	{
 		return;
 	}
@@ -131,7 +127,7 @@ void UBEEquipmentInstance::SpawnEquipmentMeshes()
 	{
 		const bool bOwnerNoSee = AttachTarget->bOwnerNoSee;
 
-		for (const FBEEquipmentMeshToSpawn& SpawnInfo : MeshesToSpawn)
+		for (const FBEEquipmentMeshToSpawn& SpawnInfo : InMeshesToSpawn)
 		{
 			if (SpawnInfo.MeshToSpawn)
 			{
@@ -153,7 +149,7 @@ void UBEEquipmentInstance::SpawnEquipmentMeshes()
 	{
 		const bool bHiddenInGame = AttachTarget->bHiddenInGame;
 
-		for (const FBEEquipmentMeshToSpawn& SpawnInfo : MeshesToSpawn)
+		for (const FBEEquipmentMeshToSpawn& SpawnInfo : InMeshesToSpawn)
 		{
 			if (SpawnInfo.MeshToSpawn)
 			{
@@ -183,7 +179,7 @@ void UBEEquipmentInstance::DestroyEquipmentMeshes()
 }
 
 
-void UBEEquipmentInstance::ApplyAnimLayer()
+void UBEEquipmentInstance::ApplyAnimLayer(TSubclassOf<UAnimInstance> InTPPLayer, TSubclassOf<UAnimInstance> InFPPLayer)
 {
 	APawn* OwningPawn = GetPawn();
 	if (!OwningPawn)
@@ -201,22 +197,22 @@ void UBEEquipmentInstance::ApplyAnimLayer()
 	UBEAnimInstance* AnimInstance = nullptr;
 
 	// TPP Mesh 用の AnimLayer を適用
-	if (AnimLayerToApplyToTPP)
+	if (InTPPLayer)
 	{
 		AnimInstance = IBEPawnMeshAssistInterface::Execute_GetTPPAnimInstance(OwningPawn);
 		if (AnimInstance)
 		{
-			AnimInstance->LinkAnimClassLayers(AnimLayerToApplyToTPP);
+			AnimInstance->LinkAnimClassLayers(InTPPLayer);
 		}
 	}
 
 	// FPP Mesh 用の AnimLayer を適用
-	if (AnimLayerToApplyToFPP)
+	if (InFPPLayer)
 	{
 		AnimInstance = IBEPawnMeshAssistInterface::Execute_GetFPPAnimInstance(OwningPawn);
 		if (AnimInstance)
 		{
-			AnimInstance->LinkAnimClassLayers(AnimLayerToApplyToFPP);
+			AnimInstance->LinkAnimClassLayers(InFPPLayer);
 		}
 	}
 }
@@ -268,8 +264,6 @@ void UBEEquipmentInstance::RemoveAnimLayer()
 
 void UBEEquipmentInstance::OnActivated()
 {
-	SpawnEquipmentMeshes();
-	ApplyAnimLayer();
 	K2_OnActivated();
 }
 
