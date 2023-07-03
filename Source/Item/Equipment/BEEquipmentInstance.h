@@ -90,9 +90,18 @@ public:
 	 */
 	virtual void OnUnequiped();
 
+protected:
+	/**
+	 * OnRep_ItemData
+	 *
+	 * ItemData が同期されたときに実行される
+	 */
+	UFUNCTION()
+	virtual void OnRep_ItemData();
+
 private:
 	// この Equipment の ItemData
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = "OnRep_ItemData")
 	TObjectPtr<const UBEItemData> ItemData;
 
 
@@ -153,7 +162,7 @@ public:
 	virtual void DestroyEquipmentMeshes();
 
 private:
-	UPROPERTY(Replicated) 
+	//UPROPERTY(Replicated) 
 	TArray<TObjectPtr<USkeletalMeshComponent>> SpawnedMeshes;
 
 
@@ -198,6 +207,12 @@ protected:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Equipment", meta = (DisplayName = "OnDeactivated"))
 	void K2_OnDeactivated();
+
+private:
+	// ItemData がまだ同期されていない状態で OnActivated が呼び出されたときに
+	// bDelayedActive を True に設定し、同期が完了したときに再度 OnActivated を
+	// 呼び出すように要求するためのフラグ。
+	bool bDelayedActive = false;
 
 
 public:

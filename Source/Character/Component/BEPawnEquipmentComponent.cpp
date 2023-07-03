@@ -224,8 +224,6 @@ void FBEEquipmentList::ActivateEntry(int32 Index, UBEAbilitySystemComponent* ASC
 	if (UBEEquipmentInstance* Instance = Entry.Instance)
 	{
 		Instance->OnActivated();
-		Instance->SpawnEquipmentMeshes(Fragment->MeshesToSpawn);
-		Instance->ApplyAnimLayer(Fragment->AnimLayerToApplyToTPP, Fragment->AnimLayerToApplyToFPP);
 	}
 
 	Entry.Activated = true;

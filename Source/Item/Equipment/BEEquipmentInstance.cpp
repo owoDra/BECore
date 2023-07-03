@@ -5,6 +5,7 @@
 #include "Character/Component/BEPawnBasicComponent.h"
 #include "Character/BEPawnMeshAssistInterface.h"
 #include "Character/BEPawnData.h"
+#include "Item/Fragment/BEItemDataFragment_Equippable.h"
 #include "Item/BEItemData.h"
 #include "Animation/BEAnimInstance.h"
 #include "BELogChannels.h"
@@ -39,7 +40,7 @@ void UBEEquipmentInstance::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>&
 
 	DOREPLIFETIME(ThisClass, StatTags);
 	DOREPLIFETIME(ThisClass, ItemData);
-	DOREPLIFETIME(ThisClass, SpawnedMeshes);
+	//DOREPLIFETIME(ThisClass, SpawnedMeshes);
 }
 
 
@@ -75,6 +76,15 @@ void UBEEquipmentInstance::OnEquiped(const UBEItemData* InItemData)
 
 void UBEEquipmentInstance::OnUnequiped()
 {
+}
+
+void UBEEquipmentInstance::OnRep_ItemData()
+{
+	if (bDelayedActive)
+	{
+		bDelayedActive = false;
+		OnActivated();
+	}
 }
 
 
@@ -127,6 +137,8 @@ void UBEEquipmentInstance::SpawnEquipmentMeshes(const TArray<FBEEquipmentMeshToS
 	{
 		const bool bOwnerNoSee = AttachTarget->bOwnerNoSee;
 
+		UE_LOG(LogBEEquipmentSystem, Log, TEXT("UBEEquipmentInstance::SpawnEquipmentMeshes: Create Equipment Meshes for TPP"));
+
 		for (const FBEEquipmentMeshToSpawn& SpawnInfo : InMeshesToSpawn)
 		{
 			if (SpawnInfo.MeshToSpawn)
@@ -137,6 +149,7 @@ void UBEEquipmentInstance::SpawnEquipmentMeshes(const TArray<FBEEquipmentMeshToS
 				NewMesh->SetRelativeTransform(SpawnInfo.AttachTransform);
 				NewMesh->AttachToComponent(AttachTarget, FAttachmentTransformRules::KeepRelativeTransform, SpawnInfo.AttachSocket);
 				NewMesh->SetOwnerNoSee(bOwnerNoSee);
+				NewMesh->RegisterComponent();
 
 				SpawnedMeshes.Add(NewMesh);
 			}
@@ -149,6 +162,8 @@ void UBEEquipmentInstance::SpawnEquipmentMeshes(const TArray<FBEEquipmentMeshToS
 	{
 		const bool bHiddenInGame = AttachTarget->bHiddenInGame;
 
+		UE_LOG(LogBEEquipmentSystem, Log, TEXT("UBEEquipmentInstance::SpawnEquipmentMeshes: Create Equipment Meshes for FPP"));
+
 		for (const FBEEquipmentMeshToSpawn& SpawnInfo : InMeshesToSpawn)
 		{
 			if (SpawnInfo.MeshToSpawn)
@@ -160,6 +175,8 @@ void UBEEquipmentInstance::SpawnEquipmentMeshes(const TArray<FBEEquipmentMeshToS
 				NewMesh->AttachToComponent(AttachTarget, FAttachmentTransformRules::KeepRelativeTransform, SpawnInfo.AttachSocket);
 				NewMesh->SetOnlyOwnerSee(true);
 				NewMesh->SetHiddenInGame(bHiddenInGame);
+				NewMesh->SetCastShadow(false);
+				NewMesh->RegisterComponent();
 
 				SpawnedMeshes.Add(NewMesh);
 			}
@@ -264,6 +281,24 @@ void UBEEquipmentInstance::RemoveAnimLayer()
 
 void UBEEquipmentInstance::OnActivated()
 {
+	if (bDelayedActive)
+	{
+		return;
+	}
+
+	if (!ItemData)
+	{
+		bDelayedActive = true;
+		return;
+	}
+
+	// Fragment の情報をもとに Mesh のスポーンと AnimLayer の設定を行う
+	if (const UBEItemDataFragment_Equippable* Fragment = ItemData->FindFragmentByClass<UBEItemDataFragment_Equippable>())
+	{
+		SpawnEquipmentMeshes(Fragment->MeshesToSpawn);
+		ApplyAnimLayer(Fragment->AnimLayerToApplyToTPP, Fragment->AnimLayerToApplyToFPP);
+	}
+
 	K2_OnActivated();
 }
 

@@ -304,13 +304,13 @@ void UBEPawnBasicComponent::InitializeAnimLayers(APawn* InOwningPawn)
 		UBEAnimInstance* AnimInstance = nullptr;
 
 		AnimInstance = IBEPawnMeshAssistInterface::Execute_GetTPPAnimInstance(InOwningPawn);
-		if (AnimInstance && PawnData->DefaultTPPAnimLayer)
+		if (AnimInstance && PawnData->DefaultTPPAnimLayer && AnimInstance->GetLinkedAnimLayerInstanceByClass(UAnimInstance::StaticClass()))
 		{
 			AnimInstance->LinkAnimClassLayers(PawnData->DefaultTPPAnimLayer);
 		}
 
 		AnimInstance = IBEPawnMeshAssistInterface::Execute_GetFPPAnimInstance(InOwningPawn);
-		if (AnimInstance && PawnData->DefaultFPPAnimLayer)
+		if (AnimInstance && PawnData->DefaultFPPAnimLayer && AnimInstance->GetLinkedAnimLayerInstanceByClass(UAnimInstance::StaticClass()))
 		{
 			AnimInstance->LinkAnimClassLayers(PawnData->DefaultFPPAnimLayer);
 		}
