@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+// Copyright owoDra
 
 #include "BEAssetManager.h"
 #include "BELogChannels.h"

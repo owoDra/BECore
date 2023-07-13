@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+// Copyright owoDra
 
 #include "BETags_Input.h"
 

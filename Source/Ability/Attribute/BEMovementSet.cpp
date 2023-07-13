@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+﻿// Copyright owoDra
 
 #include "BEMovementSet.h"
 
@@ -8,17 +8,11 @@
 
 
 UBEMovementSet::UBEMovementSet()
-	: GravityScale(2.0f)
-	, GroundFriction(8.0f)
-	, OverallSpeedMultiplier(1.0f)
-	, WalkSpeed(200.0f)
-	, WalkSpeedCrouched(200.0f)
-	, WalkSpeedSprinting(400.0f)
-	, WalkSpeedTargeting(200.0f)
-	, SwimSpeed(400.0f)
-	, FlySpeed(400.0f)
-	, JumpPower(400.0f)
-	, AirControl(0.2f)
+	: GravityScale(1.0f)
+	, GroundFrictionScale(1.0f)
+	, MoveSpeedScale(1.0f)
+	, JumpPowerScale(1.0f)
+	, AirControlScale(1.0f)
 {
 }
 
@@ -26,19 +20,11 @@ void UBEMovementSet::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLi
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME_CONDITION_NOTIFY(UBEMovementSet, GravityScale, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UBEMovementSet, GroundFriction, COND_None, REPNOTIFY_Always);
-
-	DOREPLIFETIME_CONDITION_NOTIFY(UBEMovementSet, WalkSpeed, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UBEMovementSet, OverallSpeedMultiplier, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UBEMovementSet, WalkSpeedCrouched, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UBEMovementSet, WalkSpeedSprinting, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UBEMovementSet, WalkSpeedTargeting, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UBEMovementSet, SwimSpeed, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UBEMovementSet, FlySpeed, COND_None, REPNOTIFY_Always);
-
-	DOREPLIFETIME_CONDITION_NOTIFY(UBEMovementSet, JumpPower, COND_None, REPNOTIFY_Always);
-	DOREPLIFETIME_CONDITION_NOTIFY(UBEMovementSet, AirControl, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UBEMovementSet, GravityScale			, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UBEMovementSet, GroundFrictionScale	, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UBEMovementSet, MoveSpeedScale		, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UBEMovementSet, JumpPowerScale		, COND_None, REPNOTIFY_Always);
+	DOREPLIFETIME_CONDITION_NOTIFY(UBEMovementSet, AirControlScale		, COND_None, REPNOTIFY_Always);
 }
 
 
@@ -47,54 +33,22 @@ void UBEMovementSet::OnRep_GravityScale(const FGameplayAttributeData& OldValue)
 	GAMEPLAYATTRIBUTE_REPNOTIFY(UBEMovementSet, GravityScale, OldValue);
 }
 
-void UBEMovementSet::OnRep_GroundFriction(const FGameplayAttributeData& OldValue)
+void UBEMovementSet::OnRep_GroundFrictionScale(const FGameplayAttributeData& OldValue)
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UBEMovementSet, GroundFriction, OldValue);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UBEMovementSet, GroundFrictionScale, OldValue);
 }
 
-
-void UBEMovementSet::OnRep_OverallSpeedMultiplier(const FGameplayAttributeData& OldValue)
+void UBEMovementSet::OnRep_MoveSpeedScale(const FGameplayAttributeData& OldValue)
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UBEMovementSet, OverallSpeedMultiplier, OldValue);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UBEMovementSet, MoveSpeedScale, OldValue);
 }
 
-void UBEMovementSet::OnRep_WalkSpeed(const FGameplayAttributeData& OldValue)
+void UBEMovementSet::OnRep_JumpPowerScale(const FGameplayAttributeData& OldValue)
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UBEMovementSet, WalkSpeed, OldValue);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UBEMovementSet, JumpPowerScale, OldValue);
 }
 
-void UBEMovementSet::OnRep_WalkSpeedCrouched(const FGameplayAttributeData& OldValue)
+void UBEMovementSet::OnRep_AirControlScale(const FGameplayAttributeData& OldValue)
 {
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UBEMovementSet, WalkSpeedCrouched, OldValue);
-}
-
-void UBEMovementSet::OnRep_WalkSpeedSprinting(const FGameplayAttributeData& OldValue)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UBEMovementSet, WalkSpeedSprinting, OldValue);
-}
-
-void UBEMovementSet::OnRep_WalkSpeedTargeting(const FGameplayAttributeData& OldValue)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UBEMovementSet, WalkSpeedTargeting, OldValue);
-}
-
-void UBEMovementSet::OnRep_SwimSpeed(const FGameplayAttributeData& OldValue)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UBEMovementSet, SwimSpeed, OldValue);
-}
-
-void UBEMovementSet::OnRep_FlySpeed(const FGameplayAttributeData& OldValue)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UBEMovementSet, FlySpeed, OldValue);
-}
-
-
-void UBEMovementSet::OnRep_JumpPower(const FGameplayAttributeData& OldValue)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UBEMovementSet, JumpPower, OldValue);
-}
-
-void UBEMovementSet::OnRep_AirControl(const FGameplayAttributeData& OldValue)
-{
-	GAMEPLAYATTRIBUTE_REPNOTIFY(UBEMovementSet, AirControl, OldValue);
+	GAMEPLAYATTRIBUTE_REPNOTIFY(UBEMovementSet, AirControlScale, OldValue);
 }

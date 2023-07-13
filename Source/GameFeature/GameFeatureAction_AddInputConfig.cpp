@@ -1,5 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
-// Copyright Eigi Chin
+// Copyright owoDra
 
 #include "GameFeature/GameFeatureAction_AddInputConfig.h"
 #include "Components/GameFrameworkComponentManager.h"

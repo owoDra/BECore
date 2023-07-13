@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+// Copyright owoDra
 
 #include "BEGameplayAbility_FromEquipment.h"
 

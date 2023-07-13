@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+// Copyright owoDra
 
 #include "BEUIMessaging.h"
 #include "Player/BELocalPlayer.h"

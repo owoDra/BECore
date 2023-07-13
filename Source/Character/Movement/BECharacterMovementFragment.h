@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+﻿// Copyright owoDra
 
 #pragma once
 
@@ -10,21 +10,7 @@
 
 class UBECharacterMovementComponent;
 struct FGameplayTag;
-
-
-/**
- * EBECustomMovementSpace
- *
- *	Movement の移動空間
- */
-UENUM(BlueprintType)
-enum class EBECustomMovementSpace : uint8
-{
-	None,
-	OnGround,
-	InAir,
-	InWater
-};
+struct FGameplayTagContainer;
 
 
 /**
@@ -43,28 +29,32 @@ class BECORE_API UBECharacterMovementFragment : public UObject
 #endif
 
 protected:
-	// この Movement の移動空間
-	EBECustomMovementSpace MovementSpace = EBECustomMovementSpace::None;
-
-	// この Movement の識別用 Tag
-	FGameplayTag MovementModeTag;
+	//
+	// この Movement の LocomotionMode の Tag
+	//
+	FGameplayTag LocomotionModeTag;
 
 public:
 	/**
-	 * GetMovementSpace
+	 * GetLocomotionMode
 	 *
-	 * この Movement の移動空間を返す
-	 * CharacterMovementComponent で IsMovingOnGround などで判定するのに用いる
+	 * この Movement の LocomotionMode を返す
 	 */
-	EBECustomMovementSpace GetMovementSpace() const { return MovementSpace; }
+	const FGameplayTag& GetLocomotionMode() const { return LocomotionModeTag; }
 
 	/**
-	 * GetMovementModeTag
+	 * CalculateAllowedStance
 	 *
-	 * この Movement の識別用 Tag を返す
+	 * 現在の Movement で許可されている Stance を返す
 	 */
-	FGameplayTag GetMovementModeTag() const { return MovementModeTag; }
+	virtual FGameplayTag CalculateAllowedStance(const FGameplayTag& DesiredStance) const { return DesiredStance; }
 
+	/**
+	 * CalculateAllowedGait
+	 *
+	 * 現在の Movement で許可されている Gait を返す
+	 */
+	virtual FGameplayTag CalculateAllowedGait(const FGameplayTag& DesiredGait) const { return DesiredGait; }
 
 public:
 	/**
@@ -87,20 +77,6 @@ public:
 	 * この Movement の開始を試みる
 	 */
 	virtual void TryStartMovement(UBECharacterMovementComponent* CMC) {}
-
-	/**
-	 * GetMaxMoveSpeed
-	 *
-	 * この Movement 中の最高移動速度
-	 */
-	virtual float GetMaxMoveSpeed(const UBECharacterMovementComponent* CMC) const { return 0.0; }
-
-	/**
-	 * GetMaxBrakingDeceleration
-	 *
-	 * この Movement 中の最高減速度
-	 */
-	virtual float GetMaxBrakingDeceleration(const UBECharacterMovementComponent* CMC) const { return 0.0; }
 
 	/**
 	 * OnMovementStart

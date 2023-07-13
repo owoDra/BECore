@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+// Copyright owoDra
 
 #include "BETabButtonBase.h"
 #include "CommonLazyImage.h"

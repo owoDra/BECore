@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+// Copyright owoDra
 
 #include "CommonInputSubsystem.h"
 #include "BEGameSettingRegistry.h"

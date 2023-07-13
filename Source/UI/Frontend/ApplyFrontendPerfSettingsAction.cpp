@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+// Copyright owoDra
 
 #include "ApplyFrontendPerfSettingsAction.h"
 #include "GameSetting/BEGameDeviceSettings.h"

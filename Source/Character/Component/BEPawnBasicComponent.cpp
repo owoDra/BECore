@@ -1,4 +1,4 @@
-﻿// Copyright Eigi Chin
+﻿// Copyright owoDra
 
 #include "BEPawnBasicComponent.h"
 
@@ -304,13 +304,13 @@ void UBEPawnBasicComponent::InitializeAnimLayers(APawn* InOwningPawn)
 		UBEAnimInstance* AnimInstance = nullptr;
 
 		AnimInstance = IBEPawnMeshAssistInterface::Execute_GetTPPAnimInstance(InOwningPawn);
-		if (AnimInstance && PawnData->DefaultTPPAnimLayer && AnimInstance->GetLinkedAnimLayerInstanceByClass(UAnimInstance::StaticClass()))
+		if (AnimInstance && PawnData->DefaultTPPAnimLayer)
 		{
 			AnimInstance->LinkAnimClassLayers(PawnData->DefaultTPPAnimLayer);
 		}
 
 		AnimInstance = IBEPawnMeshAssistInterface::Execute_GetFPPAnimInstance(InOwningPawn);
-		if (AnimInstance && PawnData->DefaultFPPAnimLayer && AnimInstance->GetLinkedAnimLayerInstanceByClass(UAnimInstance::StaticClass()))
+		if (AnimInstance && PawnData->DefaultFPPAnimLayer)
 		{
 			AnimInstance->LinkAnimClassLayers(PawnData->DefaultFPPAnimLayer);
 		}

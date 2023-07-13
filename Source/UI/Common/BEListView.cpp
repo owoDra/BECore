@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+// Copyright owoDra
 
 #include "BEListView.h"
 #include "BEWidgetFactory.h"

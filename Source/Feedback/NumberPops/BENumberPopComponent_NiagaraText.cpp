@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+// Copyright owoDra
 
 #include "BENumberPopComponent_NiagaraText.h"
 #include "NiagaraDataInterfaceArrayFunctionLibrary.h"

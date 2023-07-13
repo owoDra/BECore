@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+// Copyright owoDra
 
 #include "IndicatorDescriptor.h"
 #include "Engine/LocalPlayer.h"

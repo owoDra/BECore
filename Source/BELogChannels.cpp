@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+// Copyright owoDra
 
 #include "BELogChannels.h"
 #include "GameFramework/Actor.h"

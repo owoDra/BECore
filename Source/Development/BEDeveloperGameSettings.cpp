@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+// Copyright owoDra
 
 #include "BEDeveloperGameSettings.h"
 #include "Misc/App.h"

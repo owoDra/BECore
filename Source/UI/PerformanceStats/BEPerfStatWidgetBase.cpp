@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+// Copyright owoDra
 
 #include "BEPerfStatWidgetBase.h"
 #include "Performance/BEPerformanceStatSubsystem.h"

@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+// Copyright owoDra
 
 #include "BEContextEffectsSubsystem.h"
 #include "Kismet/GameplayStatics.h"

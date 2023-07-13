@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+﻿// Copyright owoDra
 
 #pragma once
 
@@ -6,20 +6,38 @@
 
 
 ////////////////////////////////////
-// Status.MoveMode
+// Status.LocomotionMode
 
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Movement_Mode_Walking);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Movement_Mode_NavWalking);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Movement_Mode_Falling);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Movement_Mode_Swimming);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Movement_Mode_Flying);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_LocomotionMode_OnGround);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_LocomotionMode_InAir);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_LocomotionMode_InWater);
+
+
+////////////////////////////////////
+// Status.RotationMode
+
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_RotationMode_VelocityDirection);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_RotationMode_ViewDirection);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_RotationMode_Aiming);
+
+
+////////////////////////////////////
+// Status.Stance
+
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Stance_Standing);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Stance_Crouching);
+
+
+////////////////////////////////////
+// Status.Gait
+
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Gait_Walking);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Gait_Running);
+UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Gait_Sprinting);
+
 
 ////////////////////////////////////
 // Status
-
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Crouching);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Sprinting);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Targeting);
 
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Spawning);
 UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Attacking);

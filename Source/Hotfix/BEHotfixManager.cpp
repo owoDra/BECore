@@ -1,5 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
-// Copyright Eigi Chin
+// Copyright owoDra
 
 #include "BEHotfixManager.h"
 #include "Misc/AES.h"

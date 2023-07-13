@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+// Copyright owoDra
 
 #include "BEButtonBase.h"
 #include "CommonActionWidget.h"

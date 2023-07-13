@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+// Copyright owoDra
 
 #include "BENumberPopComponent_MeshText.h"
 #include "TimerManager.h"

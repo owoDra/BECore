@@ -1,5 +1,5 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
-// Copyright Eigi Chin
+// Copyright owoDra
 
 #include "UI/BESimulatedInputWidget.h"
 #include "Engine/LocalPlayer.h"

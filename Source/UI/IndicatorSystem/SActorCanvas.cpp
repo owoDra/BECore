@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+// Copyright owoDra
 
 #include "SActorCanvas.h"
 #include "Layout/ArrangedChildren.h"

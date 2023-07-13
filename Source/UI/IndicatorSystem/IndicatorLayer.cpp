@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+// Copyright owoDra
 
 #include "IndicatorLayer.h"
 #include "Widgets/DeclarativeSyntaxSupport.h"

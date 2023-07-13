@@ -1,4 +1,4 @@
-// Copyright Eigi Chin
+// Copyright owoDra
 
 #include "BEPerfStatContainerBase.h"
 #include "GameSetting/BEGameDeviceSettings.h"

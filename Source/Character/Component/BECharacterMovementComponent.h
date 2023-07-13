@@ -1,50 +1,91 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
-// Copyright Eigi Chin
+﻿// Copyright owoDra
 
 #pragma once
 
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Components/GameFrameworkInitStateInterface.h"
 
-#include "Engine/HitResult.h"
-#include "Math/Rotator.h"
-#include "Math/UnrealMathSSE.h"
-#include "UObject/UObjectGlobals.h"
+#include "Components/GameFrameworkInitStateInterface.h"
 
 #include "BECharacterMovementComponent.generated.h"
 
-class ABECharacter;
-class UBEAbilitySystemComponent;
-class UBECharacterMovementFragment;
 class UBEMovementSet;
-class UAnimMontage;
-class UObject;
-struct FOnAttributeChangeData;
-struct FFrame;
+class UBECharacterMovementConfigs;
+struct GameplayTag;
+struct FMovementGaitConfigs;
 
 
 /**
- * FBECharacterGroundInfo
- *
- *	キャラクターが立っている地面の状態
+ * FBECharacterNetworkMoveData
  */
-USTRUCT(BlueprintType)
-struct FBECharacterGroundInfo
+class BECORE_API FBECharacterNetworkMoveData : public FCharacterNetworkMoveData
 {
-	GENERATED_BODY()
+private:
+	using Super = FCharacterNetworkMoveData;
 
-	FBECharacterGroundInfo()
-		: LastUpdateFrame(0)
-		, GroundDistance(0.0f)
-	{}
+public:
+	FGameplayTag RotationMode;
+	FGameplayTag Stance;
+	FGameplayTag MaxAllowedGait;
 
-	uint64 LastUpdateFrame;
+public:
+	virtual void ClientFillNetworkMoveData(const FSavedMove_Character& Move, ENetworkMoveType MoveType) override;
+	virtual bool Serialize(UCharacterMovementComponent& Movement, FArchive& Archive, UPackageMap* Map, ENetworkMoveType MoveType) override;
+};
 
-	UPROPERTY(BlueprintReadOnly)
-	FHitResult GroundHitResult;
 
-	UPROPERTY(BlueprintReadOnly)
-	float GroundDistance;
+/**
+ * FBECharacterNetworkMoveDataContainer
+ */
+class BECORE_API FBECharacterNetworkMoveDataContainer : public FCharacterNetworkMoveDataContainer
+{
+public:
+	FBECharacterNetworkMoveDataContainer();
+
+public:
+	FBECharacterNetworkMoveDataContainer MoveData[3];
+};
+
+
+/**
+ * FBESavedMove
+ */
+class BECORE_API FBESavedMove : public FSavedMove_Character
+{
+private:
+	using Super = FSavedMove_Character;
+
+public:
+	FGameplayTag RotationMode;
+	FGameplayTag Stance;
+	FGameplayTag MaxAllowedGait;
+
+public:
+	virtual void Clear() override;
+
+	virtual void SetMoveFor(ACharacter* Character, float NewDeltaTime, const FVector& NewAcceleration,
+		FNetworkPredictionData_Client_Character& PredictionData) override;
+
+	virtual bool CanCombineWith(const FSavedMovePtr& NewMovePtr, ACharacter* Character, float MaxDelta) const override;
+
+	virtual void CombineWith(const FSavedMove_Character* PreviousMove, ACharacter* Character,
+		APlayerController* Player, const FVector& PreviousStartLocation) override;
+
+	virtual void PrepMoveFor(ACharacter* Character) override;
+};
+
+
+/**
+ * FBENetworkPredictionData
+ */
+class BECORE_API FBENetworkPredictionData : public FNetworkPredictionData_Client_Character
+{
+private:
+	using Super = FNetworkPredictionData_Client_Character;
+
+public:
+	explicit FBENetworkPredictionData(const UCharacterMovementComponent& Movement);
+
+	virtual FSavedMovePtr AllocateNewMove() override;
 };
 
 
@@ -54,58 +95,127 @@ struct FBECharacterGroundInfo
  *	Character の Movement 関係の処理を担当するコンポーネント
  */
 UCLASS()
-class BECORE_API UBECharacterMovementComponent : public UCharacterMovementComponent, public IGameFrameworkInitStateInterface
+class BECORE_API UBECharacterMovementComponent 
+	: public UCharacterMovementComponent
+	, public IGameFrameworkInitStateInterface
 {
 	GENERATED_BODY()
 
-	/**
-	 * FSavedMove_BECharacter
-	 *
-	 *	ネットワークにレプリケートするために移動データを保存するためのクラス
-	 */
-	class FSavedMove_BECharacter : public FSavedMove_Character
-	{
-	public:
-		typedef FSavedMove_Character Super;
-
-		enum CompressedFlags
-		{
-			FLAG_Sprint		= 0x10,
-			FLAG_Target		= 0x20,
-			FLAG_Custom_2	= 0x40,
-			FLAG_Custom_3	= 0x80,
-		};
-
-		virtual void Clear() override;
-		virtual uint8 GetCompressedFlags() const override;
-		virtual bool CanCombineWith(const FSavedMovePtr& NewMove, ACharacter* Character, float MaxDelta) const override;
-		virtual void SetMoveFor(ACharacter* Character, float InDeltaTime, FVector const& NewAccel, class FNetworkPredictionData_Client_Character& ClientData) override;
-		virtual void PrepMoveFor(ACharacter* Character) override;
-
-		// Flags
-		uint8 Saved_bWantsToSprint		: 1;
-		uint8 Saved_bWantsToTarget	: 1;
-	};
-
-	/**
-	 * FNetworkPredictionData_Client_BECharacter
-	 */
-	class FNetworkPredictionData_Client_BECharacter : public FNetworkPredictionData_Client_Character
-	{
-	public:
-		FNetworkPredictionData_Client_BECharacter(const UCharacterMovementComponent& ClientMovement);
-
-		typedef FNetworkPredictionData_Client_Character Super;
-
-		// Allocates a new copy of our custom saved move
-		virtual FSavedMovePtr AllocateNewMove() override;
-	};
+	friend FBESavedMove;
 	
 public:
 	UBECharacterMovementComponent(const FObjectInitializer& ObjectInitializer);
 
+	//
 	// このコンポーネントを実装する際の FeatureName
+	// 
 	static const FName NAME_ActorFeatureName;
+
+#if WITH_EDITOR
+	virtual bool CanEditChange(const FProperty* Property) const override;
+#endif
+
+
+protected:
+	FBECharacterNetworkMoveDataContainer MoveDataContainer;
+
+	//
+	// Character の移動設定
+	//
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Configs")
+	TObjectPtr<UBECharacterMovementConfigs> MovementConfigs;
+
+public:
+	//
+	// MovementMode をロックするか
+	//
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	bool bMovementModeLocked;
+
+	//
+	// ひとつ前の更新の ControlRotation
+	// Locally Controlled の Character のみ更新される。
+	//
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	FRotator PreviousControlRotation;
+
+	//
+	// めり込み時の位置補正
+	//
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	FVector PendingPenetrationAdjustment;
+
+	//
+	// めり込み時の位置補正前の速度
+	//
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	FVector PrePenetrationAdjustmentVelocity;
+
+	//
+	// めり込み時の位置補正前の速度が有効かどうか
+	//
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	bool bPrePenetrationAdjustmentVelocityValid;
+
+
+protected:
+	//
+	// Character に適応される GravityScale の倍率
+	//
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	float GravityScaleScale = 1.0;
+
+	//
+	// Character に適応される GroundFriction の倍率
+	//
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	float GroundFrictionScale = 1.0;
+
+	//
+	// Character に適応される MoveSpeed の倍率
+	//
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	float MoveSpeedScale = 1.0;
+
+	//
+	// Character に適応される JumpPower の倍率
+	//
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	float JumpPowerScale = 1.0;
+
+	//
+	// Character に適応される AirControl の倍率
+	//
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	float AirControlScale = 1.0;
+
+
+protected:
+	//
+	// Owning Character が登録されている AbilitySystem
+	//
+	UPROPERTY(Transient)
+	TObjectPtr<UBEAbilitySystemComponent> AbilitySystemComponent;
+
+	//
+	// 移動に関係する Attribute Set
+	//
+	UPROPERTY(Transient)
+	TObjectPtr<const UBEMovementSet> MovementSet;
+
+
+public:
+	/**
+	 *	このコンポーネントを所有する BECharacter を取得する
+	 */
+	ABECharacter* GetBECharacterOwner() const { return Cast<ABECharacter>(CharacterOwner); }
+
+	/**
+	 *	Character からこのコンポーネントを取得する
+	 */
+	UFUNCTION(BlueprintPure, Category = "Character")
+	static UBECharacterMovementComponent* FindCharacterMovementComponent(const ABECharacter* Character);
+
 
 protected:
 	virtual void OnRegister() override;
@@ -116,18 +226,6 @@ protected:
 	void InitializeWithAbilitySystem(UBEAbilitySystemComponent* InASC);
 	void UninitializeFromAbilitySystem();
 	void InitializeGameplayTags();
-
-	UPROPERTY(Transient)
-	TObjectPtr<UBEAbilitySystemComponent> AbilitySystemComponent;
-
-	UPROPERTY(Transient)
-	TObjectPtr<const UBEMovementSet> MovementSet;
-
-	UPROPERTY(Transient)
-	bool bHasReplicatedAcceleration = false;
-
-	UPROPERTY(Transient)
-	FBECharacterGroundInfo CachedGroundInfo;
 
 	
 public:
@@ -141,114 +239,189 @@ public:
 
 
 protected:
-	virtual void HandleGravityScaleChanged(const FOnAttributeChangeData& ChangeData);
-	virtual void HandleGroundFrictionChanged(const FOnAttributeChangeData& ChangeData);
-
-	virtual void HandleOverallSpeedMultiplierChanged(const FOnAttributeChangeData& ChangeData);
-	virtual void HandleWalkSpeedChanged(const FOnAttributeChangeData& ChangeData);
-	virtual void HandleWalkSpeedCrouchedChanged(const FOnAttributeChangeData& ChangeData);
-	virtual void HandleWalkSpeedSprintingChanged(const FOnAttributeChangeData& ChangeData);
-	virtual void HandleWalkSpeedTargetingChanged(const FOnAttributeChangeData& ChangeData);
-	virtual void HandleSwimSpeedChanged(const FOnAttributeChangeData& ChangeData);
-	virtual void HandleFlySpeedChanged(const FOnAttributeChangeData& ChangeData);
-
-	virtual void HandleJumpPowerChanged(const FOnAttributeChangeData& ChangeData);
-	virtual void HandleAirControlChanged(const FOnAttributeChangeData& ChangeData);
+	virtual void HandleGravityScaleScaleChanged(const FOnAttributeChangeData& ChangeData);
+	virtual void HandleGroundFrictionScaleChanged(const FOnAttributeChangeData& ChangeData);
+	virtual void HandleMoveSpeedScaleChanged(const FOnAttributeChangeData& ChangeData);
+	virtual void HandleJumpPowerScaleChanged(const FOnAttributeChangeData& ChangeData);
+	virtual void HandleAirControlScaleChanged(const FOnAttributeChangeData& ChangeData);
 
 
 public:
-	void SetReplicatedAcceleration(const FVector& InAcceleration);
-	virtual class FNetworkPredictionData_Client* GetPredictionData_Client() const override;
-	virtual void UpdateFromCompressedFlags(uint8 Flags) override;
-	virtual void SimulateMovement(float DeltaTime) override;
 	virtual void UpdateCharacterStateBeforeMovement(float DeltaSeconds) override;
 
-	virtual bool CanCrouchInCurrentState() const override;
-
-	virtual bool CanAttemptJump() const override;
-	virtual bool IsMovingOnGround() const override;
-	virtual bool IsMovingInAir() const;
-
-	virtual FRotator GetDeltaRotation(float DeltaTime) const override;
-	virtual float GetMaxSpeed() const override;
+	virtual void SetMovementMode(EMovementMode NewMovementMode, uint8 NewCustomMode = 0) override;
+	virtual void UpdateBasedRotation(FRotator& FinalRotation, const FRotator& ReducedRotation) override;
+	virtual void CalcVelocity(float DeltaTime, float Friction, bool bFluid, float BrakingDeceleration) override;
+	virtual float GetMaxAcceleration() const override;
 	virtual float GetMaxBrakingDeceleration() const override;
+	virtual float GetMaxSpeed() const override;
 
-	UFUNCTION(BlueprintCallable, Category = "CharacterMovement")
-	virtual float GetSpeed() const;
+	virtual void PhysicsRotation(float DeltaTime) override;
 
-	UFUNCTION(BlueprintCallable, Category = "CharacterMovement")
-	virtual float GetSpeed2D() const;
+	virtual void ComputeFloorDist(const FVector& CapsuleLocation, float LineDistance, float SweepDistance, FFindFloorResult& OutFloorResult,
+		float SweepRadius, const FHitResult* DownwardSweepResult) const override;
+
+	virtual FNetworkPredictionData_Client* GetPredictionData_Client() const override;
 
 protected:
-	void SetMovementModeTag(EMovementMode InMovementMode, uint8 InCustomMovementMode, bool bTagEnabled);
+	virtual void ControlledCharacterMove(const FVector& InputVector, float DeltaTime) override;
+	virtual FVector ConsumeInputVector() override;
 
+	virtual void PhysWalking(float DeltaTime, int32 Iterations) override;
+	virtual void PhysNavWalking(float DeltaTime, int32 Iterations) override;
+	virtual void PhysCustom(float DeltaTime, int32 Iterations) override;
+
+	virtual void PerformMovement(float DeltaTime) override;
+
+	virtual void SmoothClientPosition(float DeltaTime) override;
+	virtual void MoveAutonomous(float ClientTimeStamp, float DeltaTime, uint8 CompressedFlags, const FVector& NewAcceleration) override;
+
+private:
+	bool TryGetMovementBaseRotationSpeed(const FBasedMovementInfo& BasedMovement, FRotator& RotationSpeed);
+	void SavePenetrationAdjustment(const FHitResult& Hit);
+	void ApplyPendingPenetrationAdjustment();
+
+public:
+	void SetMovementModeLocked(bool bNewMovementModeLocked);
+	bool TryConsumePrePenetrationAdjustmentVelocity(FVector& OutVelocity);
+
+
+	//////////////////////////////////////////
+	// Locomotion Mode
+protected:
 	virtual void OnMovementModeChanged(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode) override;
-	virtual void PhysCustom(float deltaTime, int32 Iterations);
 
 
-public:
-	uint8 bWantsToSprint : 1;
-
-	UFUNCTION(BlueprintCallable, Category = "Character Movement")
-	virtual bool IsSprinting() const;
-
-	virtual bool CanSprintInCurrentState() const;
-
-	virtual void Sprint(bool bClientSimulation);
-	virtual void UnSprint(bool bClientSimulation);
-
-public:
-	uint8 bWantsToTarget : 1;
-
-	UFUNCTION(BlueprintCallable, Category = "Character Movement")
-	virtual bool IsTargeting() const;
-
-	virtual bool CanTargetInCurrentState() const;
-
-	virtual void Target(bool bClientSimulation);
-	virtual void UnTarget(bool bClientSimulation);
-
+	//////////////////////////////////////////
+	// Rotation Mode
+protected:
+	//
+	// Character の現在の回転方式
+	// (Velocity Direction, View Direction, Aiming ...)
+	// 
+	// この Tag は AbilitySystem によって Active な Tag としても適応される。
+	//
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	FGameplayTag RotationMode;
 
 public:
-	ABECharacter* GetBECharacterOwner() const { return Cast<ABECharacter>(CharacterOwner); }
+	/**
+	 * SetRotationMode
+	 *
+	 *  現在の Rotation Mode を設定する
+	 */
+	void SetRotationMode(const FGameplayTag& NewRotationMode);
 
-	UFUNCTION(BlueprintPure, Category = "Character")
-	static UBECharacterMovementComponent* FindCharacterMovementComponent(const ABECharacter* Character);
+
+	//////////////////////////////////////////
+	// Stance
+protected:
+	//
+	// Character の現在の Stance 状態
+	// (Standing, Crouching ...)
+	// 
+	// この Tag は AbilitySystem によって Active な Tag としても適応される。
+	//
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	FGameplayTag Stance;
+
+public:
+	/**
+	 * SetStance
+	 *
+	 *  現在の Stance を設定する
+	 */
+	void SetStance(const FGameplayTag& NewStance);
+
+
+	//////////////////////////////////////////
+	// Gait
+protected:
+	//
+	// Character の現在の状態の Gait 設定
+	//
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	FMovementGaitConfigs GaitConfigs;
+
+	//
+	// Character の最大 Gait 状態
+	// (Walk, Run, Sprint ...)
+	//
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State", Transient)
+	FGameplayTag MaxAllowedGait;
+
+public:
+	/**
+	 * SetMaxAllowedGait
+	 *
+	 *  現在の MaxAllowedGait を設定する
+	 */
+	void SetMaxAllowedGait(const FGameplayTag& NewMaxAllowedGait);
 
 	/**
-	 * GetGroundInfo
-	 * 
-	 *  現在の地面の情報を返します。古い場合は、これを呼び出すと地面情報が更新される
+	 * CalculateGaitAmount
+	 *
+	 *  現在の移動速度に基づいた Gait の重み値
 	 */
-	UFUNCTION(BlueprintCallable, Category = "CharacterMovement")
-	const FBECharacterGroundInfo& GetGroundInfo();
+	virtual float CalculateGaitAmount() const;
+
+	/**
+	 * RefreshGaitConfigs
+	 * 
+	 *  現在の状態における Gait 設定を更新する
+	 *  この関数は Stance または RotationMode が更新されたときに呼び出される必要がある
+	 */
+	virtual void RefreshGaitConfigs();
+
+	/**
+	 * RefreshMaxWalkSpeed
+	 *
+	 *  現在の Gait における 移動速度を更新する
+	 *  MaxAllowedGait または GaitConfigs が更新されたときに呼び出される必要がある
+	 */
+	virtual void RefreshMaxWalkSpeed();
 
 
-	//==========================================================
-	//	Movement Settings
-	// 
-	// ここからは Movement 処理に関係する定数の定義を行う
-	//==========================================================
 
+	//////////////////////////////////////////
+	// Rotation
 public:
-	// 移動速度全体に影響する速度倍率
-	UPROPERTY(Category = "Character Movement (General Settings)", EditAnywhere, BlueprintReadWrite, meta = (DisplayAfter = "GravityScale", ClampMin = "0", UIMin = "0", ForceUnits = "x"))
-	float OverallMaxSpeedMultiplier = 1.0;
+	void CharacterMovement_OnPhysicsRotation(float DeltaTime);
 
-	// Movement Mode が Walking かつ走り状態の最大移動速度
-	UPROPERTY(Category = "Character Movement: Walking", EditAnywhere, BlueprintReadWrite, meta = (DisplayAfter = "MaxWalkSpeedCrouched", ClampMin = "0", UIMin = "0", ForceUnits = "cm/s"))
-	float MaxWalkSpeedSprinting = 550;
+private:
+	void RefreshGroundedRotation(float DeltaTime);
 
-	// Movement Mode が Walking かつターゲット状態の最大移動速度
-	UPROPERTY(Category = "Character Movement: Walking", EditAnywhere, BlueprintReadWrite, meta = (DisplayAfter = "MaxWalkSpeedCrouched", ClampMin = "0", UIMin = "0", ForceUnits = "cm/s"))
-	float MaxWalkSpeedTargeting = 250;
+protected:
+	virtual bool RefreshCustomGroundedMovingRotation(float DeltaTime);
 
-	// 空中でしゃがむことができるかどうか
-	UPROPERTY(Category = "Character Movement: Jumping / Falling", EditAnywhere, BlueprintReadWrite)
-	uint8 bCanCrouchInAir : 1;
+	virtual bool RefreshCustomGroundedNotMovingRotation(float DeltaTime);
 
-	// CustomMovementMode の Movement 処理
-	// 配列の順番が CustomMovement の番号と一致する
-	UPROPERTY(EditDefaultsOnly, Category = "Inventory", Instanced)
-	TArray<TObjectPtr<UBECharacterMovementFragment>> Fragments;
+	void RefreshGroundedMovingAimingRotation(float DeltaTime);
+
+	void RefreshGroundedNotMovingAimingRotation(float DeltaTime);
+
+	float CalculateRotationInterpolationSpeed() const;
+
+private:
+	void ApplyRotationYawSpeed(float DeltaTime);
+
+	void RefreshInAirRotation(float DeltaTime);
+
+protected:
+	virtual bool RefreshCustomInAirRotation(float DeltaTime);
+
+	void RefreshInAirAimingRotation(float DeltaTime);
+
+	void RefreshRotation(float TargetYawAngle, float DeltaTime, float RotationInterpolationSpeed);
+
+	void RefreshRotationExtraSmooth(float TargetYawAngle, float DeltaTime,
+		float RotationInterpolationSpeed, float TargetYawAngleRotationSpeed);
+
+	void RefreshRotationInstant(float TargetYawAngle, ETeleportType Teleport = ETeleportType::None);
+
+	void RefreshTargetYawAngleUsingLocomotionRotation();
+
+	void RefreshTargetYawAngle(float TargetYawAngle);
+
+	void RefreshViewRelativeTargetYawAngle();
 };
