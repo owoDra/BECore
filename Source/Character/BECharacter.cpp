@@ -5,7 +5,9 @@
 #include "Character/Component/BEPawnBasicComponent.h"
 #include "Character/Component/BECharacterMovementComponent.h"
 #include "Character/Component/BEPawnCameraComponent.h"
-#include "Character/Movement/BECharacterMovementFragment.h"
+#include "Character/Animation/BECharacterAnimInstance.h"
+#include "Character/Movement/BEMovementMathLibrary.h"
+#include "Character/Movement/State/BEViewState.h"
 #include "Ability/BEAbilitySystemComponent.h"
 #include "Player/BEPlayerController.h"
 #include "Player/BEPlayerState.h"
@@ -47,13 +49,8 @@
 
 /////////////////////////////////////////////////////////////////////////////////
 
-static FName NAME_BECharacterCollisionProfile_Capsule(TEXT("BEPawnCapsule"));
-static FName NAME_BECharacterCollisionProfile_Mesh(TEXT("BEPawnMesh"));
-
-namespace BECharacterConstants
-{
-	constexpr auto TeleportDistanceThresholdSquared{ FMath::Square(50.0f) };
-}
+static const FName NAME_BECharacterCollisionProfile_Capsule(TEXT("BEPawnCapsule"));
+static const FName NAME_BECharacterCollisionProfile_Mesh(TEXT("BEPawnMesh"));
 
 /////////////////////////////////////////////////////////////////////////////////
 
@@ -63,7 +60,7 @@ ABECharacter::ABECharacter(const FObjectInitializer& ObjectInitializer)
 	// Tickを無効化。できる限り使用しない
 	PrimaryActorTick.bCanEverTick = false;
 	PrimaryActorTick.bStartWithTickEnabled = false;
-
+	
 	// Controller の回転を適応させない
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -120,19 +117,6 @@ void ABECharacter::GetLifetimeReplicatedProps(TArray< FLifetimeProperty >& OutLi
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	FDoRepLifetimeParams Parameters;
-	Parameters.bIsPushBased = true;
-
-	Parameters.Condition = COND_SkipOwner;
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredStance, Parameters);
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredGait, Parameters);
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredRotationMode, Parameters);
-
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ReplicatedViewRotation, Parameters);
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, InputDirection, Parameters);
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredVelocityYawAngle, Parameters);
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, RagdollTargetLocation, Parameters);
-
 	DOREPLIFETIME(ThisClass, MyTeamID);
 }
 
@@ -140,7 +124,7 @@ void ABECharacter::PostNetReceiveLocationAndRotation()
 {
 	// この関数はシミュレートされたプロキシ上でのみ呼び出されるため、ここでロールを確認する必要はない
 
-	const FVector PreviousLocation = GetActorLocation();
+	const auto PreviousLocation{ GetActorLocation() };
 
 	// サーバーがレプリケートした回転を無視して Character 自体が回転を完全に制御する
 
@@ -150,20 +134,24 @@ void ABECharacter::PostNetReceiveLocationAndRotation()
 
 	// シミュレートされたプロキシのテレポートを検出する
 
-	bool bTeleported = static_cast<bool>(bSimGravityDisabled);
+	auto bTeleported{ static_cast<bool>(bSimGravityDisabled) };
 
 	if (!bTeleported && !ReplicatedBasedMovement.HasRelativeLocation())
 	{
 		const auto NewLocation{ FRepMovement::RebaseOntoLocalOrigin(GetReplicatedMovement().Location, this) };
 
-		bTeleported |= FVector::DistSquared(PreviousLocation, NewLocation) > BECharacterConstants::TeleportDistanceThresholdSquared;
+		bTeleported |= FVector::DistSquared(PreviousLocation, NewLocation) > UBEMovementMath::TeleportDistanceThresholdSquared;
 	}
 
 	if (bTeleported)
 	{
-		if (UBEAnimInstance* AnimInstance = IBEPawnMeshAssistInterface::Execute_GetTPPAnimInstance(this);)
+		UBEAnimInstance* BEAnimIns{ nullptr };
+
+		IBEPawnMeshAssistInterface::Execute_GetMainAnimInstance(this, BEAnimIns);
+
+		if (UBECharacterAnimInstance* BECharaAnimIns = Cast<UBECharacterAnimInstance>(BEAnimIns))
 		{
-			AnimInstance->MarkTeleported();
+			BECharaAnimIns->MarkPendingUpdate();
 		}
 	}
 }
@@ -172,7 +160,7 @@ void ABECharacter::OnRep_ReplicatedBasedMovement()
 {
 	// この関数はシミュレートされたプロキシ上でのみ呼び出されるため、ここでロールを確認する必要はない
 
-	const FVector PreviousLocation = GetActorLocation();
+	const auto PreviousLocation{ GetActorLocation() };
 
 	// サーバーがレプリケートした回転を無視して Character 自体が回転を完全に制御する
 
@@ -193,20 +181,24 @@ void ABECharacter::OnRep_ReplicatedBasedMovement()
 
 	// シミュレートされたプロキシのテレポートを検出する
 
-	bool bTeleported = static_cast<bool>(bSimGravityDisabled);
+	auto bTeleported{ static_cast<bool>(bSimGravityDisabled) };
 
 	if (!bTeleported && BasedMovement.HasRelativeLocation())
 	{
-		const FVector NewLocation = GetCharacterMovement()->OldBaseLocation + GetCharacterMovement()->OldBaseQuat.RotateVector(BasedMovement.Location);
+		const auto NewLocation{ GetCharacterMovement()->OldBaseLocation + GetCharacterMovement()->OldBaseQuat.RotateVector(BasedMovement.Location) };
 
-		bTeleported |= FVector::DistSquared(PreviousLocation, NewLocation) > BECharacterConstants::TeleportDistanceThresholdSquared;
+		bTeleported |= FVector::DistSquared(PreviousLocation, NewLocation) > UBEMovementMath::TeleportDistanceThresholdSquared;
 	}
 
 	if (bTeleported)
 	{
-		if (UBEAnimInstance* AnimInstance = IBEPawnMeshAssistInterface::Execute_GetTPPAnimInstance(this);)
+		UBEAnimInstance* BEAnimIns{ nullptr };
+
+		IBEPawnMeshAssistInterface::Execute_GetMainAnimInstance(this, BEAnimIns);
+
+		if (UBECharacterAnimInstance* BECharaAnimIns = Cast<UBECharacterAnimInstance>(BEAnimIns))
 		{
-			AnimInstance->MarkTeleported();
+			BECharaAnimIns->MarkPendingUpdate();
 		}
 	}
 }
@@ -216,47 +208,14 @@ void ABECharacter::OnRep_ReplicatedBasedMovement()
 
 #pragma region Initialize and Uninitialize
 
-void ABECharacter::PreRegisterAllComponents()
-{
-	// Component が最新のデータを取得できるように
-	// Component の初期化前にデフォルト値を設定する
-
-	RotationMode	= DesiredRotationMode;
-	Stance			= DesiredStance;
-	Gait			= DesiredGait;
-
-	SetReplicatedViewRotation(Super::GetViewRotation().GetNormalized());
-
-	ViewState.NetworkSmoothing.InitialRotation = ReplicatedViewRotation;
-	ViewState.NetworkSmoothing.Rotation = ReplicatedViewRotation;
-	ViewState.Rotation = ReplicatedViewRotation;
-	ViewState.PreviousYawAngle = UE_REAL_TO_FLOAT(ReplicatedViewRotation.Yaw);
-
-	const auto& ActorTransform{ GetActorTransform() };
-
-	LocomotionState.Location = ActorTransform.GetLocation();
-	LocomotionState.RotationQuaternion = ActorTransform.GetRotation();
-	LocomotionState.Rotation = GetActorRotation();
-	LocomotionState.PreviousYawAngle = UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw);
-
-	RefreshTargetYawAngleUsingLocomotionRotation();
-
-	LocomotionState.InputYawAngle = UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw);
-	LocomotionState.VelocityYawAngle = UE_REAL_TO_FLOAT(LocomotionState.Rotation.Yaw);
-
-	Super::PreRegisterAllComponents();
-}
-
 void ABECharacter::PostInitializeComponents()
 {
 	TArray<USkeletalMeshComponent*> Meshes;
 	IBEPawnMeshAssistInterface::Execute_GetMeshes(this, Meshes);
-	for (USkeletalMeshComponent* Mesh : Meshes)
+	for (USkeletalMeshComponent* Each : Meshes)
 	{
-		Mesh->AddTickPrerequisiteActor(this);
+		Each->AddTickPrerequisiteActor(this);
 	}
-
-	BECharacterMovement->OnPhysicsRotation.AddUObject(this, &ThisClass::CharacterMovement_OnPhysicsRotation);
 
 	Super::PostInitializeComponents();
 }
@@ -264,7 +223,7 @@ void ABECharacter::PostInitializeComponents()
 
 void ABECharacter::NotifyControllerChanged()
 {
-	const FGenericTeamId OldTeamId = GetGenericTeamId();
+	const auto OldTeamId{ GetGenericTeamId() };
 
 	Super::NotifyControllerChanged();
 
@@ -279,13 +238,6 @@ void ABECharacter::NotifyControllerChanged()
 	}
 }
 
-
-void ABECharacter::Restart()
-{
-	Super::Restart();
-
-	ApplyDesiredStance();
-}
 
 void ABECharacter::Reset()
 {
@@ -304,12 +256,12 @@ void ABECharacter::DisableMovementAndCollision()
 		Controller->SetIgnoreMoveInput(true);
 	}
 
-	UCapsuleComponent* CapsuleComp = GetCapsuleComponent();
+	auto* CapsuleComp{ GetCapsuleComponent() };
 	check(CapsuleComp);
 	CapsuleComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	CapsuleComp->SetCollisionResponseToAllChannels(ECR_Ignore);
 
-	UBECharacterMovementComponent* BEMoveComp = CastChecked<UBECharacterMovementComponent>(GetCharacterMovement());
+	auto* BEMoveComp{ CastChecked<UBECharacterMovementComponent>(GetCharacterMovement()) };
 	BEMoveComp->StopMovementImmediately();
 	BEMoveComp->DisableMovement();
 }
@@ -338,8 +290,7 @@ void ABECharacter::UninitAndDestroy()
 
 void ABECharacter::BeginPlay()
 {
-	ensureMsgf(!bUseControllerRotationPitch && !bUseControllerRotationYaw && !bUseControllerRotationRoll, 
-				TEXT("bUseControllerRotationXXX must be turned off!"));
+	ensureMsgf(!bUseControllerRotationPitch && !bUseControllerRotationYaw && !bUseControllerRotationRoll, TEXT("bUseControllerRotationXXX must be turned off!"));
 
 	Super::BeginPlay();
 
@@ -349,26 +300,30 @@ void ABECharacter::BeginPlay()
 		{
 			if (TeleportType != ETeleportType::None)
 			{
-				if (UBEAnimInstance* AnimInstance = IBEPawnMeshAssistInterface::Execute_GetTPPAnimInstance(this))
+				UBEAnimInstance* BEAnimIns{ nullptr };
+
+				IBEPawnMeshAssistInterface::Execute_GetMainAnimInstance(this, BEAnimIns);
+
+				if (UBECharacterAnimInstance* BECharaAnimIns = Cast<UBECharacterAnimInstance>(BEAnimIns))
 				{
-					AnimInstance->MarkTeleported();
+					BECharaAnimIns->MarkPendingUpdate();
 				}
 			}
 		});
 	}
 
-	RefreshUsingAbsoluteRotation();
-	RefreshVisibilityBasedAnimTickOption();
+	GetBECharacterMovement()->UpdateUsingAbsoluteRotation();
+	GetBECharacterMovement()->UpdateVisibilityBasedAnimTickOption();
 }
 
 void ABECharacter::PossessedBy(AController* NewController)
 {
-	const FGenericTeamId OldTeamID = MyTeamID;
+	const auto OldTeamID{ MyTeamID };
 
 	Super::PossessedBy(NewController);
 
-	RefreshUsingAbsoluteRotation();
-	RefreshVisibilityBasedAnimTickOption();
+	GetBECharacterMovement()->UpdateUsingAbsoluteRotation();
+	GetBECharacterMovement()->UpdateVisibilityBasedAnimTickOption();
 
 	CharacterBasic->HandleControllerChanged();
 
@@ -383,10 +338,10 @@ void ABECharacter::PossessedBy(AController* NewController)
 
 void ABECharacter::UnPossessed()
 {
-	AController* const OldController = Controller;
+	AController* OldController{ Controller };
 
 	// Team の変更のリッスンを終了する
-	const FGenericTeamId OldTeamID = MyTeamID;
+	const auto OldTeamID{ MyTeamID };
 	if (IBETeamAgentInterface* ControllerAsTeamProvider = Cast<IBETeamAgentInterface>(OldController))
 	{
 		ControllerAsTeamProvider->GetTeamChangedDelegateChecked().RemoveAll(this);
@@ -425,215 +380,6 @@ void ABECharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 #pragma endregion
 
 
-#pragma region Movement Base
-
-void ABECharacter::RefreshUsingAbsoluteRotation() const
-{
-	const bool bNotDedicatedServer						= !IsNetMode(NM_DedicatedServer);
-	const bool bAutonomousProxyOnListenServer			= (IsNetMode(NM_ListenServer) && (GetRemoteRole() == ROLE_AutonomousProxy));
-	const bool bNonLocallyControllerCharacterWithURO	= (GetMesh()->ShouldUseUpdateRateOptimizations() && !IsValid(GetInstigatorController<APlayerController>()));
-
-	GetMesh()->SetUsingAbsoluteRotation(bNotDedicatedServer && (bAutonomousProxyOnListenServer || bNonLocallyControllerCharacterWithURO));
-}
-
-void ABECharacter::RefreshVisibilityBasedAnimTickOption() const
-{
-	const EVisibilityBasedAnimTickOption DefaultTickOption = GetClass()->GetDefaultObject<ABECharacter>()->GetMesh()->VisibilityBasedAnimTickOption;
-
-	// キャラクタがリモートクライアントによって制御されているときは、サーバ上でポーズが常にチェックされていることを確認しないと
-	// 何らかの問題が発生する可能性があります (ジッタなど)
-
-	const EVisibilityBasedAnimTickOption TargetTickOption = IsNetMode(NM_Standalone) || GetLocalRole() <= ROLE_AutonomousProxy ||
-		(GetRemoteRole() != ROLE_AutonomousProxy) ? EVisibilityBasedAnimTickOption::OnlyTickMontagesWhenNotRendered : EVisibilityBasedAnimTickOption::AlwaysTickPose;
-
-	// 少なくとも、対象のtickオプションがプラグインで正しく動作するために必要でない場合は、デフォルトのtickオプションを維持する
-
-	GetMesh()->VisibilityBasedAnimTickOption = TargetTickOption <= DefaultTickOption ? TargetTickOption : DefaultTickOption;
-}
-
-void ABECharacter::RefreshMovementBase()
-{
-	if (BasedMovement.MovementBase != MovementBase.Primitive ||
-		BasedMovement.BoneName != MovementBase.BoneName)
-	{
-		MovementBase.Primitive = BasedMovement.MovementBase;
-		MovementBase.BoneName = BasedMovement.BoneName;
-		MovementBase.bBaseChanged = true;
-	}
-	else
-	{
-		MovementBase.bBaseChanged = false;
-	}
-
-	MovementBase.bHasRelativeLocation = BasedMovement.HasRelativeLocation();
-	MovementBase.bHasRelativeRotation = MovementBase.bHasRelativeLocation && BasedMovement.bRelativeRotation;
-
-	const FQuat PreviousRotation = MovementBase.Rotation;
-
-	MovementBaseUtility::GetMovementBaseTransform(BasedMovement.MovementBase, BasedMovement.BoneName, MovementBase.Location, MovementBase.Rotation);
-
-	MovementBase.DeltaRotation = MovementBase.bHasRelativeLocation &&
-		!MovementBase.bBaseChanged ? (MovementBase.Rotation * PreviousRotation.Inverse()).Rotator() : FRotator::ZeroRotator;
-}
-
-void ABECharacter::RefreshAnimInstanceMovement()
-{
-	if (!GetMesh()->bRecentlyRendered &&
-		GetMesh()->VisibilityBasedAnimTickOption > EVisibilityBasedAnimTickOption::AlwaysTickPose)
-	{
-		GetMesh()->GetAnimInstance()->MarkPendingUpdate();
-	}
-}
-
-#pragma endregion
-
-
-#pragma region Locomotion Mode
-
-void ABECharacter::SetLocomotionMode(const FGameplayTag& NewLocomotionMode)
-{
-	if (LocomotionMode != NewLocomotionMode)
-	{
-		const auto PreviousLocomotionMode{ LocomotionMode };
-
-		LocomotionMode = NewLocomotionMode;
-
-		OnLocomotionModeChanged(PreviousLocomotionMode);
-	}
-}
-
-void ABECharacter::OnLocomotionModeChanged(const FGameplayTag& PreviousLocomotionMode)
-{
-	ApplyDesiredStance();
-
-	if (LocomotionMode == TAG_Status_LocomotionMode_OnGround && PreviousLocomotionMode == TAG_Status_LocomotionMode_InAir)
-	{
-		// 着地後、最後に入力された方向へのキャラクターの回転をブロックします
-		// 着地アニメーションの再生中に脚が螺旋状にねじれるのを防ぐ
-
-		LocomotionState.bRotationTowardsLastInputDirectionBlocked = true;
-	}
-
-	// AbilitySystem に Tag を追加
-	if (UBEAbilitySystemComponent* BEASC = GetBEAbilitySystemComponent())
-	{
-		BEASC->SetLooseGameplayTagCount(PreviousLocomotionMode, 0);
-		BEASC->SetLooseGameplayTagCount(LocomotionMode, 1);
-	}
-
-	K2_OnLocomotionModeChanged(PreviousLocomotionMode);
-}
-
-#pragma endregion
-
-
-#pragma region Desired Rotation Mode
-
-void ABECharacter::SetDesiredRotationMode(const FGameplayTag& NewDesiredRotationMode)
-{
-	if (DesiredRotationMode != NewDesiredRotationMode)
-	{
-		DesiredRotationMode = NewDesiredRotationMode;
-
-		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredRotationMode, this);
-
-		if (GetLocalRole() == ROLE_AutonomousProxy)
-		{
-			Server_SetDesiredRotationMode(DesiredRotationMode);
-		}
-	}
-}
-
-void ABECharacter::Server_SetDesiredRotationMode_Implementation(const FGameplayTag& NewDesiredRotationMode)
-{
-	SetDesiredRotationMode(NewDesiredRotationMode);
-}
-
-#pragma endregion
-
-
-#pragma region Rotation Mode
-
-void ABECharacter::RefreshRotationMode()
-{
-	SetRotationMode(CalculateAllowedRotationMode());
-}
-
-void ABECharacter::SetRotationMode(const FGameplayTag& NewRotationMode)
-{
-	BECharacterMovement->SetRotationMode(NewRotationMode);
-
-	if (RotationMode != NewRotationMode)
-	{
-		const FGameplayTag PreviousRotationMode = RotationMode;
-
-		RotationMode = NewRotationMode;
-
-		OnRotationModeChanged(PreviousRotationMode);
-	}
-}
-
-FGameplayTag ABECharacter::CalculateAllowedRotationMode() const
-{
-	return DesiredRotationMode;
-}
-
-void ABECharacter::OnRotationModeChanged(const FGameplayTag& PreviousRotationMode)
-{
-	// AbilitySystem に Tag を追加
-	if (UBEAbilitySystemComponent* BEASC = GetBEAbilitySystemComponent())
-	{
-		BEASC->SetLooseGameplayTagCount(PreviousRotationMode, 0);
-		BEASC->SetLooseGameplayTagCount(RotationMode, 1);
-	}
-	
-	K2_OnRotationModeChanged(PreviousRotationMode);
-}
-
-#pragma endregion
-
-
-#pragma region Desired Stance
-
-void ABECharacter::SetDesiredStance(const FGameplayTag& NewDesiredStance)
-{
-	if (DesiredStance != NewDesiredStance)
-	{
-		DesiredStance = NewDesiredStance;
-
-		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredStance, this);
-
-		if (GetLocalRole() == ROLE_AutonomousProxy)
-		{
-			Server_SetDesiredStance(DesiredStance);
-		}
-
-		ApplyDesiredStance();
-	}
-}
-
-void ABECharacter::ApplyDesiredStance()
-{
-	const FGameplayTag AllowedStance = CalculateAllowedStance();
-
-	if (AllowedStance == TAG_Status_Stance_Standing)
-	{
-		UnCrouch();
-	}
-	else if (AllowedStance == TAG_Status_Stance_Crouching)
-	{
-		Crouch();
-	}
-}
-
-void ABECharacter::Server_SetDesiredStance_Implementation(const FGameplayTag& NewDesiredStance)
-{
-	SetDesiredStance(NewDesiredStance);
-}
-
-#pragma endregion
-
-
 #pragma region Stance
 
 bool ABECharacter::CanCrouch() const
@@ -643,7 +389,7 @@ bool ABECharacter::CanCrouch() const
 
 void ABECharacter::OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
 {
-	FNetworkPredictionData_Client_Character* PredictionData = GetCharacterMovement()->GetPredictionData_Client_Character();
+	auto* PredictionData{ GetCharacterMovement()->GetPredictionData_Client_Character() };
 
 	if (PredictionData != nullptr && GetLocalRole() <= ROLE_SimulatedProxy &&
 		ScaledHalfHeightAdjust > 0.0f && IsPlayingNetworkedRootMotionMontage())
@@ -660,12 +406,12 @@ void ABECharacter::OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightA
 
 	Super::OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
 
-	SetStance(TAG_Status_Stance_Crouching);
+	BECharacterMovement->SetStanceIndex(BECharacterMovement->GetDesiredStanceIndex());
 }
 
 void ABECharacter::OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
 {
-	FNetworkPredictionData_Client_Character* PredictionData = GetCharacterMovement()->GetPredictionData_Client_Character();
+	auto* PredictionData{ GetCharacterMovement()->GetPredictionData_Client_Character() };
 
 	if (PredictionData != nullptr && GetLocalRole() <= ROLE_SimulatedProxy &&
 		ScaledHalfHeightAdjust > 0.0f && IsPlayingNetworkedRootMotionMontage())
@@ -678,141 +424,7 @@ void ABECharacter::OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdj
 
 	Super::OnEndCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
 
-	SetStance(TAG_Status_Stance_Standing);
-}
-
-void ABECharacter::SetStance(const FGameplayTag& NewStance)
-{
-	BECharacterMovement->SetStance(NewStance);
-
-	if (Stance != NewStance)
-	{
-		const FGameplayTag PreviousStance = Stance;
-
-		Stance = NewStance;
-
-		OnStanceChanged(PreviousStance);
-	}
-}
-
-FGameplayTag ABECharacter::CalculateAllowedStance() const
-{
-	if (LocomotionMode == TAG_Status_LocomotionMode_OnGround)
-	{
-		if (DesiredStance == TAG_Status_Stance_Standing)
-		{
-			UnCrouch();
-		}
-		else if (DesiredStance == TAG_Status_Stance_Crouching)
-		{
-			Crouch();
-		}
-	}
-	else if (LocomotionMode == TAG_Status_LocomotionMode_InAir)
-	{
-		UnCrouch();
-	}
-}
-
-void ABECharacter::OnStanceChanged(const FGameplayTag& PreviousStance)
-{
-	// AbilitySystem に Tag を追加
-	if (UBEAbilitySystemComponent* BEASC = GetBEAbilitySystemComponent())
-	{
-		BEASC->SetLooseGameplayTagCount(PreviousStance, 0);
-		BEASC->SetLooseGameplayTagCount(Stance, 1);
-	}
-
-	K2_OnStanceChanged(PreviousStance);
-}
-
-#pragma endregion
-
-
-#pragma region Desired Gait
-
-void ABECharacter::SetDesiredGait(const FGameplayTag& NewDesiredGait)
-{
-	if (DesiredGait != NewDesiredGait)
-	{
-		DesiredGait = NewDesiredGait;
-
-		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredGait, this);
-
-		if (GetLocalRole() == ROLE_AutonomousProxy)
-		{
-			Server_SetDesiredGait(DesiredGait);
-		}
-	}
-}
-
-void ABECharacter::Server_SetDesiredGait_Implementation(const FGameplayTag& NewDesiredGait)
-{
-	SetDesiredGait(NewDesiredGait);
-}
-
-#pragma endregion
-
-
-#pragma region Gait
-
-void ABECharacter::RefreshGait()
-{
-	const FGameplayTag MaxAllowedGait = CalculateMaxAllowedGait();
-	
-	BECharacterMovement->SetMaxAllowedGait(MaxAllowedGait);
-
-	SetGait(CalculateActualGait(MaxAllowedGait));
-}
-
-FGameplayTag ABECharacter::CalculateMaxAllowedGait() const
-{
-	if (DesiredGait != TAG_Status_Gait_Sprinting)
-	{
-		return DesiredGait;
-	}
-
-	if (CanSprint())
-	{
-		return TAG_Status_Gait_Sprinting;
-	}
-
-	return TAG_Status_Gait_Running;
-}
-
-FGameplayTag ABECharacter::CalculateActualGait(const FGameplayTag& MaxAllowedGait) const
-{
-
-}
-
-bool ABECharacter::CanSprint() const
-{
-
-}
-
-void ABECharacter::SetGait(const FGameplayTag& NewGait)
-{
-
-}
-
-void ABECharacter::OnGaitChanged(const FGameplayTag& PreviousGait)
-{
-
-}
-
-#pragma endregion
-
-
-#pragma region Input
-
-void ABECharacter::RefreshInput(float DeltaTime)
-{
-
-}
-
-void ABECharacter::SetInputDirection(FVector NewInputDirection)
-{
-
+	BECharacterMovement->SetStanceIndex(BECharacterMovement->GetDesiredStanceIndex());
 }
 
 #pragma endregion
@@ -820,164 +432,74 @@ void ABECharacter::SetInputDirection(FVector NewInputDirection)
 
 #pragma region View
 
-void ABECharacter::CorrectViewNetworkSmoothing(const FRotator& NewViewRotation)
+FRotator ABECharacter::GetViewRotation() const
 {
-
+	return BECharacterMovement->GetViewState().Rotation;
 }
 
-void ABECharacter::RefreshView(float DeltaTime)
+FRotator ABECharacter::GetViewRotationSuperClass() const
 {
+	if (Controller != nullptr)
+	{
+		return Controller->GetControlRotation();
+	}
+	else if (GetLocalRole() < ROLE_Authority)
+	{
+		// check if being spectated
+		for (FConstPlayerControllerIterator Iterator = GetWorld()->GetPlayerControllerIterator(); Iterator; ++Iterator)
+		{
+			APlayerController* PlayerController = Iterator->Get();
+			if (PlayerController &&
+				PlayerController->PlayerCameraManager &&
+				PlayerController->PlayerCameraManager->GetViewTargetPawn() == this)
+			{
+				return PlayerController->BlendedTargetViewRotation;
+			}
+		}
+	}
 
+	return GetActorRotation();
 }
 
-void ABECharacter::RefreshViewNetworkSmoothing(float DeltaTime)
-{
-
-}
-
-void ABECharacter::SetReplicatedViewRotation(const FRotator& NewViewRotation)
-{
-
-}
-
-void ABECharacter::OnReplicated_ReplicatedViewRotation()
-{
-
-}
-
-void ABECharacter::Server_SetReplicatedViewRotation_Implementation(const FRotator& NewViewRotation)
-{
-
-}
 
 #pragma endregion
 
 
-#pragma region Locomotion State
-
-void ABECharacter::RefreshLocomotionEarly()
-{
-
-}
-
-void ABECharacter::RefreshLocomotion(float DeltaTime)
-{
-
-}
-
-void ABECharacter::RefreshLocomotionLate(float DeltaTime)
-{
-
-}
-
-void ABECharacter::RefreshLocomotionLocationAndRotation()
-{
-
-}
-
-void ABECharacter::SetDesiredVelocityYawAngle(float NewDesiredVelocityYawAngle)
-{
-
-}
-
-#pragma endregion
-
-
-#pragma region Jumping
-
-void ABECharacter::Jump()
-{
-
-}
+#pragma region Jump
 
 void ABECharacter::OnJumped_Implementation()
 {
+	Super::OnJumped_Implementation();
 
+	if (IsLocallyControlled())
+	{
+		OnJumpedNetworked();
+	}
+
+	if (GetLocalRole() >= ROLE_Authority)
+	{
+		Multicast_OnJumpedNetworked();
+	}
 }
 
 void ABECharacter::Multicast_OnJumpedNetworked_Implementation()
 {
-
+	if (!IsLocallyControlled())
+	{
+		OnJumpedNetworked();
+	}
 }
 
 void ABECharacter::OnJumpedNetworked()
 {
+	UBEAnimInstance* BEAnimIns{ nullptr };
 
-}
+	IBEPawnMeshAssistInterface::Execute_GetMainAnimInstance(this, BEAnimIns);
 
-#pragma endregion
-
-
-#pragma region Rotation
-
-void ABECharacter::FaceRotation(FRotator Rotation, float DeltaTime)
-{
-	// 何もしない
-}
-
-void ABECharacter::RefreshGroundedRotation(float DeltaTime)
-{
-
-}
-
-void ABECharacter::RefreshInAirRotation(float DeltaTime)
-{
-
-}
-
-float ABECharacter::CalculateRotationInterpolationSpeed() const
-{
-
-}
-
-void ABECharacter::RefreshGroundedMovingAimingRotation(float DeltaTime)
-{
-
-}
-
-void ABECharacter::RefreshGroundedNotMovingAimingRotation(float DeltaTime)
-{
-
-}
-
-void ABECharacter::RefreshInAirAimingRotation(float DeltaTime)
-{
-
-}
-
-void ABECharacter::RefreshRotation(float TargetYawAngle, float DeltaTime, float RotationInterpolationSpeed)
-{
-
-}
-
-void ABECharacter::RefreshRotationExtraSmooth(float TargetYawAngle, float DeltaTime, float RotationInterpolationSpeed, float TargetYawAngleRotationSpeed)
-{
-
-}
-
-void ABECharacter::RefreshRotationInstant(float TargetYawAngle, ETeleportType Teleport)
-{
-
-}
-
-void ABECharacter::RefreshTargetYawAngleUsingLocomotionRotation()
-{
-
-}
-
-void ABECharacter::RefreshTargetYawAngle(float TargetYawAngle)
-{
-
-}
-
-void ABECharacter::RefreshViewRelativeTargetYawAngle()
-{
-
-}
-
-void ABECharacter::ApplyRotationYawSpeed(float DeltaTime)
-{
-
+	if (UBECharacterAnimInstance* BECharaAnimIns = Cast<UBECharacterAnimInstance>(BEAnimIns))
+	{
+		BECharaAnimIns->Jump();
+	}
 }
 
 #pragma endregion
@@ -991,7 +513,7 @@ void ABECharacter::SetGenericTeamId(const FGenericTeamId& NewTeamID)
 	{
 		if (HasAuthority())
 		{
-			const FGenericTeamId OldTeamID = MyTeamID;
+			const auto OldTeamID{ MyTeamID };
 			MyTeamID = NewTeamID;
 			ConditionalBroadcastTeamChanged(this, OldTeamID, MyTeamID);
 		}
@@ -1023,7 +545,7 @@ FGenericTeamId ABECharacter::DetermineNewTeamAfterPossessionEnds(FGenericTeamId 
 
 void ABECharacter::OnControllerChangedTeam(UObject* TeamAgent, int32 OldTeam, int32 NewTeam)
 {
-	const FGenericTeamId MyOldTeamID = MyTeamID;
+	const auto MyOldTeamID{ MyTeamID };
 	MyTeamID = IntegerToGenericTeamId(NewTeam);
 	ConditionalBroadcastTeamChanged(this, MyOldTeamID, MyTeamID);
 }
@@ -1038,36 +560,52 @@ void ABECharacter::OnRep_MyTeamID(FGenericTeamId OldTeamID)
 
 #pragma region Meshes Assist
 
-void ABECharacter::GetMeshes_Implementation(TArray<USkeletalMeshComponent*>& Meshes) const
+void ABECharacter::GetMeshes_Implementation(TArray<USkeletalMeshComponent*>& OutMeshes) const
 {
-	Meshes.Empty();
-	Meshes.Emplace(GetMesh());
+	OutMeshes.Empty();
+	OutMeshes.Emplace(GetMesh());
 }
 
-USkeletalMeshComponent* ABECharacter::GetFPPMesh_Implementation() const
+void ABECharacter::GetFPPMeshes_Implementation(TArray<USkeletalMeshComponent*>& OutMeshes) const
 {
-	return nullptr;
+	OutMeshes.Empty();
 }
 
-USkeletalMeshComponent* ABECharacter::GetTPPMesh_Implementation() const
+void ABECharacter::GetTPPMeshes_Implementation(TArray<USkeletalMeshComponent*>& OutMeshes) const
 {
-	return GetMesh();
+	OutMeshes.Empty();
+	OutMeshes.Emplace(GetMesh());
 }
 
-void ABECharacter::GetMainAnimInstances_Implementation(TArray<UBEAnimInstance*>& Instances) const
+void ABECharacter::GetFPPFirstMesh_Implementation(USkeletalMeshComponent*& OutMesh) const
 {
-	Instances.Empty();
-	Instances.Emplace(Cast<UBEAnimInstance>(GetMesh()->GetAnimInstance()));
+	OutMesh = nullptr;
 }
 
-UBEAnimInstance* ABECharacter::GetFPPAnimInstance_Implementation() const
+void ABECharacter::GetTPPFirstMesh_Implementation(USkeletalMeshComponent*& OutMesh) const
 {
-	return nullptr;
+	OutMesh = GetMesh();
 }
 
-UBEAnimInstance* ABECharacter::GetTPPAnimInstance_Implementation() const
+
+void ABECharacter::GetMainAnimInstance_Implementation(UBEAnimInstance*& OutInstance) const
 {
-	return Cast<UBEAnimInstance>(GetMesh()->GetAnimInstance());
+	OutInstance = Cast<UBEAnimInstance>(GetMesh()->GetAnimInstance());
+}
+
+void ABECharacter::GetSubAnimInstances_Implementation(TArray<UAnimInstance*>& OutInstances) const
+{
+	OutInstances.Empty();
+}
+
+void ABECharacter::GetTPPAnimInstance_Implementation(UAnimInstance*& OutInstance) const
+{
+	OutInstance = GetMesh()->GetAnimInstance();
+}
+
+void ABECharacter::GetFPPAnimInstance_Implementation(UAnimInstance*& OutInstance) const
+{
+	OutInstance = nullptr;
 }
 
 #pragma endregion
@@ -1083,6 +621,11 @@ ABEPlayerController* ABECharacter::GetBEPlayerController() const
 ABEPlayerState* ABECharacter::GetBEPlayerState() const
 {
 	return CastChecked<ABEPlayerState>(GetPlayerState(), ECastCheckedType::NullAllowed);
+}
+
+UBECharacterAnimInstance* ABECharacter::GetBEMainTPPAnimInstance() const
+{
+	return CastChecked<UBECharacterAnimInstance>(GetMesh()->GetAnimInstance(), ECastCheckedType::NullAllowed);
 }
 
 UBEAbilitySystemComponent* ABECharacter::GetBEAbilitySystemComponent() const
@@ -1131,18 +674,6 @@ bool ABECharacter::HasAnyMatchingGameplayTags(const FGameplayTagContainer& TagCo
 	}
 
 	return false;
-}
-
-FCollisionQueryParams ABECharacter::GetIgnoreCharacterParams() const
-{
-	FCollisionQueryParams Params;
-
-	TArray<AActor*> CharacterChildren;
-	GetAllChildActors(CharacterChildren);
-	Params.AddIgnoredActors(CharacterChildren);
-	Params.AddIgnoredActor(this);
-
-	return Params;
 }
 
 #pragma endregion

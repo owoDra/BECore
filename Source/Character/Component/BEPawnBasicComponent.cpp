@@ -183,8 +183,6 @@ void UBEPawnBasicComponent::HandleChangeInitState(UGameFrameworkComponentManager
 			return;
 		}
 
-		InitializeAnimLayers(Pawn);
-
 		ABEPlayerState* BEPS = GetPlayerState<ABEPlayerState>();
 		if (ensure(BEPS))
 		{
@@ -292,29 +290,6 @@ void UBEPawnBasicComponent::HandlePlayerStateReplicated()
 void UBEPawnBasicComponent::HandlePlayerInputComponentSetup()
 {
 	CheckDefaultInitialization();
-}
-
-
-void UBEPawnBasicComponent::InitializeAnimLayers(APawn* InOwningPawn)
-{
-	check(PawnData);
-
-	if (Cast<IBEPawnMeshAssistInterface>(InOwningPawn))
-	{
-		UBEAnimInstance* AnimInstance = nullptr;
-
-		AnimInstance = IBEPawnMeshAssistInterface::Execute_GetTPPAnimInstance(InOwningPawn);
-		if (AnimInstance && PawnData->DefaultTPPAnimLayer)
-		{
-			AnimInstance->LinkAnimClassLayers(PawnData->DefaultTPPAnimLayer);
-		}
-
-		AnimInstance = IBEPawnMeshAssistInterface::Execute_GetFPPAnimInstance(InOwningPawn);
-		if (AnimInstance && PawnData->DefaultFPPAnimLayer)
-		{
-			AnimInstance->LinkAnimClassLayers(PawnData->DefaultFPPAnimLayer);
-		}
-	}
 }
 
 

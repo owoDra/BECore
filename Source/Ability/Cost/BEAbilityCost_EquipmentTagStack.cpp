@@ -1,10 +1,11 @@
-// Copyright owoDra
+﻿// Copyright owoDra
 
 #include "BEAbilityCost_EquipmentTagStack.h"
 
 #include "Item/Equipment/BEGameplayAbility_FromEquipment.h"
 #include "Item/Equipment/BEEquipmentInstance.h"
 #include "Ability/BEGameplayAbility.h"
+#include "GameplayTag/BETags_GameplayAbility.h"
 
 #include "Abilities/GameplayAbilityTypes.h"
 #include "Math/UnrealMathSSE.h"

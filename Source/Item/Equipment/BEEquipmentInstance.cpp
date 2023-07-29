@@ -132,7 +132,7 @@ void UBEEquipmentInstance::SpawnEquipmentMeshes(const TArray<FBEEquipmentMeshToS
 	USkeletalMeshComponent* AttachTarget = nullptr;
 
 	// TPP Mesh 用の Actor をスポーン
-	AttachTarget = IBEPawnMeshAssistInterface::Execute_GetTPPMesh(OwningPawn);
+	IBEPawnMeshAssistInterface::Execute_GetTPPFirstMesh(OwningPawn, AttachTarget);
 	if (AttachTarget)
 	{
 		const bool bOwnerNoSee = AttachTarget->bOwnerNoSee;
@@ -157,7 +157,7 @@ void UBEEquipmentInstance::SpawnEquipmentMeshes(const TArray<FBEEquipmentMeshToS
 	}
 
 	// FPP Mesh 用の Actor をスポーン
-	AttachTarget = IBEPawnMeshAssistInterface::Execute_GetFPPMesh(OwningPawn);
+	IBEPawnMeshAssistInterface::Execute_GetFPPFirstMesh(OwningPawn, AttachTarget);
 	if (AttachTarget)
 	{
 		const bool bHiddenInGame = AttachTarget->bHiddenInGame;
@@ -211,12 +211,12 @@ void UBEEquipmentInstance::ApplyAnimLayer(TSubclassOf<UAnimInstance> InTPPLayer,
 		return;
 	}
 
-	UBEAnimInstance* AnimInstance = nullptr;
+	UAnimInstance* AnimInstance = nullptr;
 
 	// TPP Mesh 用の AnimLayer を適用
 	if (InTPPLayer)
 	{
-		AnimInstance = IBEPawnMeshAssistInterface::Execute_GetTPPAnimInstance(OwningPawn);
+		IBEPawnMeshAssistInterface::Execute_GetTPPAnimInstance(OwningPawn, AnimInstance);
 		if (AnimInstance)
 		{
 			AnimInstance->LinkAnimClassLayers(InTPPLayer);
@@ -226,7 +226,7 @@ void UBEEquipmentInstance::ApplyAnimLayer(TSubclassOf<UAnimInstance> InTPPLayer,
 	// FPP Mesh 用の AnimLayer を適用
 	if (InFPPLayer)
 	{
-		AnimInstance = IBEPawnMeshAssistInterface::Execute_GetFPPAnimInstance(OwningPawn);
+		IBEPawnMeshAssistInterface::Execute_GetFPPAnimInstance(OwningPawn, AnimInstance);
 		if (AnimInstance)
 		{
 			AnimInstance->LinkAnimClassLayers(InFPPLayer);
@@ -251,17 +251,17 @@ void UBEEquipmentInstance::RemoveAnimLayer()
 
 	if (const UBEItemDataFragment_Equippable* Fragment = ItemData->FindFragmentByClass<UBEItemDataFragment_Equippable>())
 	{
-		UBEAnimInstance* AnimInstance = nullptr;
+		UAnimInstance* AnimInstance = nullptr;
 
 		// TPP Mesh 用の AnimLayer を適用
-		AnimInstance = IBEPawnMeshAssistInterface::Execute_GetTPPAnimInstance(OwningPawn);
+		IBEPawnMeshAssistInterface::Execute_GetTPPAnimInstance(OwningPawn, AnimInstance);
 		if (AnimInstance && Fragment->AnimLayerToApplyToTPP)
 		{
 			AnimInstance->UnlinkAnimClassLayers(Fragment->AnimLayerToApplyToTPP);
 		}
 
 		// FPP Mesh 用の AnimLayer を適用
-		AnimInstance = IBEPawnMeshAssistInterface::Execute_GetFPPAnimInstance(OwningPawn);
+		IBEPawnMeshAssistInterface::Execute_GetFPPAnimInstance(OwningPawn, AnimInstance);
 		if (AnimInstance && Fragment->AnimLayerToApplyToFPP)
 		{
 			AnimInstance->UnlinkAnimClassLayers(Fragment->AnimLayerToApplyToFPP);

@@ -96,13 +96,6 @@ public:
 	void HandlePlayerInputComponentSetup();
 
 	/**
-	 * InitializeAnimLayers
-	 *
-	 * このコンポーネントを所有する Pawn または Character の DefaultAnimLayer を設定する
-	 */
-	void InitializeAnimLayers(APawn* InOwningPawn);
-
-	/**
 	 * InitializeAbilitySystem
 	 *
 	 * このコンポーネントを所有する Pawn または Character を Avater として AbilitySystem を初期化

@@ -1,5 +1,4 @@
-﻿// Copyright Epic Games, Inc. All Rights Reserved.
-// Copyright owoDra
+﻿// Copyright owoDra
 
 #pragma once
 
@@ -14,8 +13,11 @@ class UAbilitySystemComponent;
 /**
  * UBEAnimInstance
  *
- *	Pawn または Character の見た目となる Mesh に適応するメインの AnimInsntace。
- *  CopyPose や AnimLayer などには使用せず Animation の主要な処理もおこなう。
+ *	Pawn または Character の見た目となる Mesh に適応するメインの AnimInsntace
+ *  基本的に CopyPose や AnimLayer などには使用せず Main の Animation にのみ使用する
+ *  
+ *  UAnimInstance から Pawn または Character の AbilitySystem に
+ *  アクセスするための機能を追加している
  */
 UCLASS(Config = Game)
 class UBEAnimInstance : public UAnimInstance
@@ -30,7 +32,6 @@ protected:
 #endif // WITH_EDITOR
 
 	virtual void NativeInitializeAnimation() override;
-	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 public:
 	/**
@@ -47,7 +48,4 @@ protected:
 	// これらは GameplayTag を手動でクエリする代わりに使用する。
 	UPROPERTY(EditDefaultsOnly, Category = "GameplayTags")
 	FGameplayTagBlueprintPropertyMap GameplayTagPropertyMap;
-
-	UPROPERTY(BlueprintReadOnly, Category = "Character State Data")
-	float GroundDistance = -1.0f;
 };

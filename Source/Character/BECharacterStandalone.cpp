@@ -1,4 +1,4 @@
-// Copyright owoDra
+﻿// Copyright owoDra
 
 #include "BECharacterStandalone.h"
 
@@ -30,16 +30,16 @@ void ABECharacterStandalone::PostInitializeComponents()
 	Super::PostInitializeComponents();
 
 	check(AbilitySystemComponent);
-	check(CharacterBasicComponent);
-	CharacterBasicComponent->InitializeAbilitySystem(AbilitySystemComponent, this);
+	check(CharacterBasic);
+	CharacterBasic->InitializeAbilitySystem(AbilitySystemComponent, this);
 }
 
 void ABECharacterStandalone::OnPawnBasicInitialized()
 {
-	UBEAbilitySystemComponent* BEASC = CharacterBasicComponent->GetBEAbilitySystemComponent();
+	UBEAbilitySystemComponent* BEASC = CharacterBasic->GetBEAbilitySystemComponent();
 	check(BEASC);
 
-	const UBEPawnData* PawnData = CharacterBasicComponent->GetPawnData();
+	const UBEPawnData* PawnData = CharacterBasic->GetPawnData();
 	check(PawnData);
 
 	for (const UBEAbilitySet* AbilitySet : PawnData->AbilitySets)

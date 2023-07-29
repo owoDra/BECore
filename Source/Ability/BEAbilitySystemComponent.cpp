@@ -1,4 +1,4 @@
-// Copyright Epic Games, Inc. All Rights Reserved.
+﻿// Copyright Epic Games, Inc. All Rights Reserved.
 // Copyright owoDra
 
 #include "BEAbilitySystemComponent.h"
@@ -110,14 +110,11 @@ void UBEAbilitySystemComponent::InitAbilityActorInfo(AActor* InOwnerActor, AActo
 
 		if (Cast<IBEPawnMeshAssistInterface>(ActorInfo->AvatarActor))
 		{
-			TArray<UBEAnimInstance*> MainAnimInstances;
-			IBEPawnMeshAssistInterface::Execute_GetMainAnimInstances(ActorInfo->AvatarActor.Get(), MainAnimInstances);
-			for (UBEAnimInstance* BEAnimInst : MainAnimInstances)
+			UBEAnimInstance* MainAnimInstance;
+			IBEPawnMeshAssistInterface::Execute_GetMainAnimInstance(ActorInfo->AvatarActor.Get(), MainAnimInstance);
+			if (MainAnimInstance)
 			{
-				if (BEAnimInst)
-				{
-					BEAnimInst->InitializeWithAbilitySystem(this);
-				}
+				MainAnimInstance->InitializeWithAbilitySystem(this);
 			}
 		}
 

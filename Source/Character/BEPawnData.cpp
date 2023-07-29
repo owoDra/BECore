@@ -12,6 +12,4 @@ UBEPawnData::UBEPawnData(const FObjectInitializer& ObjectInitializer)
 	InputConfig			= nullptr;
 	DefaultCameraMode	= nullptr;
 	EquipmentSet		= nullptr;
-	DefaultTPPAnimLayer = nullptr;
-	DefaultFPPAnimLayer = nullptr;
 }

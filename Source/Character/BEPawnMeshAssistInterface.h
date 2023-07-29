@@ -1,4 +1,4 @@
-// Copyright owoDra
+﻿// Copyright owoDra
 
 #pragma once
 
@@ -31,52 +31,79 @@ public:
 	 * GetMeshes
 	 * 
 	 *  Pawn または Character の見た目を表す Mesh をすべて取得する
-	 *  一般的にこれには TPP Mesh と FPP Meshが含まれます。
+	 *  一般的にこれには TPP Meshes と FPPes Meshが含まれます
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Pawn|Mesh")
 	void GetMeshes(TArray<USkeletalMeshComponent*>& Meshes) const;
 
 	/**
-	 * GetFPPMesh
+	 * GetFPPMeshes
 	 *
-	 *  Pawn または Character の FPP視点における見た目を表す Mesh を返す。
-	 *  FPP 視点での Mesh を使用しない場合は nullptr を返す。
+	 *  Pawn または Character の FPP視点における見た目を表す Mesh をすべて返す
+	 *  FPP 視点での Mesh を使用しない場合は空の配列を返す
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Pawn|Mesh")
-	USkeletalMeshComponent* GetFPPMesh() const;
+	void GetFPPMeshes(TArray<USkeletalMeshComponent*>& Meshes) const;
 
 	/**
 	 * GetTPPMesh
 	 *
-	 *  Pawn または Character の TPP視点における見た目を表す Mesh を返す。
+	 *  Pawn または Character の TPP視点における見た目を表す Mesh をすべて返す
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Pawn|Mesh")
-	USkeletalMeshComponent* GetTPPMesh() const;
-
-
-	/**
-	 * GetMainAnimInstances
-	 *
-	 *  Pawn または Character の CopyPose などではないメインの AnimInstance を取得する。
-	 *  一般的に FPP Mesh および TPP Mesh の AnimInstance が含まれる。
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Pawn|Anim")
-	void GetMainAnimInstances(TArray<UBEAnimInstance*>& Instances) const;
+	void GetTPPMeshes(TArray<USkeletalMeshComponent*>& Meshes) const;
 
 	/**
-	 * GetFPPAnimInstance
+	 * GetFPPFirstMesh
 	 *
-	 *  Pawn または Character の FPP視点における Mesh の AnimInstance を返す。
-	 *  FPP 視点での Mesh を使用しない場合は nullptr を返す。
+	 *  Pawn または Character の FPP視点における見た目を表す Mesh を返す
+	 *  FPP 視点での Mesh を使用しない場合は nullptr を返す
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Pawn|Mesh")
+	void GetFPPFirstMesh(USkeletalMeshComponent*& Mesh) const;
+
+	/**
+	 * GetTPPFirstMesh
+	 *
+	 *  Pawn または Character の TPP視点における見た目を表す Mesh を返す
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Pawn|Mesh")
+	void GetTPPFirstMesh(USkeletalMeshComponent*& Mesh) const;
+	
+
+public:
+	/**
+	 * GetMainAnimInstance
+	 *
+	 *  Pawn または Character の CopyPose などではないメインの AnimInstance を取得する
+	 *  一般的に TPP Mesh の AnimInstance が含まれる
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Pawn|Anim")
-	UBEAnimInstance* GetFPPAnimInstance() const;
+	void GetMainAnimInstance(UBEAnimInstance*& Instance) const;
+
+	/**
+	 * GetSubAnimInstances
+	 *
+	 *  Pawn または Character の CopyPose などサブの AnimInstance を全て取得する
+	 *  一般的に FPP Mesh の AnimInstance が含まれる
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Pawn|Anim")
+	void GetSubAnimInstances(TArray<UAnimInstance*>& Instances) const;
 
 	/**
 	 * GetTPPAnimInstance
 	 *
-	 *  Pawn または Character の TPP視点における Mesh の AnimInstance を返す。
+	 *  Pawn または Character の TPP Mesh の AnimInstance を取得する
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Pawn|Anim")
-	UBEAnimInstance* GetTPPAnimInstance() const;
+	void GetTPPAnimInstance(UAnimInstance*& Instance) const;
+
+
+	/**
+	 * GetFPPAnimInstance
+	 *
+	 *  Pawn または Character の FPP Mesh の AnimInstance を取得する
+	 */
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Pawn|Anim")
+	void GetFPPAnimInstance(UAnimInstance*& Instance) const;
 };

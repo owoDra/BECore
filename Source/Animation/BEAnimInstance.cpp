@@ -1,11 +1,8 @@
-﻿// Copyright Epic Games, Inc. All Rights Reserved.
-// Copyright owoDra
+﻿// Copyright owoDra
 
 #include "BEAnimInstance.h"
-#include "AbilitySystemComponent.h"
+
 #include "AbilitySystemGlobals.h"
-#include "Character/BECharacter.h"
-#include "Character/Component/BECharacterMovementComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BEAnimInstance)
 
@@ -38,21 +35,6 @@ void UBEAnimInstance::NativeInitializeAnimation()
 			InitializeWithAbilitySystem(ASC);
 		}
 	}
-}
-
-void UBEAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
-{
-	Super::NativeUpdateAnimation(DeltaSeconds);
-
-	const ABECharacter* Character = Cast<ABECharacter>(GetOwningActor());
-	if (!Character)
-	{
-		return;
-	}
-
-	UBECharacterMovementComponent* CharMoveComp = CastChecked<UBECharacterMovementComponent>(Character->GetCharacterMovement());
-	const FBECharacterGroundInfo& GroundInfo = CharMoveComp->GetGroundInfo();
-	GroundDistance = GroundInfo.GroundDistance;
 }
 
 void UBEAnimInstance::InitializeWithAbilitySystem(UAbilitySystemComponent* ASC)

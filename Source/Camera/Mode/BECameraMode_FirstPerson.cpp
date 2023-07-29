@@ -22,31 +22,25 @@ void UBECameraMode_FirstPerson::PostActivateMode()
 		{
 			if (Cast<IBEPawnMeshAssistInterface>(BEChara))
 			{
+				TArray<USkeletalMeshComponent*> Meshes;
+
 				// FPP Mesh の表示
-				if (USkeletalMeshComponent* FPPMesh = IBEPawnMeshAssistInterface::Execute_GetFPPMesh(BEChara))
+				IBEPawnMeshAssistInterface::Execute_GetFPPMeshes(BEChara, Meshes);
+				for (USkeletalMeshComponent* Mesh :Meshes)
 				{
-					FPPMesh->SetHiddenInGame(false, true);
+					Mesh->SetHiddenInGame(false, true);
 				}
 
 				// TPP Mesh の非表示
-				if (USkeletalMeshComponent* TPPMesh = IBEPawnMeshAssistInterface::Execute_GetTPPMesh(BEChara))
+				IBEPawnMeshAssistInterface::Execute_GetTPPMeshes(BEChara, Meshes);
+				for (USkeletalMeshComponent* Mesh : Meshes)
 				{
-					TPPMesh->SetOwnerNoSee(true);
-
-					TArray<USceneComponent*> Children;
-					TPPMesh->GetChildrenComponents(true, Children);
-					for (USceneComponent* Child : Children)
-					{
-						if (USkeletalMeshComponent* ChildMesh = Cast<USkeletalMeshComponent>(Child))
-						{
-							ChildMesh->SetOwnerNoSee(true);
-						}
-					}
+					Mesh->SetOwnerNoSee(true);
 				}
 			}
 
 			// しゃがみ時の Mesh 位置の更新を無効にする
-			BEChara->UpdateMeshPositionWhenCrouch = false;
+			//BEChara->UpdateMeshPositionWhenCrouch = false;
 		}
 	}
 }
@@ -59,31 +53,25 @@ void UBECameraMode_FirstPerson::PreDeactivateMode()
 		{
 			if (Cast<IBEPawnMeshAssistInterface>(BEChara))
 			{
-				// FPP Mesh の非表示
-				if (USkeletalMeshComponent* FPPMesh = IBEPawnMeshAssistInterface::Execute_GetFPPMesh(BEChara))
+				TArray<USkeletalMeshComponent*> Meshes;
+
+				// FPP Mesh の表示
+				IBEPawnMeshAssistInterface::Execute_GetFPPMeshes(BEChara, Meshes);
+				for (USkeletalMeshComponent* Mesh : Meshes)
 				{
-					FPPMesh->SetHiddenInGame(true, true);
+					Mesh->SetHiddenInGame(true, true);
 				}
 
-				// TPP Mesh の表示
-				if (USkeletalMeshComponent* TPPMesh = IBEPawnMeshAssistInterface::Execute_GetTPPMesh(BEChara))
+				// TPP Mesh の非表示
+				IBEPawnMeshAssistInterface::Execute_GetTPPMeshes(BEChara, Meshes);
+				for (USkeletalMeshComponent* Mesh : Meshes)
 				{
-					TPPMesh->SetOwnerNoSee(false);
-
-					TArray<USceneComponent*> Children;
-					TPPMesh->GetChildrenComponents(true, Children);
-					for (USceneComponent* Child : Children)
-					{
-						if (USkeletalMeshComponent* ChildMesh = Cast<USkeletalMeshComponent>(Child))
-						{
-							ChildMesh->SetOwnerNoSee(false);
-						}
-					}
+					Mesh->SetOwnerNoSee(false);
 				}
 			}
 
 			// しゃがみ時の Mesh 位置の更新を有効にする
-			BEChara->UpdateMeshPositionWhenCrouch = true;
+			//BEChara->UpdateMeshPositionWhenCrouch = true;
 		}
 	}
 }
