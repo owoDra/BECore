@@ -382,6 +382,11 @@ void ABECharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 #pragma region Stance
 
+bool ABECharacter::CanJumpInternal_Implementation() const
+{
+	return JumpIsAllowedInternal();
+}
+
 bool ABECharacter::CanCrouch() const
 {
 	return bIsCrouched || Super::CanCrouch();

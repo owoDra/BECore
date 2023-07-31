@@ -866,12 +866,21 @@ uint8 UBECharacterMovementComponent::CalculateAllowedStanceIndex() const
 
 void UBECharacterMovementComponent::UpdateStance(bool bFroceRefreshConfigs)
 {
-	if (!SetStanceIndex(CalculateAllowedStanceIndex()))
+	uint8 AllowedStanceIndex = CalculateAllowedStanceIndex();
+	const FGameplayTag& AllowedStanceTag = RotationModeConfigs.Stances[AllowedStanceIndex].StanceTag;
+
+	if (AllowedStanceTag == TAG_Status_Stance_Crouching)
 	{
-		if (bFroceRefreshConfigs)
-		{
-			RefreshStanceConfigs();
-		}
+		CharacterOwner->Crouch();
+	}
+	else if (AllowedStanceTag == TAG_Status_Stance_Standing)
+	{
+		CharacterOwner->UnCrouch();
+	}
+
+	if (bFroceRefreshConfigs)
+	{
+		RefreshStanceConfigs();
 	}
 }
 
