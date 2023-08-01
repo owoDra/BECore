@@ -382,14 +382,9 @@ void ABECharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 
 #pragma region Stance
 
-bool ABECharacter::CanJumpInternal_Implementation() const
-{
-	return JumpIsAllowedInternal();
-}
-
 bool ABECharacter::CanCrouch() const
 {
-	return bIsCrouched || Super::CanCrouch();
+	return GetCharacterMovement() && GetCharacterMovement()->CanEverCrouch() && GetRootComponent() && !GetRootComponent()->IsSimulatingPhysics();
 }
 
 void ABECharacter::OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
@@ -410,8 +405,6 @@ void ABECharacter::OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightA
 	}
 
 	Super::OnStartCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
-
-	BECharacterMovement->SetStanceIndex(BECharacterMovement->GetDesiredStanceIndex());
 }
 
 void ABECharacter::OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
@@ -428,8 +421,6 @@ void ABECharacter::OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdj
 	}
 
 	Super::OnEndCrouch(HalfHeightAdjust, ScaledHalfHeightAdjust);
-
-	BECharacterMovement->SetStanceIndex(BECharacterMovement->GetDesiredStanceIndex());
 }
 
 #pragma endregion
@@ -485,6 +476,11 @@ void ABECharacter::OnJumped_Implementation()
 	{
 		Multicast_OnJumpedNetworked();
 	}
+}
+
+bool ABECharacter::CanJumpInternal_Implementation() const
+{
+	return JumpIsAllowedInternal();
 }
 
 void ABECharacter::Multicast_OnJumpedNetworked_Implementation()

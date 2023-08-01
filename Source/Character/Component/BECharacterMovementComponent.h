@@ -23,13 +23,16 @@ struct GameplayTag;
  */
 class BECORE_API FBECharacterNetworkMoveData : public FCharacterNetworkMoveData
 {
+public:
+	FBECharacterNetworkMoveData();
+
 private:
 	using Super = FCharacterNetworkMoveData;
 
 public:
-	uint8 RotationMode;
-	uint8 Stance;
-	uint8 MaxAllowedGait;
+	FGameplayTag RotationMode;
+	FGameplayTag Stance;
+	FGameplayTag Gait;
 
 public:
 	virtual void ClientFillNetworkMoveData(const FSavedMove_Character& Move, ENetworkMoveType MoveType) override;
@@ -55,13 +58,16 @@ public:
  */
 class BECORE_API FBESavedMove : public FSavedMove_Character
 {
+public:
+	FBESavedMove();
+
 private:
 	using Super = FSavedMove_Character;
 
 public:
-	uint8 RotationMode;
-	uint8 Stance;
-	uint8 MaxAllowedGait;
+	FGameplayTag RotationMode;
+	FGameplayTag Stance;
+	FGameplayTag Gait;
 
 public:
 	virtual void Clear() override;
@@ -277,12 +283,6 @@ protected:
 	FGameplayTag LocomotionMode;
 
 	//
-	// キャラクターの LocomotionMode ごとの設定を定義する
-	//
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Locomotion Mode", Transient)
-	FBECharacterLocomotionModeConfigs LocomotionModeConfigs;
-
-	//
 	// MovementMode の変更を無効にするかどうか
 	//
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Locomotion Mode", Transient)
@@ -315,18 +315,18 @@ protected:
 	void SetLocomotionMode(const FGameplayTag& NewLocomotionMode);
 
 	/**
+	 * UpdateLocomotionConfigs
+	 *
+	 *  現在の DesiredXXX の値に応じて参照する Configs を切り替えてそれぞれの State を更新する
+	 */
+	void UpdateLocomotionConfigs();
+
+	/**
 	 * OnMovementModeChanged
 	 *
 	 *  MovementMode が変更されたことを知らせる
 	 */
 	virtual void OnMovementModeChanged(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode) override;
-
-	/**
-	 * RefreshLocomotionModeConfigs
-	 *
-	 *  現在の LocomotionMode に対応する LocomotionModeConfigs に更新する
-	 */
-	void RefreshLocomotionModeConfigs();
 
 
 	////////////////////////////////////////////////
@@ -340,33 +340,33 @@ protected:
 	// インデックスに関連している
 	//
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Configs|Rotation Mode", Replicated)
-	uint8 DesiredRotationModeIndex;
+	FGameplayTag DesiredRotationMode;
 
 public:
 	/**
-	 * GetDesiredRotationModeIndex
+	 * GetDesiredRotationMode
 	 *
-	 *  現在の DesiredRotationModeIndex を取得する
+	 *  現在の DesiredRotationMode を取得する
 	 */
-	uint8 GetDesiredRotationModeIndex() const { return DesiredRotationModeIndex; }
+	const FGameplayTag& GetDesiredRotationMode() const { return DesiredRotationMode; }
 
 	/**
-	 * SetDesiredRotationModeIndex
+	 * SetDesiredRotationMode
 	 *
-	 *  現在の DesiredRotationModeIndex を設定する
+	 *  現在の DesiredRotationMode を設定する
 	 */
 	UFUNCTION(BlueprintCallable, Category = "State|Rotation Mode")
-	void SetDesiredRotationModeIndex(uint8 NewDesiredRotationModeIndex);
+	void SetDesiredRotationMode(FGameplayTag NewDesiredRotationMode);
 
 private:
 	/**
-	 * Server_SetDesiredRotationModeIndex
+	 * Server_SetDesiredRotationMode
 	 *
-	 *  現在の DesiredRotationModeIndex をサーバー経由で設定する
+	 *  現在の DesiredRotationMode をサーバー経由で設定する
 	 */
 	UFUNCTION(Server, Reliable)
-	void Server_SetDesiredRotationModeIndex(uint8 NewDesiredRotationModeIndex);
-	void Server_SetDesiredRotationModeIndex_Implementation(uint8 NewDesiredRotationModeIndex);
+	void Server_SetDesiredRotationMode(FGameplayTag NewDesiredRotationMode);
+	void Server_SetDesiredRotationMode_Implementation(FGameplayTag NewDesiredRotationMode);
 
 
 	////////////////////////////////////////////////
@@ -380,58 +380,24 @@ protected:
 	// インデックスに関連している
 	//
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Rotation Mode", Transient)
-	uint8 RotationModeIndex;
-
-	//
-	// キャラクターの RotationMode ごとの設定を定義する
-	//
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Rotation Mode", Transient)
-	FBECharacterRotationModeConfigs RotationModeConfigs;
+	FGameplayTag RotationMode;
 
 public:
 	/**
-	 * GetRotationModeIndex
+	 * GetRotationMode
 	 *
-	 *  現在の RotationModeIndex を取得する
+	 *  現在の RotationMode を取得する
 	 */
-	uint8 GetRotationModeIndex() const { return RotationModeIndex; }
-
-	/**
-	 * GetRotationModeTag
-	 *
-	 *  現在の RotationModeTag を取得する
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "State|Rotation Mode", meta = (DisplayName = "GetRotationMode"))
-	const FGameplayTag& GetRotationModeTag() const { return RotationModeConfigs.RotationModeTag; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "State|Rotation Mode")
+	const FGameplayTag& GetRotationMode() const { return RotationMode; }
 
 protected:
 	/**
-	 * SetRotationModeIndex
+	 * SetRotationMode
 	 *
-	 *  現在の RotationModeIndex を設定する
+	 *  現在の RotationMode を設定する
 	 */
-	bool SetRotationModeIndex(uint8 NewRotationModeIndex);
-
-	/**
-	 * CalculateAllowedRotationModeIndex
-	 *
-	 *  現在の状態で許可される RotationModeIndex を計算する
-	 */
-	virtual uint8 CalculateAllowedRotationModeIndex() const;
-
-	/**
-	 * UpdateRotationMode
-	 *
-	 *  現在の Rotation Mode を更新する
-	 */
-	void UpdateRotationMode(bool bFroceRefreshConfigs = false);
-
-	/**
-	 * RefreshRotationModeConfigs
-	 *
-	 *  現在の RotationMode に対応する RotationModeConfigs に更新する
-	 */
-	void RefreshRotationModeConfigs();
+	void SetRotationMode(FGameplayTag NewRotationMode);
 
 
 	////////////////////////////////////////////////
@@ -442,33 +408,33 @@ protected:
 	// (Standing, Crouching ...)
 	//
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Configs|Stance", Replicated)
-	uint8 DesiredStanceIndex;
+	FGameplayTag DesiredStance;
 
 public:
 	/**
-	 * GetDesiredStanceIndex
+	 * GetDesiredStance
 	 *
-	 *  現在の DesiredStanceIndex を取得する
+	 *  現在の DesiredStance を取得する
 	 */
-	uint8 GetDesiredStanceIndex() const { return DesiredStanceIndex; }
+	const FGameplayTag& GetDesiredStance() const { return DesiredStance; }
 
 	/**
-	 * SetDesiredStanceIndex
+	 * SetDesiredStance
 	 *
-	 *  現在の DesiredStanceIndex を設定する
+	 *  現在の DesiredStance を設定する
 	 */
 	UFUNCTION(BlueprintCallable, Category = "State|Stance")
-	void SetDesiredStanceIndex(uint8 NewDesiredStanceIndex);
+	void SetDesiredStance(FGameplayTag NewDesiredStance);
 
 private:
 	/**
-	 * Server_SetDesiredStanceIndex
+	 * Server_SetDesiredStance
 	 *
-	 *  現在の DesiredStanceIndex をサーバー経由で設定する
+	 *  現在の DesiredStance をサーバー経由で設定する
 	 */
 	UFUNCTION(Server, Reliable)
-	void Server_SetDesiredStanceIndex(uint8 NewDesiredStanceIndex);
-	void Server_SetDesiredStanceIndex_Implementation(uint8 NewDesiredStanceIndex);
+	void Server_SetDesiredStance(FGameplayTag NewDesiredStance);
+	void Server_SetDesiredStance_Implementation(FGameplayTag NewDesiredStance);
 
 
 	////////////////////////////////////////////////
@@ -482,58 +448,25 @@ protected:
 	// インデックスに関連している
 	//
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Stance", Transient)
-	uint8 StanceIndex;
-	
-	//
-	// キャラクターの Stance ごとの設定を定義する
-	//
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Stance", Transient)
-	FBECharacterStanceConfigs StanceConfigs;
+	FGameplayTag Stance;
 
 public:
-	/**
-	 * GetStanceIndex
-	 *
-	 *  現在の StanceIndex を取得する
-	 */
-	uint8 GetStanceIndex() const { return StanceIndex; }
+	virtual bool CanCrouchInCurrentState() const override;
 
 	/**
-	 * GetStanceTag
+	 * GetStance
 	 *
-	 *  現在の StanceTag を取得する
+	 *  現在の Stance を取得する
 	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "State|Stance", meta = (DisplayName = "GetStance"))
-	const FGameplayTag& GetStanceTag() const { return StanceConfigs.StanceTag; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "State|Stance")
+	const FGameplayTag& GetStance() const { return Stance; }
 
 	/**
-	 * SetStanceIndex
+	 * SetStance
 	 *
-	 *  現在の StanceIndex を設定する
+	 *  現在の Stance を設定する
 	 */
-	bool SetStanceIndex(uint8 NewStanceIndex);
-
-protected:
-	/**
-	 * CalculateAllowedStance
-	 *
-	 *  現在の状態で許可される Stance を計算する
-	 */
-	virtual uint8 CalculateAllowedStanceIndex() const;
-
-	/**
-	 * UpdateStance
-	 *
-	 *  現在の Stance を更新する
-	 */
-	void UpdateStance(bool bFroceRefreshConfigs = false);
-
-	/**
-	 * RefreshStanceConfigs
-	 *
-	 *  現在の Stance に対応する StanceConfigs に更新する
-	 */
-	void RefreshStanceConfigs();
+	void SetStance(FGameplayTag NewStance);
 
 
 	////////////////////////////////////////////////
@@ -544,33 +477,33 @@ protected:
 	// (Walk, Run, Sprint ...)
 	//
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Configs|Gait", Replicated)
-	uint8 DesiredGaitIndex;
+	FGameplayTag DesiredGait;
 
 public:
 	/**
-	 * GetDesiredGaitIndex
+	 * GetDesiredGait
 	 *
-	 *  現在の DesiredGaitIndex を取得する
+	 *  現在の DesiredGait を取得する
 	 */
-	uint8 GetDesiredGaitIndex() const { return DesiredGaitIndex; }
+	FGameplayTag GetDesiredGait() const { return DesiredGait; }
 
 	/**
-	 * SetDesiredGaitIndex
+	 * SetDesiredGait
 	 *
-	 *  現在の DesiredGaitIndex を設定する
+	 *  現在の DesiredGait を設定する
 	 */
 	UFUNCTION(BlueprintCallable, Category = "State|Gait")
-	void SetDesiredGaitIndex(uint8 NewDesiredGaitIndex);
+	void SetDesiredGait(FGameplayTag NewDesiredGait);
 
 private:
 	/**
-	 * Server_SetDesiredGaitIndex
+	 * Server_SetDesiredGait
 	 *
-	 *  現在の DesiredGaitIndex をサーバー経由で設定する
+	 *  現在の DesiredGait をサーバー経由で設定する
 	 */
 	UFUNCTION(Server, Reliable)
-	void Server_SetDesiredGaitIndex(uint8 NewDesiredGaitIndex);
-	void Server_SetDesiredGaitIndex_Implementation(uint8 NewDesiredGaitIndex);
+	void Server_SetDesiredGait(FGameplayTag NewDesiredGait);
+	void Server_SetDesiredGait_Implementation(FGameplayTag NewDesiredGait);
 
 
 	////////////////////////////////////////////////
@@ -579,29 +512,9 @@ protected:
 	//
 	// Character の最大 Gait 状態
 	// (Walk, Run, Sprint ...)
-	// 
-	// MovementData で定義した Stance ごとの Gait の
-	// インデックスに関連している
 	//
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Gait", Transient)
-	uint8 MaxAllowedGaitIndex;
-
-	//
-	// Character の現在の Gait 状態
-	// (Walk, Run, Sprint ...)
-	// 
-	// MovementData で定義した Stance ごとの Gait の
-	// インデックスに関連している
-	//
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Gait", Transient)
-	uint8 GaitIndex;
-
-	//
-	// Character の現在の Gait 状態の Tag
-	// (Walk, Run, Sprint ...)
-	//
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Gait", Transient)
-	FGameplayTag GaitTag;
+	FGameplayTag Gait;
 
 	//
 	// Character の現在の Gait 状態での回転補間速度
@@ -614,48 +527,20 @@ public:
 	virtual float GetMaxSpeed() const override;
 
 	/**
-	 * GetGaitIndex
+	 * GetGait
 	 *
-	 *  現在の GaitIndex を取得する
+	 *  現在の Gait を取得する
 	 */
-	uint8 GetGaitIndex() const { return GaitIndex; }
-
-	/**
-	 * GetGaitTag
-	 *
-	 *  現在の GaitTag を取得する
-	 */
-	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "State|Gait", meta = (DisplayName = "GetGait"))
-	const FGameplayTag& GetGaitTag() const { return GaitTag; }
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "State|Gait")
+	FGameplayTag GetGait() const { return Gait; }
 
 protected:
 	/**
-	 * SetMaxAllowedGaitIndex
+	 * SetGait
 	 *
-	 *  現在の MaxAllowedGaitIndex を設定する
+	 *  現在の Gait を設定する
 	 */
-	bool SetMaxAllowedGaitIndex(uint8 NewMaxAllowedGaitIndex);
-
-	/**
-	 * SetGaitIndex
-	 *
-	 *  現在の GaitIndex を設定する
-	 */
-	void SetGaitIndex(uint8 NewGaitIndex);
-
-	/**
-	 * CalculateGaitIndexes
-	 *
-	 *  現在の状態で許可される GaitIndex と移動速度に基づいた実際の GaitIndex を計算する
-	 */
-	virtual void CalculateGaitIndexes(uint8& OutAllowedGaitIndex, uint8& OutActualGaitIndex);
-
-	/**
-	 * UpdateGait
-	 *
-	 *  現在の Gait を更新する
-	 */
-	void UpdateGait(bool bFroceRefreshConfigs = false);
+	void SetGait(FGameplayTag NewGait);
 
 	/**
 	 * RefreshGaitConfigs
@@ -663,6 +548,13 @@ protected:
 	 *  現在の Gait に対応する GaitConfigs に更新する
 	 */
 	void RefreshGaitConfigs();
+
+	/**
+	 * RefreshGaitConfigs
+	 *
+	 *  現在の Gait に対応する GaitConfigs に更新する
+	 */
+	void RefreshGaitConfigs(const FBECharacterGaitConfigs& GaitConfigs);
 
 private:
 	/**

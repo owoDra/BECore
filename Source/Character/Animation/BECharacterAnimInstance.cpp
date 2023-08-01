@@ -76,9 +76,9 @@ void UBECharacterAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	}
 
 	LocomotionMode		= CharacterMovement->GetLocomotionMode();
-	RotationMode		= CharacterMovement->GetRotationModeTag();
-	Stance				= CharacterMovement->GetStanceTag();
-	Gait				= CharacterMovement->GetGaitTag();
+	RotationMode		= CharacterMovement->GetRotationMode();
+	Stance				= CharacterMovement->GetStance();
+	Gait				= CharacterMovement->GetGait();
 	LocomotionAction	= CharacterMovement->GetLocomotionAction();
 
 	UpdateMovementBaseOnGameThread();
@@ -1214,7 +1214,7 @@ void UBECharacterAnimInstance::PlayTransitionAnimation(UAnimSequenceBase* Animat
 		return;
 	}
 
-	if (bFromStandingIdleOnly && (CharacterMovement->GetLocomotionState().bMoving || CharacterMovement->GetStanceTag() != TAG_Status_Stance_Standing))
+	if (bFromStandingIdleOnly && (CharacterMovement->GetLocomotionState().bMoving || CharacterMovement->GetStance() != TAG_Status_Stance_Standing))
 	{
 		return;
 	}

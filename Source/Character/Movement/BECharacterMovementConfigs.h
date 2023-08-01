@@ -19,19 +19,11 @@ struct FBECharacterGaitConfigs
 {
 	GENERATED_BODY()
 public:
-	FBECharacterGaitConfigs() {}
+	FBECharacterGaitConfigs();
 
-	FBECharacterGaitConfigs(const FGameplayTag& InGaitTag, float InMaxSpeed, float InMaxAcceleration, float InBrakingDeceleration,
-		float InGroundFriction, float InJumpZPower, float InAirControl, float InRotationInterpSpeed);
+	FBECharacterGaitConfigs(float InMaxSpeed, float InMaxAcceleration, float InBrakingDeceleration, float InGroundFriction, float InJumpZPower, float InAirControl, float InRotationInterpSpeed, const TObjectPtr<UBECharacterMovementCondition>& InCondition);
 
 public:
-	//
-	// この Gait を識別するための GameplayTag
-	// この Gait が適応されたときに Ability System に登録される
-	//
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Configs", Meta = (Categories = "Status.Gait"))
-	FGameplayTag GaitTag;
-
 	//
 	// この Gait が適応中の最大移動速度
 	//
@@ -75,11 +67,10 @@ public:
 	float RotationInterpSpeed;
 
 	//
-	// 遷移可能かどうかの条件
-	// 設定しない場合は無条件で遷移可能
+	// 遷移可能かどうかの条件を定義する
 	//
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Configs", Instanced)
-	TObjectPtr<UBECharacterMovementCondition> EnterCondition = nullptr;
+	TObjectPtr<UBECharacterMovementCondition> Condition;
 };
 
 
@@ -93,30 +84,28 @@ struct FBECharacterStanceConfigs
 {
 	GENERATED_BODY()
 public:
-	FBECharacterStanceConfigs() {}
-
-	FBECharacterStanceConfigs(const FGameplayTag& InStanceTag);
+	FBECharacterStanceConfigs();
 
 public:
 	//
-	// この Stance を識別するための GameplayTag
-	// この Stance が適応されたときに Ability System に登録される
+	// 無効な Gait が設定された際に遷移する Gait
 	//
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Configs", Meta = (Categories = "Status.Stance"))
-	FGameplayTag StanceTag;
-
-	//
-	// 遷移可能かどうかの条件
-	// 設定しない場合は無条件で遷移可能
-	//
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Configs", Instanced)
-	TObjectPtr<UBECharacterMovementCondition> EnterCondition = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Configs", Meta = (Categories = "Status.Gait"))
+	FGameplayTag DefaultGait;
 
 	//
 	// この Stance 適応中に許可されている Gait
 	//
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Configs")
-	TArray<FBECharacterGaitConfigs> Gaits;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Configs", Meta = (Categories = "Status.Gait", ForceInlineRow))
+	TMap<FGameplayTag, FBECharacterGaitConfigs> Gaits;
+
+public:
+	/**
+	 * GetAllowedGait
+	 *
+	 *  遷移可能な GaitTag を取得する
+	 */
+	const FBECharacterGaitConfigs& GetAllowedGait(const UBECharacterMovementComponent* CMC, const FGameplayTag& DesiredGait, FGameplayTag& OutTag) const;
 };
 
 
@@ -130,30 +119,34 @@ struct FBECharacterRotationModeConfigs
 {
 	GENERATED_BODY()
 public:
-	FBECharacterRotationModeConfigs() {}
-
-	FBECharacterRotationModeConfigs(const FGameplayTag& InRotationModeTag);
+	FBECharacterRotationModeConfigs();
 
 public:
 	//
-	// この RotationMode を識別するための GameplayTag
-	// この RotationMode が適応されたときに Ability System に登録される
+	// この RotationMode 適応中のデフォルトの Stance
 	//
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Configs", Meta = (Categories = "Status.RotationMode"))
-	FGameplayTag RotationModeTag;
-
-	//
-	// 遷移可能かどうかの条件
-	// 設定しない場合は無条件で遷移可能
-	//
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Configs", Instanced)
-	TObjectPtr<UBECharacterMovementCondition> EnterCondition = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Configs", Meta = (Categories = "Status.Stance"))
+	FGameplayTag DefaultStance;
 
 	//
 	// この RotationMode 適応中に許可されている Stance
 	//
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Configs")
-	TArray<FBECharacterStanceConfigs> Stances;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Configs", Meta = (Categories = "Status.Stance", ForceInlineRow))
+	TMap<FGameplayTag, FBECharacterStanceConfigs> Stances;
+
+	//
+	// 遷移可能かどうかの条件を定義する
+	//
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Configs", Instanced)
+	TObjectPtr<UBECharacterMovementCondition> Condition;
+
+public:
+	/**
+	 * GetAllowedStance
+	 *
+	 *  遷移可能な StanceTag を取得する
+	 */
+	const FBECharacterStanceConfigs& GetAllowedStance(const FGameplayTag& DesiredStance, FGameplayTag& OutTag) const;
 };
 
 
@@ -171,8 +164,22 @@ public:
 
 public:
 	//
-	// この RotationMode 適応中に許可されている Stance
+	// この Locomotion 適応中のデフォルトの RotationMode
 	//
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Configs")
-	TArray<FBECharacterRotationModeConfigs> RotationModes;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Configs", Meta = (Categories = "Status.RotationMode"))
+	FGameplayTag DefaultRotationMode;
+
+	//
+	// この Locomotion 適応中に許可されている RotationMode
+	//
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Configs", Meta = (Categories = "Status.RotationMode", ForceInlineRow))
+	TMap<FGameplayTag, FBECharacterRotationModeConfigs> RotationModes;
+
+public:
+	/**
+	 * GetAllowedRotationMode
+	 *
+	 *  遷移可能な RotationModeTag を取得する
+	 */
+	const FBECharacterRotationModeConfigs& GetAllowedRotationMode(const UBECharacterMovementComponent* CMC, const FGameplayTag& DesiredRotationMode, FGameplayTag& OutTag) const;
 };

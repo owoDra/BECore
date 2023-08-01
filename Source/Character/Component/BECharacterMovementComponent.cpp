@@ -7,7 +7,6 @@
 #include "Character/Component/BEPawnBasicComponent.h"
 #include "Character/Movement/BECharacterCustomMovement.h"
 #include "Character/Movement/BECharacterMovementData.h"
-#include "Character/Movement/BECharacterMovementCondition.h"
 #include "Character/Movement/BEMovementMathLibrary.h"
 #include "Character/BEPawnMeshAssistInterface.h"
 #include "Character/BECharacter.h"
@@ -33,6 +32,13 @@
  */
 #pragma region FBECharacterNetworkMoveData
 
+FBECharacterNetworkMoveData::FBECharacterNetworkMoveData()
+{
+	RotationMode	= TAG_Status_RotationMode_ViewDirection;
+	Stance			= TAG_Status_Stance_Standing;
+	Gait			= TAG_Status_Gait_Walking;
+}
+
 void FBECharacterNetworkMoveData::ClientFillNetworkMoveData(const FSavedMove_Character& Move, ENetworkMoveType MoveType)
 {
 	Super::ClientFillNetworkMoveData(Move, MoveType);
@@ -41,16 +47,16 @@ void FBECharacterNetworkMoveData::ClientFillNetworkMoveData(const FSavedMove_Cha
 
 	RotationMode	= SavedMove.RotationMode;
 	Stance			= SavedMove.Stance;
-	MaxAllowedGait	= SavedMove.MaxAllowedGait;
+	Gait			= SavedMove.Gait;
 }
 
 bool FBECharacterNetworkMoveData::Serialize(UCharacterMovementComponent& Movement, FArchive& Archive, UPackageMap* Map, const ENetworkMoveType MoveType) 
 {
 	Super::Serialize(Movement, Archive, Map, MoveType);
 
-	//NetSerializeOptionalValue(Archive.IsSaving(), Archive, RotationMode	 , static_cast<uint8>(0), Map);
-	//NetSerializeOptionalValue(Archive.IsSaving(), Archive, Stance		 , static_cast<uint8>(0), Map);
-	//NetSerializeOptionalValue(Archive.IsSaving(), Archive, MaxAllowedGait, static_cast<uint8>(0), Map);
+	NetSerializeOptionalValue(Archive.IsSaving(), Archive, RotationMode	, TAG_Status_RotationMode_ViewDirection.GetTag(), Map);
+	NetSerializeOptionalValue(Archive.IsSaving(), Archive, Stance		, TAG_Status_Stance_Standing.GetTag()			, Map);
+	NetSerializeOptionalValue(Archive.IsSaving(), Archive, Gait			, TAG_Status_Gait_Walking.GetTag()				, Map);
 
 	return !Archive.IsError();
 }
@@ -79,13 +85,20 @@ FBECharacterNetworkMoveDataContainer::FBECharacterNetworkMoveDataContainer()
 
 #pragma region FBESavedMove
 
+FBESavedMove::FBESavedMove()
+{
+	RotationMode	= TAG_Status_RotationMode_ViewDirection;
+	Stance			= TAG_Status_Stance_Standing;
+	Gait			= TAG_Status_Gait_Walking;
+}
+
 void FBESavedMove::Clear()
 {
 	Super::Clear();
 
-	RotationMode	= 0;
-	Stance			= 0;
-	MaxAllowedGait	= 0;
+	RotationMode	= TAG_Status_RotationMode_ViewDirection;
+	Stance			= TAG_Status_Stance_Standing;
+	Gait			= TAG_Status_Gait_Walking;
 }
 
 void FBESavedMove::SetMoveFor(ACharacter* Character, float NewDeltaTime, const FVector& NewAcceleration, FNetworkPredictionData_Client_Character& PredictionData)
@@ -95,9 +108,9 @@ void FBESavedMove::SetMoveFor(ACharacter* Character, float NewDeltaTime, const F
 	const auto* Movement{ Cast<UBECharacterMovementComponent>(Character->GetCharacterMovement()) };
 	if (IsValid(Movement))
 	{
-		RotationMode	= Movement->RotationModeIndex;
-		Stance			= Movement->StanceIndex;
-		MaxAllowedGait	= Movement->MaxAllowedGaitIndex;
+		RotationMode	= Movement->RotationMode;
+		Stance			= Movement->Stance;
+		Gait			= Movement->Gait;
 	}
 }
 
@@ -105,7 +118,7 @@ bool FBESavedMove::CanCombineWith(const FSavedMovePtr& NewMovePtr, ACharacter* C
 {
 	const auto* NewMove{ static_cast<FBESavedMove*>(NewMovePtr.Get()) };
 
-	return RotationMode == NewMove->RotationMode && Stance == NewMove->Stance && MaxAllowedGait == NewMove->MaxAllowedGait && Super::CanCombineWith(NewMovePtr, Character, MaxDelta);
+	return RotationMode == NewMove->RotationMode && Stance == NewMove->Stance && Gait == NewMove->Gait && Super::CanCombineWith(NewMovePtr, Character, MaxDelta);
 }
 
 void FBESavedMove::CombineWith(const FSavedMove_Character* PreviousMove, ACharacter* Character, APlayerController* Player, const FVector& PreviousStartLocation)
@@ -135,11 +148,11 @@ void FBESavedMove::PrepMoveFor(ACharacter* Character)
 	auto* Movement{ Cast<UBECharacterMovementComponent>(Character->GetCharacterMovement()) };
 	if (IsValid(Movement))
 	{
-		Movement->RotationModeIndex		= RotationMode;
-		Movement->StanceIndex			= Stance;
-		Movement->MaxAllowedGaitIndex	= MaxAllowedGait;
+		Movement->RotationMode	= RotationMode;
+		Movement->Stance		= Stance;
+		Movement->Gait			= Gait;
 
-		Movement->RefreshRotationModeConfigs();
+		Movement->RefreshGaitConfigs();
 	}
 }
 
@@ -190,9 +203,14 @@ UBECharacterMovementComponent::UBECharacterMovementComponent(const FObjectInitia
 	GetNavAgentPropertiesRef().bCanCrouch = true;
 	SetCrouchedHalfHeight(65.0f);
 
-	// Character Movement: Walking 設定
-	MaxWalkSpeed = 250.0f;
-	MaxWalkSpeedCrouched = 200.0f;
+	// ステート設定
+	LocomotionMode			= TAG_Status_LocomotionMode_OnGround;
+	DesiredRotationMode		= TAG_Status_RotationMode_ViewDirection;
+	RotationMode			= TAG_Status_RotationMode_ViewDirection;
+	DesiredStance			= TAG_Status_Stance_Standing;
+	Stance					= TAG_Status_Stance_Standing;
+	DesiredGait				= TAG_Status_Gait_Walking;
+	Gait					= TAG_Status_Gait_Walking;
 }
 
 #if WITH_EDITOR
@@ -374,9 +392,12 @@ void UBECharacterMovementComponent::HandleChangeInitState(UGameFrameworkComponen
 			return;
 		}
 
-		RotationModeIndex = DesiredRotationModeIndex;
-		StanceIndex = DesiredStanceIndex;
-		GaitIndex = DesiredGaitIndex;
+		if (!ensure(MovementData))
+		{
+			return;
+		}
+
+		UpdateLocomotionConfigs();
 
 		SetReplicatedViewRotation(GetBECharacterOwner()->GetViewRotationSuperClass());
 
@@ -472,9 +493,9 @@ void UBECharacterMovementComponent::GetLifetimeReplicatedProps(TArray<FLifetimeP
 	Parameters.bIsPushBased = true;
 
 	Parameters.Condition = COND_SkipOwner;
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredStanceIndex, Parameters);
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredGaitIndex, Parameters);
-	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredRotationModeIndex, Parameters);
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredStance, Parameters);
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredGait, Parameters);
+	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, DesiredRotationMode, Parameters);
 
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, ReplicatedViewRotation, Parameters);
 	DOREPLIFETIME_WITH_PARAMS_FAST(ThisClass, InputDirection, Parameters);
@@ -604,8 +625,35 @@ void UBECharacterMovementComponent::SetLocomotionMode(const FGameplayTag& NewLoc
 	{
 		LocomotionMode = NewLocomotionMode;
 
-		RefreshLocomotionModeConfigs();
+		RefreshGaitConfigs();
 	}
+}
+
+void UBECharacterMovementComponent::UpdateLocomotionConfigs()
+{
+	// 現在の LocomotionMode の Configs を取得
+
+	const auto& LocomotionModeConfigs{ MovementData->GetAllowedLocomotionMode(LocomotionMode) };
+
+	// LocomotionModeConfigs から現在の DesiredRotationMode に基づいて Tag と Configs を取得し RotationMode を更新する
+
+	auto AllowedRotationMode{ DesiredRotationMode };
+	const auto& RotationModeConfigs{ LocomotionModeConfigs.GetAllowedRotationMode(this, DesiredRotationMode, AllowedRotationMode) };
+	SetRotationMode(AllowedRotationMode);
+	
+	// RotationModeConfigs から現在の Stance の Configs を取得
+
+	auto AllowedStance{ DesiredStance };
+	const auto& StanceConfigs{ RotationModeConfigs.GetAllowedStance(DesiredStance, AllowedStance) };
+	SetStance(AllowedStance);
+
+	// StanceConfigs から現在の DesiredGait に基づいて Tag と Configs を取得 Gait を更新する
+
+	auto AllowedGait{ DesiredGait };
+	const auto& GaitConfigs{ StanceConfigs.GetAllowedGait(this, DesiredGait, AllowedGait) };
+	SetGait(AllowedGait);
+
+	RefreshGaitConfigs(GaitConfigs);
 }
 
 void UBECharacterMovementComponent::OnMovementModeChanged(EMovementMode PreviousMovementMode, uint8 PreviousCustomMode)
@@ -668,41 +716,29 @@ void UBECharacterMovementComponent::OnMovementModeChanged(EMovementMode Previous
 	}
 }
 
-void UBECharacterMovementComponent::RefreshLocomotionModeConfigs()
-{
-	if (FBECharacterLocomotionModeConfigs* Configs = MovementData->LocomotionModes.Find(LocomotionMode))
-	{
-		LocomotionModeConfigs = *Configs;
-	}
-
-	LocomotionModeConfigs = FBECharacterLocomotionModeConfigs();
-
-	UpdateRotationMode(true);
-}
-
 #pragma endregion
 
 
 #pragma region Desired Rotation Mode
 
-void UBECharacterMovementComponent::SetDesiredRotationModeIndex(uint8 NewDesiredRotationModeIndex)
+void UBECharacterMovementComponent::SetDesiredRotationMode(FGameplayTag NewDesiredRotationMode)
 {
-	if (DesiredRotationModeIndex != NewDesiredRotationModeIndex)
+	if (DesiredRotationMode != NewDesiredRotationMode)
 	{
-		DesiredRotationModeIndex = NewDesiredRotationModeIndex;
+		DesiredRotationMode = NewDesiredRotationMode;
 
-		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredRotationModeIndex, this);
+		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredRotationMode, this);
 
 		if (CharacterOwner->GetLocalRole() == ROLE_AutonomousProxy)
 		{
-			Server_SetDesiredRotationModeIndex(DesiredRotationModeIndex);
+			Server_SetDesiredRotationMode(DesiredRotationMode);
 		}
 	}
 }
 
-void UBECharacterMovementComponent::Server_SetDesiredRotationModeIndex_Implementation(uint8 NewDesiredRotationModeIndex)
+void UBECharacterMovementComponent::Server_SetDesiredRotationMode_Implementation(FGameplayTag NewDesiredRotationMode)
 {
-	SetDesiredRotationModeIndex(NewDesiredRotationModeIndex);
+	SetDesiredRotationMode(NewDesiredRotationMode);
 }
 
 #pragma endregion
@@ -710,74 +746,12 @@ void UBECharacterMovementComponent::Server_SetDesiredRotationModeIndex_Implement
 
 #pragma region Rotation Mode
 
-bool UBECharacterMovementComponent::SetRotationModeIndex(uint8 NewRotationModeIndex)
+void UBECharacterMovementComponent::SetRotationMode(FGameplayTag NewRotationMode)
 {
-	if (RotationModeIndex != NewRotationModeIndex)
+	if (RotationMode != NewRotationMode)
 	{
-		RotationModeIndex = NewRotationModeIndex;
-
-		RefreshRotationModeConfigs();
-
-		return true;
+		RotationMode = NewRotationMode;
 	}
-
-	return false;
-}
-
-uint8 UBECharacterMovementComponent::CalculateAllowedRotationModeIndex() const
-{
-	const auto NumAllowed{ static_cast<uint8>(LocomotionModeConfigs.RotationModes.Num()) };
-
-	checkf(NumAllowed != 0, TEXT("LocomotionModeConfigs.RotationModes is Empty"));
-
-	// 遷移可能な Index を探す
-	for (uint8 DesiredIndex = (DesiredRotationModeIndex < NumAllowed) ? DesiredRotationModeIndex : (NumAllowed - 1);
-		DesiredIndex != 0;
-		DesiredIndex -= 1)
-	{
-		// EnterCondition が設定されている場合はそれを検証する
-		if (const UBECharacterMovementCondition* Condition = LocomotionModeConfigs.RotationModes[DesiredIndex].EnterCondition)
-		{
-			// 遷移可能
-			if (Condition->CanEnter(this))
-			{
-				return DesiredIndex;
-			}
-
-			// 遷移不可なら次の Index を検証
-			else
-			{
-				continue;
-			}
-		}
-
-		// EnterCondition が設定されていなければ無条件で遷移可能
-		else
-		{
-			return DesiredIndex;
-		}
-	}
-
-	// Index 0 の RotationMode は無条件で遷移可能と返す
-	return 0;
-}
-
-void UBECharacterMovementComponent::UpdateRotationMode(bool bFroceRefreshConfigs)
-{
-	if (!SetRotationModeIndex(CalculateAllowedRotationModeIndex()))
-	{
-		if (bFroceRefreshConfigs)
-		{
-			RefreshRotationModeConfigs();
-		}
-	}
-}
-
-void UBECharacterMovementComponent::RefreshRotationModeConfigs()
-{
-	RotationModeConfigs = LocomotionModeConfigs.RotationModes[RotationModeIndex];
-
-	UpdateStance(true);
 }
 
 #pragma endregion
@@ -785,26 +759,24 @@ void UBECharacterMovementComponent::RefreshRotationModeConfigs()
 
 #pragma region Desired Stance
 
-void UBECharacterMovementComponent::SetDesiredStanceIndex(uint8 NewDesiredStanceIndex)
+void UBECharacterMovementComponent::SetDesiredStance(FGameplayTag NewDesiredStance)
 {
-	if (DesiredStanceIndex != NewDesiredStanceIndex)
+	if (DesiredStance != NewDesiredStance)
 	{
-		DesiredStanceIndex = NewDesiredStanceIndex;
+		DesiredStance = NewDesiredStance;
 
-		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredStanceIndex, this);
+		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredStance, this);
 
 		if (CharacterOwner->GetLocalRole() == ROLE_AutonomousProxy)
 		{
-			Server_SetDesiredStanceIndex(DesiredStanceIndex);
+			Server_SetDesiredStance(DesiredStance);
 		}
-
-		UpdateStance();
 	}
 }
 
-void UBECharacterMovementComponent::Server_SetDesiredStanceIndex_Implementation(uint8 NewDesiredStanceIndex)
+void UBECharacterMovementComponent::Server_SetDesiredStance_Implementation(FGameplayTag NewDesiredStance)
 {
-	SetDesiredStanceIndex(NewDesiredStanceIndex);
+	SetDesiredStance(NewDesiredStance);
 }
 
 #pragma endregion 
@@ -812,83 +784,31 @@ void UBECharacterMovementComponent::Server_SetDesiredStanceIndex_Implementation(
 
 #pragma region Stance
 
-bool UBECharacterMovementComponent::SetStanceIndex(uint8 NewStanceIndex)
+void UBECharacterMovementComponent::SetStance(FGameplayTag NewStance)
 {
-	if (StanceIndex != NewStanceIndex)
+	if (Stance != NewStance)
 	{
-		StanceIndex = NewStanceIndex;
+		Stance = NewStance;
 
-		RefreshStanceConfigs();
-
-		return true;
-	}
-
-	return false;
-}
-
-uint8 UBECharacterMovementComponent::CalculateAllowedStanceIndex() const
-{
-	const auto NumAllowed{ static_cast<uint8>(RotationModeConfigs.Stances.Num()) };
-
-	checkf(NumAllowed != 0, TEXT("RotationModeConfigs.Stances is Empty"));
-
-	// 遷移可能な Index を探す
-	for (uint8 DesiredIndex = (DesiredStanceIndex < NumAllowed) ? DesiredStanceIndex : (NumAllowed - 1);
-		DesiredIndex != 0;
-		DesiredIndex -= 1)
-	{
-		// EnterCondition が設定されている場合はそれを検証する
-		if (const UBECharacterMovementCondition* Condition = RotationModeConfigs.Stances[DesiredIndex].EnterCondition)
+		if (Stance == TAG_Status_Stance_Standing)
 		{
-			// 遷移可能
-			if (Condition->CanEnter(this))
-			{
-				return DesiredIndex;
-			}
-
-			// 遷移不可なら次の Index を検証
-			else
-			{
-				continue;
-			}
+			CharacterOwner->UnCrouch();
 		}
-
-		// EnterCondition が設定されていなければ無条件で遷移可能
-		else
+		else if (Stance == TAG_Status_Stance_Crouching)
 		{
-			return DesiredIndex;
+			CharacterOwner->Crouch();
 		}
 	}
-
-	// Index 0 の RotationMode は無条件で遷移可能と返す
-	return 0;
 }
 
-void UBECharacterMovementComponent::UpdateStance(bool bFroceRefreshConfigs)
+bool UBECharacterMovementComponent::CanCrouchInCurrentState() const
 {
-	uint8 AllowedStanceIndex = CalculateAllowedStanceIndex();
-	const FGameplayTag& AllowedStanceTag = RotationModeConfigs.Stances[AllowedStanceIndex].StanceTag;
-
-	if (AllowedStanceTag == TAG_Status_Stance_Crouching)
+	if (!CanEverCrouch())
 	{
-		CharacterOwner->Crouch();
-	}
-	else if (AllowedStanceTag == TAG_Status_Stance_Standing)
-	{
-		CharacterOwner->UnCrouch();
+		return false;
 	}
 
-	if (bFroceRefreshConfigs)
-	{
-		RefreshStanceConfigs();
-	}
-}
-
-void UBECharacterMovementComponent::RefreshStanceConfigs()
-{
-	StanceConfigs = RotationModeConfigs.Stances[StanceIndex];
-
-	UpdateGait(true);
+	return UpdatedComponent && !UpdatedComponent->IsSimulatingPhysics();
 }
 
 #pragma endregion
@@ -896,24 +816,24 @@ void UBECharacterMovementComponent::RefreshStanceConfigs()
 
 #pragma region Desired Gait
 
-void UBECharacterMovementComponent::SetDesiredGaitIndex(uint8 NewDesiredGaitIndex)
+void UBECharacterMovementComponent::SetDesiredGait(FGameplayTag NewDesiredGait)
 {
-	if (DesiredGaitIndex != NewDesiredGaitIndex)
+	if (DesiredGait != NewDesiredGait)
 	{
-		DesiredGaitIndex = NewDesiredGaitIndex;
+		DesiredGait = NewDesiredGait;
 
-		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredGaitIndex, this);
+		MARK_PROPERTY_DIRTY_FROM_NAME(ThisClass, DesiredGait, this);
 
 		if (CharacterOwner->GetLocalRole() == ROLE_AutonomousProxy)
 		{
-			Server_SetDesiredGaitIndex(DesiredGaitIndex);
+			Server_SetDesiredGait(DesiredGait);
 		}
 	}
 }
 
-void UBECharacterMovementComponent::Server_SetDesiredGaitIndex_Implementation(uint8 NewDesiredGaitIndex)
+void UBECharacterMovementComponent::Server_SetDesiredGait_Implementation(FGameplayTag NewDesiredGait)
 {
-	SetDesiredGaitIndex(NewDesiredGaitIndex);
+	SetDesiredGait(NewDesiredGait);
 }
 
 #pragma endregion
@@ -947,126 +867,50 @@ float UBECharacterMovementComponent::GetMaxSpeed() const
 }
 
 
-bool UBECharacterMovementComponent::SetMaxAllowedGaitIndex(uint8 NewMaxAllowedGaitIndex)
+void UBECharacterMovementComponent::SetGait(FGameplayTag NewGait)
 {
-	if (MaxAllowedGaitIndex != NewMaxAllowedGaitIndex)
+	if (Gait != NewGait)
 	{
-		MaxAllowedGaitIndex = NewMaxAllowedGaitIndex;
-
-		RefreshGaitConfigs();
-
-		return true;
+		Gait = NewGait;
 	}
-
-	return false;
-}
-
-void UBECharacterMovementComponent::SetGaitIndex(uint8 NewGaitIndex)
-{
-	if (GaitIndex != NewGaitIndex)
-	{
-		GaitIndex = NewGaitIndex;
-	}
-}
-
-void UBECharacterMovementComponent::CalculateGaitIndexes(uint8& OutAllowedGaitIndex, uint8& OutActualGaitIndex)
-{
-	OutAllowedGaitIndex = 0;
-	OutActualGaitIndex = 0;
-
-	const auto NumAllowed{ static_cast<uint8>(StanceConfigs.Gaits.Num()) };
-
-	checkf(NumAllowed != 0, TEXT("StanceConfigs.Gaits is Empty"));
-
-	bool bFoundActualGait{ false };
-	bool bFoundAllowedGait{ false };
-
-	for (uint8 DesiredIndex = (NumAllowed - 1); DesiredIndex != 0; DesiredIndex -= 1)
-	{
-		// AllowedGait を探す
-		if (bFoundAllowedGait == false)
-		{
-			// EnterCondition が設定されている場合はそれを検証する
-			if (const UBECharacterMovementCondition* Condition = StanceConfigs.Gaits[DesiredIndex].EnterCondition)
-			{
-				// 遷移可能
-				if (Condition->CanEnter(this))
-				{
-					OutAllowedGaitIndex = DesiredIndex;
-					bFoundAllowedGait = true;
-				}
-			}
-
-			// EnterCondition が設定されていなければ無条件で遷移可能
-			else
-			{
-				OutAllowedGaitIndex = DesiredIndex;
-				bFoundAllowedGait = true;
-			}
-		}
-
-		// ActualGait を探す
-		if (bFoundActualGait == false)
-		{
-			if (LocomotionState.Speed < (StanceConfigs.Gaits[DesiredIndex].MaxSpeed + 10.0))
-			{
-				OutActualGaitIndex = DesiredIndex;
-			}
-			else
-			{
-				bFoundActualGait = true;
-			}
-		}
-
-		if (bFoundAllowedGait && bFoundActualGait)
-		{
-			return;
-		}
-	}
-}
-
-void UBECharacterMovementComponent::UpdateGait(bool bFroceRefreshConfigs)
-{
-	uint8 AllowedIndex, ActualIndex;
-	CalculateGaitIndexes(AllowedIndex, ActualIndex);
-
-	if (!SetMaxAllowedGaitIndex(AllowedIndex))
-	{
-		if (bFroceRefreshConfigs)
-		{
-			RefreshGaitConfigs();
-		}
-	}
-
-	SetGaitIndex(ActualIndex);
 }
 
 void UBECharacterMovementComponent::RefreshGaitConfigs()
 {
-	const FBECharacterGaitConfigs& GaitConfig = StanceConfigs.Gaits[GaitIndex];
+	auto AllowedRotationMode{ DesiredRotationMode };
+	auto AllowedGait{ DesiredGait };
+	auto AllowedStance{ DesiredStance };
 
-	GaitTag = GaitConfig.GaitTag;
+	const auto& LocomotionModeConfigs{ MovementData->GetAllowedLocomotionMode(LocomotionMode) };
+	const auto& RotationModeConfigs{ LocomotionModeConfigs.GetAllowedRotationMode(this, DesiredRotationMode, AllowedRotationMode) };
+	const auto& StanceConfigs{ RotationModeConfigs.GetAllowedStance(Stance, AllowedStance) };
+	const auto& GaitConfigs{ StanceConfigs.GetAllowedGait(this, DesiredGait, AllowedGait) };
 
-	MaxWalkSpeed			= GaitConfig.MaxSpeed;
-	MaxWalkSpeedCrouched	= GaitConfig.MaxSpeed;
-	MaxFlySpeed				= GaitConfig.MaxSpeed;
-	MaxSwimSpeed			= GaitConfig.MaxSpeed;
-	MaxCustomMovementSpeed	= GaitConfig.MaxSpeed;
+	RefreshGaitConfigs(GaitConfigs);
+}
 
-	MaxAcceleration = GaitConfig.MaxAcceleration;
+void UBECharacterMovementComponent::RefreshGaitConfigs(const FBECharacterGaitConfigs& GaitConfigs)
+{
+	MaxWalkSpeed			= GaitConfigs.MaxSpeed;
+	MaxWalkSpeedCrouched	= GaitConfigs.MaxSpeed;
+	MaxFlySpeed				= GaitConfigs.MaxSpeed;
+	MaxSwimSpeed			= GaitConfigs.MaxSpeed;
+	MaxCustomMovementSpeed	= GaitConfigs.MaxSpeed;
 
-	BrakingDecelerationWalking	= GaitConfig.BrakingDeceleration;
-	BrakingDecelerationSwimming = GaitConfig.BrakingDeceleration;
-	BrakingDecelerationFlying	= GaitConfig.BrakingDeceleration;
-	BrakingDecelerationFalling	= GaitConfig.BrakingDeceleration;
+	MaxAcceleration = GaitConfigs.MaxAcceleration;
 
-	GroundFriction = GaitConfig.GroundFriction;
+	BrakingDecelerationWalking	= GaitConfigs.BrakingDeceleration;
+	BrakingDecelerationSwimming = GaitConfigs.BrakingDeceleration;
+	BrakingDecelerationFlying	= GaitConfigs.BrakingDeceleration;
+	BrakingDecelerationFalling	= GaitConfigs.BrakingDeceleration;
 
-	JumpZVelocity = GaitConfig.JumpZPower;
+	GroundFriction = GaitConfigs.GroundFriction;
 
-	AirControl = GaitConfig.AirControl;
+	JumpZVelocity = GaitConfigs.JumpZPower;
 
-	RotationInterpSpeed = GaitConfig.RotationInterpSpeed;
+	AirControl = GaitConfigs.AirControl;
+
+	RotationInterpSpeed = GaitConfigs.RotationInterpSpeed;
 }
 
 
@@ -1109,8 +953,6 @@ void UBECharacterMovementComponent::SetLocomotionAction(const FGameplayTag& NewL
 	if (LocomotionAction != NewLocomotionAction)
 	{
 		LocomotionAction = NewLocomotionAction;
-
-		UpdateRotationMode(true);
 	}
 }
 
@@ -1318,11 +1160,9 @@ void UBECharacterMovementComponent::UpdateCharacterStateBeforeMovement(float Del
 
 	UpdateView(DeltaSeconds);
 
-	UpdateRotationMode();
-
 	UpdateLocomotion(DeltaSeconds);
 
-	UpdateGait();
+	UpdateLocomotionConfigs();
 
 	UpdateGroundedRotation(DeltaSeconds);
 	UpdateInAirRotation(DeltaSeconds);
@@ -1846,11 +1686,11 @@ void UBECharacterMovementComponent::MoveAutonomous(float ClientTimeStamp, float 
 	const auto* MoveData{ static_cast<FBECharacterNetworkMoveData*>(GetCurrentNetworkMoveData()) };
 	if (MoveData != nullptr)
 	{
-		RotationModeIndex	= MoveData->RotationMode;
-		StanceIndex			= MoveData->Stance;
-		MaxAllowedGaitIndex = MoveData->MaxAllowedGait;
+		RotationMode	= MoveData->RotationMode;
+		Stance			= MoveData->Stance;
+		Gait			= MoveData->Gait;
 
-		RefreshRotationModeConfigs();
+		RefreshGaitConfigs();
 	}
 
 	Super::MoveAutonomous(ClientTimeStamp, DeltaTime, CompressedFlags, NewAcceleration);
@@ -2045,7 +1885,7 @@ void UBECharacterMovementComponent::UpdateGroundedRotation(float DeltaTime)
 
 		// RotationMode が VelocityDirection 
 
-		if (GetRotationModeTag() == TAG_Status_RotationMode_VelocityDirection)
+		if (GetRotationMode() == TAG_Status_RotationMode_VelocityDirection)
 		{
 			const auto TargetYawAngle{ (MovementBase.bHasRelativeLocation && !MovementBase.bHasRelativeRotation && MovementData->bInheritMovementBaseRotationInVelocityDirectionRotationMode)
 										? FRotator3f::NormalizeAxis(LocomotionState.TargetYawAngle + MovementBase.DeltaRotation.Yaw)
@@ -2112,7 +1952,7 @@ void UBECharacterMovementComponent::UpdateGroundedRotation(float DeltaTime)
 	{
 		// RotationMode が VelocityDirection かつ入力がある
 
-		if (GetRotationModeTag() == TAG_Status_RotationMode_VelocityDirection &&
+		if (GetRotationMode() == TAG_Status_RotationMode_VelocityDirection &&
 			(LocomotionState.bHasInput || !LocomotionState.bRotationTowardsLastInputDirectionBlocked))
 		{
 			LocomotionState.bRotationTowardsLastInputDirectionBlocked = false;
@@ -2148,7 +1988,7 @@ void UBECharacterMovementComponent::UpdateInAirRotation(float DeltaTime)
 
 	// RotationMode が VelocityDirection
 
-	if (GetRotationModeTag() == TAG_Status_RotationMode_VelocityDirection)
+	if (GetRotationMode() == TAG_Status_RotationMode_VelocityDirection)
 	{
 		static constexpr auto RotationInterpolationSpeed{ 5.0f };
 

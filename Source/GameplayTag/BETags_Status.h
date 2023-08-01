@@ -8,32 +8,32 @@
 ////////////////////////////////////
 // Status.LocomotionMode
 
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_LocomotionMode_OnGround);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_LocomotionMode_InAir);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_LocomotionMode_InWater);
+BECORE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_LocomotionMode_OnGround);
+BECORE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_LocomotionMode_InAir);
+BECORE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_LocomotionMode_InWater);
 
 
 ////////////////////////////////////
 // Status.RotationMode
 
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_RotationMode_VelocityDirection);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_RotationMode_ViewDirection);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_RotationMode_Aiming);
+BECORE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_RotationMode_VelocityDirection);
+BECORE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_RotationMode_ViewDirection);
+BECORE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_RotationMode_Aiming);
 
 
 ////////////////////////////////////
 // Status.Stance
 
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Stance_Standing);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Stance_Crouching);
+BECORE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Stance_Standing);
+BECORE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Stance_Crouching);
 
 
 ////////////////////////////////////
 // Status.Gait
 
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Gait_Walking);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Gait_Running);
-UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Gait_Sprinting);
+BECORE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Gait_Walking);
+BECORE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Gait_Running);
+BECORE_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(TAG_Status_Gait_Sprinting);
 
 
 ////////////////////////////////////

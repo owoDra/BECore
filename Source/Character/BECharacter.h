@@ -100,8 +100,6 @@ protected:
 	////////////////////////////////////////////////
 	// Stance
 public:
-	virtual bool CanJumpInternal_Implementation() const;
-
 	virtual bool CanCrouch() const override;
 	virtual void OnStartCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
 	virtual void OnEndCrouch(float HalfHeightAdjust, float ScaledHalfHeightAdjust) override;
@@ -132,6 +130,7 @@ public:
 	// Jump
 public:
 	virtual void OnJumped_Implementation() override;
+	virtual bool CanJumpInternal_Implementation() const;
 
 private:
 	UFUNCTION(NetMulticast, Reliable)

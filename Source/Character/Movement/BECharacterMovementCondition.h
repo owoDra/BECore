@@ -27,4 +27,11 @@ public:
 	 *  遷移可能かどうか
 	 */
 	virtual bool CanEnter(const UBECharacterMovementComponent* CMC) const { return false; }
+
+public:
+	//
+	// 遷移不可だった時に遷移を推奨する Tag
+	//
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Movement Condition")
+	FGameplayTag SuggestStateTag{ FGameplayTag::EmptyTag };
 };

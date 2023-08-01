@@ -15,15 +15,16 @@ class UCurveFloat;
 class UCurveVector;
 class UAnimMontage;
 class UBECharacterCustomMovement;
+class UBECharacterMovementComponent;
 struct FGameplayTag;
-
+struct FGameplayTagContainer;
 
 /**
  * UBECharacterMovementData
  *
  *  キャラクターの移動設定を定義する
  */
-UCLASS(Blueprintable, BlueprintType)
+UCLASS(Blueprintable, BlueprintType, Const)
 class BECORE_API UBECharacterMovementData : public UDataAsset
 {
 	GENERATED_BODY()
@@ -76,4 +77,7 @@ public:
 	//
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Netowork")
 	bool bEnableListenServerNetworkSmoothing = true;
+
+public:
+	const FBECharacterLocomotionModeConfigs& GetAllowedLocomotionMode(const FGameplayTag& LomotionMode) const;
 };

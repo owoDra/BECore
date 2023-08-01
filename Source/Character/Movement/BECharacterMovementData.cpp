@@ -16,3 +16,14 @@ UBECharacterMovementData::UBECharacterMovementData()
 		{ TAG_Status_LocomotionMode_InWater	, FBECharacterLocomotionModeConfigs() }
 	};
 }
+
+const FBECharacterLocomotionModeConfigs& UBECharacterMovementData::GetAllowedLocomotionMode(const FGameplayTag& LomotionMode) const
+{
+	// DesiredLocomotionMode から LocomotionModeConfigs を検索
+
+	auto* Configs{ LocomotionModes.Find(LomotionMode) };
+
+	check(Configs);
+
+	return *Configs;
+}
