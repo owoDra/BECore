@@ -522,6 +522,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "State|Gait", Transient)
 	float RotationInterpSpeed = 0.0;
 
+	//
+	// GaitConfigs を更新すべきかどうか
+	//
+	UPROPERTY(BlueprintReadWrite, Transient, VisibleAnywhere, Category = "State|Gait")
+	bool bShouldUpdateGaitConfigs = true;
+
 public:
 	virtual void CalcVelocity(float DeltaTime, float Friction, bool bFluid, float BrakingDeceleration) override;
 	virtual float GetMaxSpeed() const override;

@@ -2,6 +2,7 @@
 
 #include "BECharacterMovementConfigs.h"
 
+#include "Character/Component/BECharacterMovementComponent.h"
 #include "Character/Movement/BECharacterMovementCondition.h"
 #include "GameplayTag/BETags_Status.h"
 

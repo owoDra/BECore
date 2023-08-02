@@ -198,12 +198,13 @@ protected:
 	UFUNCTION(BlueprintPure, Category = "Character Anim Instance", Meta = (BlueprintProtected, BlueprintThreadSafe, ReturnDisplayName = "Setting"))
 	UBECharacterAnimData* GetAnimDataUnsafe() const { return AnimData; }
 
+public:
 	/**
 	 * GetAnimDataUnsafe
 	 *
 	 *  BlueprintThreadSafe で ControlRig へ渡すためのデータを取得する
 	 */
-	UFUNCTION(BlueprintPure, Category = "Character Anim Instance", Meta = (BlueprintProtected, BlueprintThreadSafe, ReturnDisplayName = "Rig Input"))
+	UFUNCTION(BlueprintPure, Category = "Character Anim Instance", Meta = (BlueprintThreadSafe, ReturnDisplayName = "Rig Input"))
 	FControlRigInput GetControlRigInput() const;
 
 public:

@@ -19,13 +19,7 @@ void UBECharacterLinkedAnimInstance::NativeInitializeAnimation()
 	Super::NativeInitializeAnimation();
 
 	Character = Cast<ABECharacter>(GetOwningActor());
-
-	UBEAnimInstance* BEAnimIns{ nullptr };
-	IBEPawnMeshAssistInterface::Execute_GetMainAnimInstance(Character, BEAnimIns);
-
-	Parent = Cast<UBECharacterAnimInstance>(BEAnimIns);
 	
-
 #if WITH_EDITOR
 	if (!GetWorld()->IsGameWorld())
 	{
@@ -40,8 +34,14 @@ void UBECharacterLinkedAnimInstance::NativeInitializeAnimation()
 		{
 			Character = GetMutableDefault<ABECharacter>();
 		}
+		return;
 	}
 #endif
+
+	UBEAnimInstance* BEAnimIns{ nullptr };
+	IBEPawnMeshAssistInterface::Execute_GetMainAnimInstance(Character, BEAnimIns);
+
+	Parent = Cast<UBECharacterAnimInstance>(BEAnimIns);
 }
 
 void UBECharacterLinkedAnimInstance::NativeBeginPlay()
