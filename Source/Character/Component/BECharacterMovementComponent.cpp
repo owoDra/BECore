@@ -186,6 +186,8 @@ const FName UBECharacterMovementComponent::NAME_ActorFeatureName("CharacterMovem
 UBECharacterMovementComponent::UBECharacterMovementComponent(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
+	SetNetworkMoveDataContainer(MoveDataContainer);
+
 	AbilitySystemComponent = nullptr;
 	MovementSet = nullptr;
 
@@ -198,9 +200,12 @@ UBECharacterMovementComponent::UBECharacterMovementComponent(const FObjectInitia
 	RotationRate = FRotator(0.0f, 720.0f, 0.0f);
 	bUseControllerDesiredRotation = false;
 	bOrientRotationToMovement = false;
+	bNetworkAlwaysReplicateTransformUpdateTimestamp = true;
 	bAllowPhysicsRotationDuringAnimRootMotion = false;
 	bCanWalkOffLedgesWhenCrouching = true;
-	GetNavAgentPropertiesRef().bCanCrouch = true;
+	NavAgentProps.bCanCrouch = true;
+	NavAgentProps.bCanFly = true;
+	bUseAccelerationForPaths = true;
 	SetCrouchedHalfHeight(65.0f);
 
 	// ステート設定
@@ -625,7 +630,7 @@ void UBECharacterMovementComponent::SetLocomotionMode(const FGameplayTag& NewLoc
 	{
 		LocomotionMode = NewLocomotionMode;
 
-		RefreshGaitConfigs();
+		bShouldUpdateGaitConfigs = true;
 	}
 }
 
@@ -892,14 +897,14 @@ void UBECharacterMovementComponent::SetGait(FGameplayTag NewGait)
 
 void UBECharacterMovementComponent::RefreshGaitConfigs()
 {
-	auto AllowedRotationMode{ DesiredRotationMode };
-	auto AllowedStance{ DesiredStance };
-	auto AllowedGait{ DesiredGait };
+	auto AllowedRotationMode{ RotationMode };
+	auto AllowedStance{ Stance };
+	auto AllowedGait{ Gait };
 
 	const auto& LocomotionModeConfigs{ MovementData->GetAllowedLocomotionMode(LocomotionMode) };
-	const auto& RotationModeConfigs{ LocomotionModeConfigs.GetAllowedRotationMode(this, DesiredRotationMode, AllowedRotationMode) };
-	const auto& StanceConfigs{ RotationModeConfigs.GetAllowedStance(DesiredStance, AllowedStance) };
-	const auto& GaitConfigs{ StanceConfigs.GetAllowedGait(this, DesiredGait, AllowedGait) };
+	const auto& RotationModeConfigs{ LocomotionModeConfigs.GetAllowedRotationMode(this, RotationMode, AllowedRotationMode) };
+	const auto& StanceConfigs{ RotationModeConfigs.GetAllowedStance(Stance, AllowedStance) };
+	const auto& GaitConfigs{ StanceConfigs.GetAllowedGait(this, Gait, AllowedGait) };
 
 	RefreshGaitConfigs(GaitConfigs);
 }

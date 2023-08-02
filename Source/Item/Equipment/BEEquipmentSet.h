@@ -8,6 +8,7 @@
 #include "Internationalization/Text.h"
 #include "UObject/ObjectPtr.h"
 #include "UObject/UObjectGlobals.h"
+#include "GameplayTagContainer.h"
 
 #include "BEEquipmentSet.generated.h"
 
