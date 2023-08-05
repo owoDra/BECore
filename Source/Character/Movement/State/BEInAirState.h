@@ -13,9 +13,6 @@ public:
 	float VerticalVelocity = 0.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BE")
-	bool bJumpRequested = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BE")
 	bool bJumped = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BE", Meta = (ClampMin = 0, ForceUnits = "x"))

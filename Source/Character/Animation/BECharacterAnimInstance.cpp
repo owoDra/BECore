@@ -724,11 +724,6 @@ void UBECharacterAnimInstance::ResetGroundedLeanAmount(float DeltaTime)
 
 #pragma region InAir
 
-void UBECharacterAnimInstance::Jump()
-{
-	InAirState.bJumpRequested = true;
-}
-
 void UBECharacterAnimInstance::ResetJumped()
 {
 	InAirState.bJumped = false;
@@ -738,8 +733,7 @@ void UBECharacterAnimInstance::UpdateInAirOnGameThread()
 {
 	check(IsInGameThread());
 
-	InAirState.bJumped = !bPendingUpdate && (InAirState.bJumped || InAirState.bJumpRequested);
-	InAirState.bJumpRequested = false;
+	InAirState.bJumped = !bPendingUpdate && (InAirState.bJumped || (InAirState.VerticalVelocity > 0));
 }
 
 void UBECharacterAnimInstance::UpdateInAir(float DeltaTime)

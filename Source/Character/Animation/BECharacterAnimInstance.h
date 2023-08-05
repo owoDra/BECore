@@ -283,9 +283,6 @@ private:
 
 	/////////////////////////////////////////
 	// InAir
-public:
-	void Jump();
-
 protected:
 	UFUNCTION(BlueprintCallable, Category = "Character Anim Instance", Meta = (BlueprintProtected, BlueprintThreadSafe))
 	void ResetJumped();

@@ -129,15 +129,7 @@ public:
 	////////////////////////////////////////////////
 	// Jump
 public:
-	virtual void OnJumped_Implementation() override;
 	virtual bool CanJumpInternal_Implementation() const;
-
-private:
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_OnJumpedNetworked();
-	void Multicast_OnJumpedNetworked_Implementation();
-
-	void OnJumpedNetworked();
 
 
 	//////////////////////////////////////////

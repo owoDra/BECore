@@ -463,44 +463,9 @@ FRotator ABECharacter::GetViewRotationSuperClass() const
 
 #pragma region Jump
 
-void ABECharacter::OnJumped_Implementation()
-{
-	Super::OnJumped_Implementation();
-
-	if (IsLocallyControlled())
-	{
-		OnJumpedNetworked();
-	}
-
-	if (GetLocalRole() >= ROLE_Authority)
-	{
-		Multicast_OnJumpedNetworked();
-	}
-}
-
 bool ABECharacter::CanJumpInternal_Implementation() const
 {
 	return JumpIsAllowedInternal();
-}
-
-void ABECharacter::Multicast_OnJumpedNetworked_Implementation()
-{
-	if (!IsLocallyControlled())
-	{
-		OnJumpedNetworked();
-	}
-}
-
-void ABECharacter::OnJumpedNetworked()
-{
-	UBEAnimInstance* BEAnimIns{ nullptr };
-
-	IBEPawnMeshAssistInterface::Execute_GetMainAnimInstance(this, BEAnimIns);
-
-	if (UBECharacterAnimInstance* BECharaAnimIns = Cast<UBECharacterAnimInstance>(BEAnimIns))
-	{
-		BECharaAnimIns->Jump();
-	}
 }
 
 #pragma endregion
