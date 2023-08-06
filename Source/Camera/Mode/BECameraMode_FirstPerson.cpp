@@ -26,6 +26,18 @@ void UBECameraMode_FirstPerson::PostActivateMode()
 
 				// FPP Mesh の表示
 				IBEPawnMeshAssistInterface::Execute_GetFPPMeshes(BEChara, Meshes);
+				if (Meshes.IsValidIndex(0) && IsValid(Meshes[0]))
+				{
+					TArray<USceneComponent*> Children;
+					Meshes[0]->GetChildrenComponents(true, Children);
+					for (USceneComponent* Child : Children)
+					{
+						if (USkeletalMeshComponent* Mesh = Cast<USkeletalMeshComponent>(Child))
+						{
+							Mesh->SetHiddenInGame(false, true);
+						}
+					}
+				}
 				for (USkeletalMeshComponent* Mesh :Meshes)
 				{
 					Mesh->SetHiddenInGame(false, true);
@@ -33,6 +45,18 @@ void UBECameraMode_FirstPerson::PostActivateMode()
 
 				// TPP Mesh の非表示
 				IBEPawnMeshAssistInterface::Execute_GetTPPMeshes(BEChara, Meshes);
+				if (Meshes.IsValidIndex(0) && IsValid(Meshes[0]))
+				{
+					TArray<USceneComponent*> Children;
+					Meshes[0]->GetChildrenComponents(true, Children);
+					for (USceneComponent* Child : Children)
+					{
+						if (USkeletalMeshComponent* Mesh = Cast<USkeletalMeshComponent>(Child))
+						{
+							Mesh->SetOwnerNoSee(true);
+						}
+					}
+				}
 				for (USkeletalMeshComponent* Mesh : Meshes)
 				{
 					Mesh->SetOwnerNoSee(true);
@@ -57,6 +81,18 @@ void UBECameraMode_FirstPerson::PreDeactivateMode()
 
 				// FPP Mesh の表示
 				IBEPawnMeshAssistInterface::Execute_GetFPPMeshes(BEChara, Meshes);
+				if (Meshes.IsValidIndex(0) && IsValid(Meshes[0]))
+				{
+					TArray<USceneComponent*> Children;
+					Meshes[0]->GetChildrenComponents(true, Children);
+					for (USceneComponent* Child : Children)
+					{
+						if (USkeletalMeshComponent* Mesh = Cast<USkeletalMeshComponent>(Child))
+						{
+							Mesh->SetHiddenInGame(true, true);
+						}
+					}
+				}
 				for (USkeletalMeshComponent* Mesh : Meshes)
 				{
 					Mesh->SetHiddenInGame(true, true);
@@ -64,6 +100,18 @@ void UBECameraMode_FirstPerson::PreDeactivateMode()
 
 				// TPP Mesh の非表示
 				IBEPawnMeshAssistInterface::Execute_GetTPPMeshes(BEChara, Meshes);
+				if (Meshes.IsValidIndex(0) && IsValid(Meshes[0]))
+				{
+					TArray<USceneComponent*> Children;
+					Meshes[0]->GetChildrenComponents(true, Children);
+					for (USceneComponent* Child : Children)
+					{
+						if (USkeletalMeshComponent* Mesh = Cast<USkeletalMeshComponent>(Child))
+						{
+							Mesh->SetOwnerNoSee(false);
+						}
+					}
+				}
 				for (USkeletalMeshComponent* Mesh : Meshes)
 				{
 					Mesh->SetOwnerNoSee(false);
